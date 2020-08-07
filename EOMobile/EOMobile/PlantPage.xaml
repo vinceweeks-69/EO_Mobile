@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EOMobile.PlantPage"
+              xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
+    
+    <NavigationPage.TitleView>
+         <Button x:Name="Help_PlantsPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center" Clicked="Help_PlantsPage_Clicked" />
+   </NavigationPage.TitleView>
+    
+    <ContentPage.Content>
+
+        <StackLayout>
+
+            <Label Text="Elegant Orchids - Orchids" HeightRequest="50" WidthRequest="200" FontSize="Medium" HorizontalTextAlignment="Start" Margin="10"/>
+            
+            <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="Plant Type" FontAttributes="Bold" HeightRequest="50" WidthRequest="200"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                    <Picker Title="pick one" x:Name="PlantType" ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="1"  HorizontalOptions="Start"/>
+                    <Label Text="Plant Name" FontAttributes="Bold" HeightRequest="50" WidthRequest="200" Grid.Column="1" Grid.Row="0" HorizontalTextAlignment="Start"  HorizontalOptions="Start"/>
+                    <Picker Title="pick one" x:Name="PlantName"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="50" WidthRequest="200" Grid.Column="1" Grid.Row="1"  HorizontalOptions="Start"/>
+                    <Label Text="Plant Size" FontAttributes="Bold" HeightRequest="50" WidthRequest="200" Grid.Column="2" Grid.Row="0" HorizontalTextAlignment="Start"  HorizontalOptions="Start"/>
+                    <Picker Title="pick one" x:Name="PlantSize"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="50" WidthRequest="200" Grid.Column="2" Grid.Row="1"  HorizontalOptions="Start"/>
+                </Grid>
+            </Frame>
+            
+            <ListView x:Name="plantListView" Margin="10,10,10,10">
+                <ListView.Header>
+                    <Grid Padding="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20*" />
+                            <ColumnDefinition Width="20*"/>
+                            <ColumnDefinition Width="20*"/>
+                            <ColumnDefinition Width="20*"/>
+                            <ColumnDefinition Width="20*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Label Text="Type" FontAttributes="Bold" Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                        <Label Text="Name"  FontAttributes="Bold" Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                        <Label Text="Size"  FontAttributes="Bold" Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                        <Label Text="Quantity"  FontAttributes="Bold" Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                        <Label Text="Image and Price"  FontAttributes="Bold" Grid.Column="4" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                    </Grid>
+                </ListView.Header>
+                
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid Padding="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20*" />
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Grid.Column="0" Text="{Binding Plant.PlantTypeName}" HorizontalOptions="Start"  HorizontalTextAlignment="Start"/>
+                                <Label Grid.Column="1" Text="{Binding Plant.PlantName}" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                <Label Grid.Column="2" Text="{Binding Plant.PlantSize}" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                <Label Grid.Column="3" Text="{Binding Inventory.Quantity}" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                <Button x:Name="ViewImage" Grid.Column="4" Text="View" HorizontalOptions="Start" VerticalOptions="Start"  HeightRequest="40" WidthRequest="132" Clicked="ViewImage_Clicked" />
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

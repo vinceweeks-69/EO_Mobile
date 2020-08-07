@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EOMobile.ShipmentReportPage" Title="Shipments"
+              xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
+    
+    <NavigationPage.TitleView>
+         <Button x:Name="Help_ShipmentReportPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center" Clicked="Help_ShipmentReportPage_Clicked" />
+   </NavigationPage.TitleView>
+    
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+                <Label Text="Elegant Orchids Shipment Reports"
+                       FontSize="Medium"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="CenterAndExpand" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25*" />
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="25*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                    </Grid.RowDefinitions>
+
+                    <Label Text="From"
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="StartAndExpand" />
+                    
+                    <DatePicker x:Name="ShipmentFromDate"  Grid.Column="0" Grid.Row="1" HeightRequest="50" WidthRequest="200"/>
+                
+                    <Label Text="To"
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="StartAndExpand" />
+                    
+                    <DatePicker x:Name="ShipmentToDate"  Grid.Column="1" Grid.Row="1" HeightRequest="50" WidthRequest="200"/>
+
+                    <Label Text="Vendor"
+                        Grid.Column="2"
+                        Grid.Row="0"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="StartAndExpand" />
+
+                    <Entry x:Name="Vendor" Grid.Column="2" Grid.Row="1" Focused="Vendor_Focused" HeightRequest="50" WidthRequest="200" />
+                    
+                    <Button x:Name="ShowShipmentReports"  Text="Show Reports" Clicked="OnShowReportsClicked" Grid.Column="2" Grid.Row="1"  HeightRequest="50" WidthRequest="200"/>
+                </Grid>
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10" HeightRequest="300">
+                    <ListView  x:Name="ShipmentList" ItemsSource="{Binding Shipment}" HorizontalOptions="Start" Grid.Column="0" Grid.Row="1">
+                        <ListView.Header>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="25*" />
+                                    <ColumnDefinition Width="25*"/>
+                                    <ColumnDefinition Width="25*"/>
+                                    <ColumnDefinition Width="25*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Text="Shipment Date"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold"/>
+                                <Label Text="Vendor"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold"/>
+                                <Label Text="Items"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold"/>
+                                <Label Text="Edit"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="25*" />
+                                            <ColumnDefinition Width="25*"/>
+                                            <ColumnDefinition Width="25*"/>
+                                            <ColumnDefinition Width="25*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Label  Text="{Binding ShipmentDate, StringFormat='{0:MMMM dd, yyyy}'}" Grid.Column="0" HorizontalOptions="Start" />
+                                        <Label  Text="{Binding VendorName}" Grid.Column="1" HorizontalOptions="Start" />
+                                        <Button Text="Items" Grid.Column="2" Clicked="ShowInventory_Clicked" CommandParameter="{Binding}" HorizontalOptions="Start" />
+                                        <Button Text="Edit"  Grid.Column="3" Clicked="EditShipment_Clicked" CommandParameter="{Binding ShipmentId}" HorizontalOptions="Start" />
+
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Frame>
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10" HeightRequest="300">
+                    <ListView  x:Name="InventoryList" ItemsSource="{Binding Orders}" HorizontalOptions="Start" Grid.Column="0" Grid.Row="1">
+                        <ListView.Header>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50*" />
+                                    <ColumnDefinition Width="50*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Text="InventoryName"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold" />
+                                <Label Text="Quantity"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="50*" />
+                                            <ColumnDefinition Width="50*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Label  Text="{Binding InventoryName}" Grid.Column="0" HorizontalOptions="Start" />
+                                        <Label  Text="{Binding Quantity}" Grid.Column="1" HorizontalOptions="Start" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Frame>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

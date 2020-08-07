@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:shared="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
+             mc:Ignorable="d"
+             x:Class="EOMobile.HelpPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label x:Name="Title" Text=""
+                FontSize="Large"
+                VerticalOptions="Start" 
+                HorizontalOptions="Center" />
+            
+            <Frame Padding="10,10,10,10">
+                <ScrollView Orientation="Vertical"> 
+                    <Label x:Name="HelpContent" Text="" HeightRequest="300" WidthRequest="320"/>
+                </ScrollView>
+            </Frame>
+            
+            <Frame Padding="10,10,10,10">
+                <shared:MediaPlayerElement x:Name="mediaPlayer" HeightRequest="480" WidthRequest="320"/>
+            </Frame>
+         </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

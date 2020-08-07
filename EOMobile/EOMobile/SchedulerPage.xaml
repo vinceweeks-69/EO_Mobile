@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="EOMobile.SchedulerPage"
+             xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
+    
+    <NavigationPage.TitleView>
+         <Button x:Name="Help_SchedulerPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center" Clicked="Help_SchedulerPage_Clicked" />
+   </NavigationPage.TitleView>
+    
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70" />
+                <RowDefinition Height="50*" />
+                <RowDefinition Height="50*" />
+            </Grid.RowDefinitions>
+            
+             <Grid.ColumnDefinitions>
+                 <ColumnDefinition Width="20*" />
+                 <ColumnDefinition Width="60*" />
+                 <ColumnDefinition Width="20*" />
+             </Grid.ColumnDefinitions>
+               
+            <Button x:Name="calendarEarlier" Text="{x:Static fontawesome:FontAwesomeIcons.ArrowLeft}"
+                FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="0" Grid.Row="0" FontSize="Large" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" Clicked="calendarEarlier_Clicked" />
+            
+            <Label x:Name="MonthAndYear" Text = "{Binding GetMonthAndYear}" FontSize="Large" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="0"/>
+            
+            <Button x:Name="calendarLater" Text="{x:Static fontawesome:FontAwesomeIcons.ArrowRight}"
+                FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="2" Grid.Row="0" FontSize="Large" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" Clicked="calendarLater_Clicked" />
+            
+            <Frame Padding="10,10,10,10" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
+                <CollectionView x:Name="schedulerCollectionView">
+                    <CollectionView.ItemsLayout>
+                       <GridItemsLayout Orientation="Vertical" />
+                    </CollectionView.ItemsLayout>
+            
+                    <CollectionView.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                 <RowDefinition Height="40" />
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="14*" />
+                                <ColumnDefinition Width="14*" />
+                                <ColumnDefinition Width="14*" />
+                                <ColumnDefinition Width="14*" />
+                                <ColumnDefinition Width="14*" />
+                                <ColumnDefinition Width="14*" />
+                                <ColumnDefinition Width="14*" />
+                            </Grid.ColumnDefinitions>
+                                               
+                            <Label Text="S"  Grid.Column="0" Grid.Row="0" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="M"  Grid.Column="1" Grid.Row="0"  FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="T"  Grid.Column="2" Grid.Row="0"  FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="W"  Grid.Column="3" Grid.Row="0"  FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="Th"  Grid.Column="4" Grid.Row="0"  FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="F"  Grid.Column="5" Grid.Row="0"  FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="S"  Grid.Column="6" Grid.Row="0"  FontSize="Medium" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                        </Grid>
+                     </CollectionView.Header>
+            
+                    <CollectionView.Footer>
+                        <Grid>
+
+                        </Grid>
+                     </CollectionView.Footer>
+            
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="70" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="14*" />
+                                    <ColumnDefinition Width="14*" />
+                                    <ColumnDefinition Width="14*" />
+                                    <ColumnDefinition Width="14*" />
+                                    <ColumnDefinition Width="14*" />
+                                    <ColumnDefinition Width="14*" />
+                                    <ColumnDefinition Width="14*" />
+                                </Grid.ColumnDefinitions>
+                
+                                <Label Grid.Column="0"
+                                       Text="{Binding Sunday.DayText}"
+                                       BackgroundColor="{Binding Sunday.BackgroundColor}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       HeightRequest="70"
+                                       LineBreakMode="TailTruncation">
+                                       <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Tapped="TapGestureRecognizer_Tapped"
+                                                CommandParameter="{Binding Sunday}"
+                                                NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers>
+                                </Label> 
+                                <Label Grid.Column="1"
+                                       Text="{Binding Monday.DayText}"
+                                       BackgroundColor="{Binding Monday.BackgroundColor}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       HeightRequest="70"
+                                       LineBreakMode="TailTruncation">
+                                       <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Tapped="TapGestureRecognizer_Tapped"
+                                                CommandParameter="{Binding Monday}"
+                                                NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers> 
+                                </Label>   
+                                <Label Grid.Column="2"
+                                       Text="{Binding Tuesday.DayText}"
+                                       BackgroundColor="{Binding Tuesday.BackgroundColor}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       HeightRequest="70"
+                                       LineBreakMode="TailTruncation">
+                                       <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Tapped="TapGestureRecognizer_Tapped"
+                                                CommandParameter="{Binding Tuesday}"
+                                                NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers>
+                                </Label> 
+                                <Label Grid.Column="3"
+                                       Text="{Binding Wednesday.DayText}"
+                                       BackgroundColor="{Binding Wednesday.BackgroundColor}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       HeightRequest="70"
+                                       LineBreakMode="TailTruncation" >
+                                       <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Tapped="TapGestureRecognizer_Tapped"
+                                                CommandParameter="{Binding Wednesday}"
+                                                NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers>
+                                </Label> 
+                                <Label Grid.Column="4"
+                                       Text="{Binding Thursday.DayText}"
+                                       BackgroundColor="{Binding Thursday.BackgroundColor}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       HeightRequest="70"
+                                       LineBreakMode="TailTruncation">
+                                       <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Tapped="TapGestureRecognizer_Tapped"
+                                                CommandParameter="{Binding Thursday}"
+                                                NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers>
+                                </Label> 
+                                <Label Grid.Column="5"
+                                       Text="{Binding Friday.DayText}"
+                                       BackgroundColor="{Binding Friday.BackgroundColor}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       HeightRequest="70"
+                                       LineBreakMode="TailTruncation">
+                                       <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Tapped="TapGestureRecognizer_Tapped"
+                                                CommandParameter="{Binding Friday}"
+                                                NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers>
+                                </Label> 
+                                <Label Grid.Column="6"
+                                       Text="{Binding Saturday.DayText}"
+                                       BackgroundColor="{Binding Saturday.BackgroundColor}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       HeightRequest="70"
+                                       LineBreakMode="TailTruncation" >
+                                       <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Tapped="TapGestureRecognizer_Tapped"
+                                                CommandParameter="{Binding Saturday}"
+                                                NumberOfTapsRequired="1" />
+                                        </Label.GestureRecognizers>
+                                </Label> 
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>  
+            </Frame>
+            <Frame Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" CornerRadius="1"  HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    
+                    <Button Text="Button 1"  Grid.Column="0" Grid.Row="0"  HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Button Text="Button 2" Grid.Column="1" Grid.Row="0"  HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Button Text="Button 3" Grid.Column="2" Grid.Row="0"  HorizontalOptions="Center" VerticalOptions="Center"/>
+                    
+                    <Button Text="Button 4" Grid.Column="0" Grid.Row="1"  HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Button Text="Button 5" Grid.Column="1" Grid.Row="1"  HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Button Text="Button 6" Grid.Column="2" Grid.Row="1"  HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Grid>    
+            </Frame>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

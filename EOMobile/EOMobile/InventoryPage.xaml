@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EOMobile.InventoryPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="50*" />
+                </Grid.ColumnDefinitions>
+                <Label Text="Elegant Orchids Inventory"
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    FontSize="Medium"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="Center" />
+                
+                <Button x:Name="Plants" Text="Orchids" Grid.Column="0" Grid.Row="1" Clicked="OnPlantsClicked" HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Foliage" Text="Foliage" Grid.Column="1" Grid.Row="1" Clicked="OnFoliageClicked" HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Materials" Text="Materials" Grid.Column="0" Grid.Row="2" Clicked="OnMaterialsClicked" HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Containers" Text="Containers" Grid.Column="1" Grid.Row="2" Clicked="OnContainersClicked" HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Arrangements" Text="Arrangements" Grid.Column="0" Grid.Row="3" Clicked="OnArrangementsClicked" HeightRequest="50" WidthRequest="200"/>
+                
+                <!--<Button Text="Import" Grid.Column="0" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>-->
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

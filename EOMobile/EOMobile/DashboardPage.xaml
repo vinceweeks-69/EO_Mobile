@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="EOMobile.DashboardPage">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+                 <Grid>
+                    <Grid.ColumnDefinitions>    
+                        <ColumnDefinition Width="50*" />
+                        <ColumnDefinition Width="50*"/>
+                    </Grid.ColumnDefinitions>       
+                     <Label  Grid.Column="0" x:Name="DashboardDate" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Medium"/>
+                     <Button Grid.Column="1" x:Name="Home" Text="Home" HorizontalOptions="End" FontAttributes="Bold" Clicked="Home_Clicked"/>
+                 </Grid>
+                
+                 <Label Text="Pickups" HorizontalOptions="Start" FontAttributes="Bold"></Label>
+                 <Frame Padding="10,10,10,10" HeightRequest="300"> 
+                     <ListView  x:Name="PickupsListView" ItemsSource="{Binding pickupList}">
+                        <ListView.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="33*" />
+                                    <ColumnDefinition Width="33*"/>
+                                    <ColumnDefinition Width="33*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Text="Customer"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                                <Label Text="Handled By"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                                <Label Text="Detail"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="33*" />
+                                            <ColumnDefinition Width="33*"/>
+                                            <ColumnDefinition Width="33*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Column="0" Text="{Binding WorkOrder.Buyer}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                        <Label Grid.Column="1" Text="{Binding WorkOrder.Seller}" WidthRequest="40"   VerticalOptions="Center" HorizontalOptions="Start" />
+                                        <Button x:Name="PickupDetail" Grid.Column="2" Text="+" HorizontalOptions="Start" CommandParameter="{Binding WorkOrder.WorkOrderId}" Clicked="WorkOrderDetail_Clicked" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                 </Frame>
+               
+                 <Label Text="Deliveries" HorizontalOptions="Start" FontAttributes="Bold"></Label>
+                 <Frame Padding="10,10,10,10" HeightRequest="300">  
+                    <ListView  x:Name="DeliveriesListView" ItemsSource="{Binding deliveryList}">
+                        <ListView.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="33*" />
+                                    <ColumnDefinition Width="33*"/>
+                                    <ColumnDefinition Width="33*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Text="Customer"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                                <Label Text="Handled By"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                                <Label Text="Detail"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="33*" />
+                                            <ColumnDefinition Width="33*"/>
+                                            <ColumnDefinition Width="33*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Column="0" Text="{Binding WorkOrder.Buyer}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                        <Label Grid.Column="1" Text="{Binding WorkOrder.DeliveredBy}" WidthRequest="40"   VerticalOptions="Center" HorizontalOptions="Start" />
+                                        <Button x:Name ="DeliveryDetail" Grid.Column="2" Text="+" HorizontalOptions="Start" CommandParameter="{Binding WorkOrder.WorkOrderId}" Clicked="WorkOrderDetail_Clicked" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView> 
+                 </Frame>
+                
+                 <Label Text="Site Service" HorizontalOptions="Start" FontAttributes="Bold"></Label>
+                 <Frame Padding="10,10,10,10" HeightRequest="300">   
+                    <ListView  x:Name="SiteServiceListView" ItemsSource="{Binding siteServiceList}">
+                        <ListView.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="33*" />
+                                    <ColumnDefinition Width="33*"/>
+                                    <ColumnDefinition Width="33*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Label Text="Customer"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                                <Label Text="Handled By"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                                <Label Text="Detail"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="33*" />
+                                            <ColumnDefinition Width="33*"/>
+                                            <ColumnDefinition Width="33*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Column="0" Text="{Binding WorkOrder.Buyer}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                        <Label Grid.Column="1" Text="{Binding WorkOrder.DeliveredBy}" WidthRequest="40"   VerticalOptions="Center" HorizontalOptions="Start" />
+                                        <Button x:Name="SiteServiceDetail" Grid.Column="2" Text="+" HorizontalOptions="Start" CommandParameter="{Binding WorkOrder.WorkOrderId}" Clicked="WorkOrderDetail_Clicked" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>      
+                 </Frame>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

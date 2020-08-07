@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EOMobile.WorkOrderReportPage" Title="Work Orders">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+                <Label Text="Elegant Orchids Work Order Reports"
+                    FontSize="Medium"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="CenterAndExpand" />
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25*" />
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="25*"/>
+                        </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="50"/>
+                     </Grid.RowDefinitions>
+
+                    <Label Text="From"
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                    <DatePicker x:Name="WorkOrderFromDate"  Grid.Column="0" Grid.Row="1" HeightRequest="50" WidthRequest="200"/>
+
+                    <Label Text="To"
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                    <DatePicker x:Name="WorkOrderToDate"  Grid.Column="1" Grid.Row="1" HeightRequest="50" WidthRequest="200"/>
+
+                    <Label Text="Customer"
+                        Grid.Column="2"
+                        Grid.Row="0"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                     <Entry x:Name="CustomerName" Grid.Column="2" Grid.Row="1" HeightRequest="50" WidthRequest="200"/>
+
+                     <Label Text="Delivered By"
+                        Grid.Column="3"
+                        Grid.Row="0"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                        <Picker x:Name="DeliveredBy" ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" Grid.Column="3" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="50" WidthRequest="200"/>
+                      
+                        <Label Text="Paid"
+                        Grid.Column="0"
+                        Grid.Row="2"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start"/>
+                     <Picker x:Name="WorkOrderPaid" Grid.Column="0" Grid.Row="3" ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"/>
+
+                      <Label Text="Site Service"
+                        Grid.Column="1"
+                        Grid.Row="2"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start"/>
+                     <Picker x:Name="WorkOrderSiteService" Grid.Column="1" Grid.Row="3" ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"/>
+
+                      <Label Text="Delivery"
+                        Grid.Column="2"
+                        Grid.Row="2"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start"/>
+                      <Picker x:Name="WorkOrderDelivery" Grid.Column="2" Grid.Row="3" ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"/>
+
+                      <!--<Label Text="Delivery Date"
+                         Grid.Column="3"
+                         Grid.Row="2"
+                         FontSize="Default"
+                         FontAttributes="Bold"
+                         VerticalOptions="CenterAndExpand" 
+                         HorizontalOptions="Start"/>
+                      <DatePicker x:Name="DeliveryDate" Grid.Column="3" Grid.Row="3" />-->
+
+                      <Button Text="Clear" Grid.Column="0" Grid.Row="4" Clicked="Clear_Clicked" HeightRequest="50" WidthRequest="200"/>
+
+                      <Button x:Name="WorkOrderCustomer"  Text="Search" Grid.Column="2" Grid.Row="4" Clicked="WorkOrderCustomer_Clicked" HeightRequest="50" WidthRequest="200"/>
+                
+                      <Button x:Name="ShowWorkOrderReports" Text="Show Reports" Clicked="OnShowReportsClicked" Grid.Column="3" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
+                  </Grid>
+                </Frame>
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                    <ListView  x:Name="WorkOrderList" ItemsSource="{Binding WorkOrder}" HorizontalOptions="Start" HeightRequest="400">
+                        <ListView.Header>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20*" />
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Text="Created Date"  Grid.Column="0" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <Label Text="Seller"  Grid.Column="1" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <Label Text="Buyer"  Grid.Column="2" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <Label Text="Items"  Grid.Column="3" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <Label Text="Edit"  Grid.Column="4" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20*" />
+                                            <ColumnDefinition Width="20*"/>
+                                            <ColumnDefinition Width="20*"/>
+                                            <ColumnDefinition Width="20*"/>
+                                            <ColumnDefinition Width="20*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label  Text="{Binding CreateDate, StringFormat='{0:MMMM dd, yyyy}'}" Grid.Column="0" HorizontalOptions="StartAndExpand" />
+                                        <Label  Text="{Binding Seller}" Grid.Column="1" HorizontalOptions="StartAndExpand" />
+                                        <Label Text="{Binding Buyer}" Grid.Column="2" HorizontalOptions="StartAndExpand" />
+                                        <Button Text="Items" Grid.Column="3" Clicked="ShowInventory_Clicked" CommandParameter="{Binding WorkOrderId}" HorizontalOptions="StartAndExpand" />
+                                        <Button Text="Edit"  Grid.Column="4" Clicked="EditWorkOrder_Clicked" CommandParameter="{Binding WorkOrderId}" HorizontalOptions="StartAndExpand" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Frame>
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                     <ListView  x:Name="InventoryList" ItemsSource="{Binding InventoryList}" HorizontalOptions="Start" HeightRequest="400">
+                            <ListView.Header>
+                                <Grid >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50*"/>
+                                        <ColumnDefinition Width="50*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Text="InventoryName"  FontAttributes="Bold" Grid.Column="0" Grid.Row="0" HorizontalOptions="StartAndExpand"/>
+                                    <Label Text="Quantity" FontAttributes="Bold" Grid.Column="1" Grid.Row="0" HorizontalOptions="StartAndExpand"/>
+                                </Grid>
+                            </ListView.Header>
+
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ViewCell>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="50*" />
+                                                <ColumnDefinition Width="50*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Label  Text="{Binding InventoryName}" Grid.Column="0" HorizontalOptions="StartAndExpand" />
+                                            <Label  Text="{Binding Quantity}" Grid.Column="1" HorizontalOptions="StartAndExpand" />
+                                        </Grid>
+                                    </ViewCell>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                </Frame>
+             </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

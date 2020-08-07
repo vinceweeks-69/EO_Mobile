@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EOMobile.SiteServiceReportPage" Title="Site Service">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+                <Label Text="Elegant Orchids Site Service Reports"
+                       FontSize="Medium"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="CenterAndExpand" />
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="25*" />
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="50"/>
+                        </Grid.RowDefinitions>
+
+                        <Label Text="From"
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="Start" />
+                        
+                        <DatePicker x:Name="SiteServiceFromDate"  Grid.Column="0" Grid.Row="1" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="To"
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="Start" />
+                        
+                        <DatePicker x:Name="SiteServiceToDate"  Grid.Column="1" Grid.Row="1" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Customer"
+                            Grid.Column="2"
+                            Grid.Row="0"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="Start" />
+
+                        <Entry x:Name="CustomerName" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" Focused="SiteServiceCustomer_Clicked" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Paid"
+                            Grid.Column="0"
+                            Grid.Row="2"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="Start"/>
+                        
+                        <Picker x:Name="WorkOrderPaid" Grid.Column="0" Grid.Row="3" ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"/>
+
+                        <Label Text="Serviced By"
+                            Grid.Column="1"
+                            Grid.Row="2"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="Start"/>
+
+                        <Picker x:Name="ServicedBy" Grid.Column="1" Grid.Row="3" ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"/>
+
+                        <Button Text="Clear" Grid.Column="0" Grid.Row="4" Clicked="Clear_Clicked" HeightRequest="50" WidthRequest="200"/>
+
+                        <!--<Button x:Name="SiteServiceCustomer"  Text="Search" Grid.Column="2" Grid.Row="4" Clicked="SiteServiceCustomer_Clicked" HeightRequest="50" WidthRequest="200"/>-->
+
+                        <Button x:Name="ShowSiteServiceReports" Text="Show Reports" Clicked="OnShowSiteServiceReportsClicked" Grid.Column="3" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
+                    </Grid>
+                </Frame>
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                    <ListView  x:Name="SiteServiceList" ItemsSource="{Binding WorkOrder}" HorizontalOptions="Start" HeightRequest="400">
+                        <ListView.Header>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20*" />
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Text="Created Date"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold" />
+                                <Label Text="EO Rep"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold" />
+                                <Label Text="Customer"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold" />
+                                <Label Text="Items"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold" />
+                                <Label Text="Edit"  Grid.Column="4" Grid.Row="0" HorizontalOptions="Start" FontAttributes="Bold" />
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20*" />
+                                            <ColumnDefinition Width="20*"/>
+                                            <ColumnDefinition Width="20*"/>
+                                            <ColumnDefinition Width="20*"/>
+                                            <ColumnDefinition Width="20*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label  Text="{Binding CreateDate, StringFormat='{0:MMMM dd, yyyy}'}" Grid.Column="0" HorizontalOptions="Start" />
+                                        <Label  Text="{Binding DeliveredBy}" Grid.Column="1" HorizontalOptions="Start" />
+                                        <Label Text="{Binding Buyer}" Grid.Column="2" HorizontalOptions="Start" />
+                                        <Button Text="Items" Grid.Column="3" Clicked="ShowInventory_Clicked" CommandParameter="{Binding WorkOrderId}" HorizontalOptions="Start" />
+                                        <Button Text="Edit"  Grid.Column="4" Clicked="EditSiteService_Clicked" CommandParameter="{Binding WorkOrderId}" HorizontalOptions="Start" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Frame>
+
+                <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                    <ListView  x:Name="InventoryList" ItemsSource="{Binding InventoryList}" HorizontalOptions="Start" HeightRequest="400">
+                        <ListView.Header>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50*" />
+                                    <ColumnDefinition Width="50*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Text="InventoryName"  FontAttributes="Bold" Grid.Column="0" Grid.Row="0" HorizontalOptions="Start"/>
+                                <Label Text="Quantity" FontAttributes="Bold" Grid.Column="1" Grid.Row="0" HorizontalOptions="Start"/>
+                            </Grid>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="50*" />
+                                            <ColumnDefinition Width="50*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label  Text="{Binding InventoryName}" Grid.Column="0" HorizontalOptions="Start" />
+                                        <Label  Text="{Binding Quantity}" Grid.Column="1" HorizontalOptions="Start" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Frame>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
+    

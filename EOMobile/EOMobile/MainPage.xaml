@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EOMobile.MainPage"
+             xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
+    
+    <NavigationPage.TitleView>
+         <Button x:Name="Help_MainPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center" Clicked="Help_MainPage_Clicked" />
+   </NavigationPage.TitleView>
+    
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+
+            <Label Text="Elegant Orchids Administration"
+                FontSize="Medium"
+                Grid.Column="0"
+                Grid.Row="0"
+                VerticalOptions="CenterAndExpand" 
+                HorizontalOptions="CenterAndExpand" />
+            
+            <Button x:Name="Inventory" Text="Inventory"  Clicked="OnInventoryClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="1"/>
+            <Button x:Name="Arrangements" Text="Arrangements"  Clicked="OnArrangementsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="1"/>
+            <Button x:Name="WorkOrders" Text="Work Orders" Clicked="OnWorkOrdersClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="2"/>
+            <Button x:Name="Customers" Text="Customers" Clicked="OnCustomersClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="2"/>
+            <Button x:Name="Vendors" Text="Vendors" Clicked="OnVendorsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="3"/>
+            <Button x:Name="Shipments" Text="Shipments" Clicked="OnShipmentsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="3"/>
+            <Button x:Name="Reports" Text="Reports" Clicked="OnReportsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="4"/>
+            <Button x:Name="SiteService" Text="On Site Service" Clicked="OnSiteServiceClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="4"/>
+            <Button x:Name="Scheduler" Text="Scheduler" Clicked="Scheduler_Clicked"  HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="5"/>
+            <Button x:Name="Bugs" Text="Bugs" Clicked="Bugs_Clicked"  HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="5"/>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

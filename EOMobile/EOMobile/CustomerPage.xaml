@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:EOMobile"
+             x:Class="EOMobile.CustomerPage"
+              xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
+    
+    <NavigationPage.TitleView>
+         <Button x:Name="Help_CustomerPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center" Clicked="Help_CustomerPage_Clicked" />
+   </NavigationPage.TitleView>
+    
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+            <Label Text="Elegant Orchids Customers"
+                   FontSize="Medium"
+                VerticalOptions="Center" 
+                HorizontalOptions="Center" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="33*"/>
+                    <ColumnDefinition Width="33*"/>
+                    <ColumnDefinition Width="33*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+   
+                <Button x:Name="Search" Clicked="OnCustomerSearchClicked" Text="Search" Grid.Column="0" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
+
+                <Button x:Name="ShowAll" Clicked="OnShowAllCustomersClicked" Text="Show All" Grid.Column="2" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
+                
+                <Label Text="First Name"
+                        Grid.Column="0"
+                        Grid.Row="1"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="FirstName"  Text="" Grid.Column="0" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Last Name"
+                        Grid.Column="1"
+                        Grid.Row="1"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="LastName"  Text="" Grid.Column="1" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Phone"
+                        Grid.Column="2"
+                        Grid.Row="1"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="Phone"  Text="" Grid.Column="2" Grid.Row="2"  HeightRequest="50" WidthRequest="200">
+                       <Entry.Behaviors>
+                           <local:PhoneNumberValidator />
+                           <local:MaxLengthValidator  MaxLength="12"/>
+                        </Entry.Behaviors>
+                 </Entry>
+
+                <Label Text="Email"
+                    Grid.Column="0"
+                    Grid.Row="3"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="Start" />
+
+                <Entry x:Name="Email"  Text="" Grid.Column="0" Grid.Row="4"  HeightRequest="50" WidthRequest="200" >
+                    <Entry.Behaviors>
+                        <local:EmailValidator />
+                    </Entry.Behaviors> 
+                 </Entry>
+
+                <Label Text="Address"
+                        Grid.Column="1"
+                        Grid.Row="3"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="Address"  Text="" Grid.Column="1" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Unit/Apt/Suite"
+                        Grid.Column="2"
+                        Grid.Row="3"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="Address2"  Text="" Grid.Column="2" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="City"
+                        Grid.Column="0"
+                        Grid.Row="5"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="City"  Text="" Grid.Column="0" Grid.Row="6"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="State"
+                        Grid.Column="1"
+                        Grid.Row="5"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Picker x:Name="State" Grid.Column="1" Grid.Row="6"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Zip Code"
+                        Grid.Column="2"
+                        Grid.Row="5"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                 <Entry x:Name="Zip"  Keyboard="Numeric" Text="" Grid.Column="2" Grid.Row="6"  HeightRequest="50" WidthRequest="200">
+                        <Entry.Behaviors>
+                            <local:NumberValidator />
+                            <local:MaxLengthValidator  MaxLength="5"/>
+                        </Entry.Behaviors>
+                  </Entry>
+
+                  <Label Text="Community"
+                        Grid.Column="0"
+                        Grid.Row="7"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                
+                <Picker x:Name="Community"   Grid.Column="0" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
+
+                <Button x:Name="Clear"  Text="Clear" Clicked="Clear_Clicked" Grid.Column="1" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
+                
+                <Button x:Name="Save"  Text="Save" Clicked="OnSaveCustomerClicked" Grid.Column="2" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
+
+            </Grid>
+
+            <Frame Padding="10,10,10,10">
+                <ListView  x:Name="CustomerListView" ItemsSource="{Binding list1}">
+
+                    <ListView.Header>
+                        <Grid >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Text="Name"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                            <Label Text="Phone"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                            <Label Text="Email"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                            <Label Text="Delete"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                         </Grid>
+                    </ListView.Header>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Column="0" Text="{Binding Person.CustomerName}" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                    <Label Text="{Binding Person.phone_primary}" Grid.Column="1"  HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                    <Label Text="{Binding Person.email}" Grid.Column="2" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                    <Button Text="Delete"  Grid.Column="3" Clicked="OnDeleteCustomerClicked" CommandParameter="{Binding Person.person_id}" HorizontalOptions="Start" />
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Frame>
+        </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

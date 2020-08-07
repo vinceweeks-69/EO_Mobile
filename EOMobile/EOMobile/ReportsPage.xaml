@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EOMobile.ReportsPage">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="50*" />
+                </Grid.ColumnDefinitions>
+                <Label Text="Elegant Orchids Reports"
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    FontSize="Medium"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="CenterAndExpand" />
+
+                <Button Text="Work Orders" Grid.Column="0" Grid.Row="1" Clicked="OnWorkOrderReportClicked" HeightRequest="100" WidthRequest="300"/>
+                <Button Text="Shipments" Grid.Column="1" Grid.Row="1" Clicked="OnShipmentReportClicked" HeightRequest="50" WidthRequest="200"/>
+                <Button Text="Site Service" Grid.Column="0" Grid.Row="2" Clicked="OnSiteServiceClicked" HeightRequest="50" WidthRequest="200"/>
+            </Grid>
+        </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

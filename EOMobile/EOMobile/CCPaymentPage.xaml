@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="EOMobile.CCPaymentPage">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+                <Label Text="Elegant Orchids Credit Card Payment"
+                FontSize="Medium"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="CenterAndExpand" />
+
+                <!--<Label x:Name="ErrorMessages" Text=""
+                TextColor="Red"
+                FontSize="Medium"
+                FontAttributes="Bold"
+                VerticalOptions="Start" 
+                HorizontalOptions="CenterAndExpand" />-->
+
+                <Frame x:Name="CCFrame" CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+
+
+                        <Label Text="Name On Card"
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="StartAndExpand" />
+                        <Entry x:Name="NameOnCard" Text="" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Card Number"
+                            Grid.Column="2"
+                            Grid.Row="0"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="StartAndExpand" />
+                        <Entry x:Name="CardNumber" Text="" Keyboard="Numeric" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" MaxLength="16" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Expiration Month"
+                            Grid.Column="0"
+                            Grid.Row="2"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="StartAndExpand" />
+                        <Entry x:Name="ExpirationMonth" Text="" Keyboard="Numeric" Grid.Column="0" Grid.Row="3" MaxLength="2" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Expiration Year"
+                            Grid.Column="1"
+                            Grid.Row="2"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="StartAndExpand" />
+                        <Entry x:Name="ExpirationYear" Text="" Keyboard="Numeric" Grid.Column="1" Grid.Row="3"  MaxLength="4" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Security Code"
+                            Grid.Column="2"
+                            Grid.Row="2"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="StartAndExpand" />
+                        <Entry x:Name="CVV" Text="" Keyboard="Numeric" Grid.Column="2" Grid.Row="3"  MaxLength="3" HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Back"
+                            Grid.Column="0"
+                            Grid.Row="4"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="StartAndExpand" />
+                        <Button x:Name="Back" Text="Back" Clicked="Back_Clicked" Grid.Column="0" Grid.Row="5"  HeightRequest="50" WidthRequest="200"/>
+
+                        <Label Text="Pay"
+                            Grid.Column="3"
+                            Grid.Row="4"
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="CenterAndExpand" 
+                            HorizontalOptions="StartAndExpand" />
+                        <Button x:Name="Pay" Text="Pay" Clicked="Pay_Clicked" Grid.Column="3" Grid.Row="5"  HeightRequest="50" WidthRequest="200"/>
+                    </Grid>
+                </Frame>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

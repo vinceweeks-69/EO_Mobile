@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:EOMobile"
+             xmlns:xaml="http://xamarin.com/schemas/2014/forms"
+             xmlns:FFImg="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             mc:Ignorable="d"
+             x:Class="EOMobile.ImagePage" Title="Saved Images">
+    <!--<ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"></converters:ByteArrayToImageConverter>
+        </ResourceDictionary>
+    </ContentPage.Resources>-->
+    
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="Elegant Orchids Saved Arrangement Images"
+                FontSize="Medium"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+
+            <ListView x:Name="imageList" ItemsSource="{Binding  ImageSourceListOC, Mode=TwoWay}" HasUnevenRows="True" VerticalOptions="End">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Image Source="{Binding ImgSource}" Aspect="AspectFit" WidthRequest="300" HeightRequest="600" />
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:EOMobile" x:Class="EOMobile.CameraPage">
+    <StackLayout Padding="20">
+        <Button Text="Select Image" HorizontalOptions="CenterAndExpand" Clicked="SelectImageClicked"></Button>
+        <Image x:Name="img" Aspect="AspectFit" WidthRequest="300"></Image>
+        <Button Text="Back" HorizontalOptions="CenterAndExpand" Clicked="BackButton_Clicked"></Button>
+    </StackLayout>
+</ContentPage>

@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:EOMobile"
+             x:Class="EOMobile.PersonFilterPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="33*" />
+                    <ColumnDefinition Width="33*" />
+                    <ColumnDefinition Width="33*" />
+                </Grid.ColumnDefinitions>
+                <Label Text="Person Filter"
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    FontSize="Medium"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="CenterAndExpand" />
+
+                <Label Text="Name"
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="Name" Text="" Grid.Column="0" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="City"
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="City" Text="" Grid.Column="1" Grid.Row="2" HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Community"
+                    Grid.Column="2"
+                    Grid.Row="1"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="Community" Text="" Grid.Column="2" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Phone"
+                    Grid.Column="0"
+                    Grid.Row="3"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="Phone" Text="" Grid.Column="0" Grid.Row="4"  HeightRequest="50" WidthRequest="200">
+                    <Entry.Behaviors>
+                        <local:PhoneNumberValidator />
+                        <local:MaxLengthValidator  MaxLength="12"/>
+                    </Entry.Behaviors>
+                </Entry>
+                <Label Text="Email"
+                    Grid.Column="1"
+                    Grid.Row="3"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="Email" Text="" Grid.Column="1" Grid.Row="4" HeightRequest="50" WidthRequest="200">
+                    <Entry.Behaviors>
+                        <local:EmailValidator />
+                    </Entry.Behaviors>
+                </Entry>
+                
+                <Label Text="Address"
+                    Grid.Column="2"
+                    Grid.Row="3"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="Address" Text="" Grid.Column="2" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
+
+                <Button Text="Search" Grid.Column="1" Grid.Row="5" Clicked="OnSearchPersonClicked" HeightRequest="100" WidthRequest="300"/>
+            </Grid>
+
+            <Frame Padding="10,10,10,10">
+                <ListView x:Name="PersonListView" ItemSelected="PersonListView_ItemSelected"  ItemsSource="{Binding Persons}" > 
+                    <ListView.Header>
+                        <Grid >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="25*" />
+                                <ColumnDefinition Width="25*"/>
+                                <ColumnDefinition Width="25*"/>
+                                <ColumnDefinition Width="25*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Text="Name"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                            <Label Text="Address"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                            <Label Text="Phone"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                            <Label Text="Email"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                        </Grid>
+                    </ListView.Header>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="25*" />
+                                        <ColumnDefinition Width="25*"/>
+                                        <ColumnDefinition Width="25*"/>
+                                        <ColumnDefinition Width="25*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Column="0" Text="{Binding Person.first_name}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                    <Label Grid.Column="1" Text="{Binding Address.street_address}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                                    <Label Grid.Column="2" Text="{Binding Person.phone_primary}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                                    <Label Grid.Column="3" Text="{Binding Person.email}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Frame>        
+            
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
