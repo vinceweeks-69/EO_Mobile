@@ -19,7 +19,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class ContainersPage : ContentPage
+	public partial class ContainersPage : EOBasePage //ContentPage
 	{
         public string User
         {
@@ -281,7 +281,7 @@ namespace EOMobile
 
                     PopupImagePage popup = new PopupImagePage(img, price);
 
-                    Navigation.PushPopupAsync(popup);
+                    //Navigation.PushPopupAsync(popup);
 
                     if (containerImageId == ((App)App.Current).MissingImageId)
                     {
@@ -297,11 +297,6 @@ namespace EOMobile
             {
                 b.IsEnabled = true;
             }
-        }
-
-        private void Help_ContainersPage_Clicked(object sender, EventArgs e)
-        {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("ContainersPage")).GetAwaiter();
         }
     }
 }

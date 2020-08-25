@@ -1,5 +1,7 @@
 ﻿using EO.ViewModels.ControllerModels;
 using Newtonsoft.Json;
+using Org.Apache.Http.Impl.Conn.Tsccm;
+using Rg.Plugins.Popup.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,11 +36,12 @@ namespace EOMobile
             InitializeComponent();
         }
 
-        void OnLoginButtonClicked(object sender, EventArgs e)
+        async void OnLoginButtonClicked(object sender, EventArgs e)
         {
             string message = String.Empty;
             HttpResponseMessage httpResponse = new HttpResponseMessage();
             Login.IsEnabled = false;
+            PopupImagePage waiting = new PopupImagePage(null, String.Empty);
 
             try
             {
@@ -60,7 +63,12 @@ namespace EOMobile
 
                 string jsonData = JsonConvert.SerializeObject(request);
                 var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                httpResponse = client.PostAsync("api/Login/Login", content).Result;
+                                
+                await Navigation.PushPopupAsync(waiting);
+
+                httpResponse = await client.PostAsync("api/Login/Login", content);
+
+                await Navigation.PopPopupAsync();
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
@@ -68,15 +76,15 @@ namespace EOMobile
                     httpResponse.Headers.TryGetValues("EO-Header", out values);
                     if (values != null && values.ToList().Count == 1)
                     {
+                        await Navigation.PushAsync(new DashboardPage());
+
                         this.Name.Text = String.Empty;
                         this.Password.Text = String.Empty;
-                        //Navigation.PushAsync(new MainPage());
-                        Navigation.PushAsync(new DashboardPage());
                     }
                 }
                 else
                 {
-                    if(httpResponse.StatusCode == System.Net.HttpStatusCode.Forbidden || 
+                     if (httpResponse.StatusCode == System.Net.HttpStatusCode.Forbidden || 
                         httpResponse.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
                         message = "Unrecognized username / password";
@@ -85,16 +93,22 @@ namespace EOMobile
             }
             catch (Exception ex)
             {
+                await Navigation.PopPopupAsync();
+
                 if (ex.Message.Contains("failed to connect"))
                 {
-                    message = "Device not connected to network";
+                    message = "Device not connected to network.";
+                }
+                else
+                {
+                    message = "Could not connect to server.";
                 }
             }
             finally
             {
                 if (!String.IsNullOrEmpty(message))
                 {
-                    DisplayAlert("Error", message, "Cancel");
+                    await DisplayAlert("Error", message, "Cancel");
                 }
                 //else if(httpResponse.StatusCode == System.Net.HttpStatusCode.OK && httpResponse.RequestMessage is null)
                 //{

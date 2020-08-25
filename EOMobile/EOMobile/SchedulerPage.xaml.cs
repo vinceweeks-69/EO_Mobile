@@ -6,7 +6,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SchedulerPage : ContentPage
+    public partial class SchedulerPage : EOBasePage
     {
         DateTime currentMonthDT;
 

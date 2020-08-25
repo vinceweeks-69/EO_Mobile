@@ -1,13 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<d:EOBasePage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="EOMobile.ArrangementFilterPage">
+             xmlns:d="clr-namespace:EOMobile"
+             x:Class="EOMobile.ArrangementFilterPage"
+             xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
+    
+   
+    <NavigationPage.TitleView>
+        <StackLayout Orientation="Horizontal" BackgroundColor="CornflowerBlue">
+            
+            <Button x:Name="Logout" Text="Logout" BackgroundColor="CornflowerBlue"
+                TextColor="White"  FontSize="Large"  HorizontalOptions="CenterAndExpand"  VerticalOptions="Center" 
+                     Clicked="Logout_Clicked" />
+            
+            <Button x:Name="Help_ContainersPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center"
+                    Clicked="Help_Clicked"  CommandParameter="ArrangementFilterPage"/>
+            
+        </StackLayout>    
+   </NavigationPage.TitleView>
+    
     <ContentPage.Content>
+        
         <StackLayout>
-            <Label Text="Seach Inventory Filter"
+             <Label Text="Seach Inventory Filter"
                    FontSize="Medium"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+                    VerticalOptions="CenterAndExpand" 
+                     HorizontalOptions="CenterAndExpand" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="33*"/>
@@ -106,4 +125,4 @@
             
         </StackLayout>
     </ContentPage.Content>
-</ContentPage>
+</d:EOBasePage>

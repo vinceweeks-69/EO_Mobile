@@ -1,12 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<local:EOBasePage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:EOMobile"
              x:Class="EOMobile.MaterialsPage"
              xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
     
     <NavigationPage.TitleView>
-         <Button x:Name="Help_MaterialsPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
-                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center" Clicked="Help_MaterialsPage_Clicked" />
+        <StackLayout Orientation="Horizontal" BackgroundColor="CornflowerBlue">
+            
+            <Button x:Name="Logout" Text="Logout" BackgroundColor="CornflowerBlue"
+                TextColor="White"  FontSize="Large"  HorizontalOptions="CenterAndExpand"  VerticalOptions="Center" 
+                     Clicked="Logout_Clicked" />
+            
+            <Button x:Name="Help_ContainersPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center"
+                    Clicked="Help_Clicked"  CommandParameter="MaterialsPage"/>
+            
+        </StackLayout>    
    </NavigationPage.TitleView>
     
     <ContentPage.Content>
@@ -88,4 +98,4 @@
             </ListView>
         </StackLayout>
     </ContentPage.Content>
-</ContentPage>
+</local:EOBasePage>

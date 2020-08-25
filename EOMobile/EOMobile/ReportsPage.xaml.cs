@@ -10,7 +10,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class ReportsPage : ContentPage
+	public partial class ReportsPage : EOBasePage
 	{
 		public ReportsPage ()
 		{

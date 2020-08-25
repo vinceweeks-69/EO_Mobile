@@ -18,7 +18,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class PaymentPage : ContentPage
+    public partial class PaymentPage : EOBasePage
     {
         string ccConfirm = String.Empty;
         long workOrderId = 0;

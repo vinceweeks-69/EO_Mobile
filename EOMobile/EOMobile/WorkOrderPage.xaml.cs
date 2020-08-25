@@ -20,7 +20,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class WorkOrderPage : ContentPage
+	public partial class WorkOrderPage : EOBasePage
 	{
         private List<InventoryTypeDTO> inventoryTypeList = new List<InventoryTypeDTO>();
         List<WorkOrderInventoryItemDTO> workOrderInventoryList = new List<WorkOrderInventoryItemDTO>();
@@ -617,13 +617,13 @@ namespace EOMobile
 
         private void AddInventory_Clicked(object sender, EventArgs e)
         {
-            Navigation.PushModalAsync(new ArrangementFilterPage(this));
+            Navigation.PushAsync(new ArrangementFilterPage(this));
         }
 
         private void Buyer_Focused(object sender, FocusEventArgs e)
         {
             SearchedForPersonType = 0;
-            Navigation.PushModalAsync(new PersonFilterPage(this));
+            Navigation.PushAsync(new PersonFilterPage(this));
         }
 
         private void OrderType_SelectedIndexChanged(object sender, EventArgs e)
@@ -644,11 +644,11 @@ namespace EOMobile
 
                 if (p.SelectedIndex == 1)
                 {
-                    Navigation.PushModalAsync(new PersonFilterPage(this));
+                    Navigation.PushAsync(new PersonFilterPage(this));
                 }
                 else if(p.SelectedIndex == 2)
                 {
-                    Navigation.PushModalAsync(new CustomerPage(this));
+                    Navigation.PushAsync(new CustomerPage(this));
                 }
             }
         }

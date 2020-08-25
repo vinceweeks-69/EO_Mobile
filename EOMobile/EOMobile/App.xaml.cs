@@ -71,9 +71,17 @@ namespace EOMobile
 
             pngFileNames = new List<string>();
 
-            LAN_Address = "http://10.0.0.5:9000/";   //Me Fl
+            //LAN_Address = "http://10.0.0.5:9000/";   //Me Fl
 
-            //LAN_Address = "http://elegantsystem.ddns.net";   //No IP
+            //LAN_Address = "http://10.1.10.148:9000/";   //Me EO
+
+            //LAN_Address = "http://10.1.10.1:9000/";   //router EO
+
+            LAN_Address = "http://10.1.10.36:9000/";   //Roseanne EO
+
+            //LAN_Address = "http://elegantsystem3.ddns.net:9000";   //The farm NoIP ( I had to add port number)
+
+            //LAN_Address = "http://76.109.59.49:9000";   //The farm by ip
 
             //LAN_Address = "http://eo.hopto.org:9000/";   //Me
 
@@ -243,6 +251,10 @@ namespace EOMobile
             SendInfoEmail(emailHelper.ComposeMissingImage(arg));
         }
 
+        public void ClearNavigationStacks()
+        {
+
+        }
         private void SendInfoEmail(string emailHtml)
         {
             try

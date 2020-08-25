@@ -1,18 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<local:EOBasePage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:EOMobile"
              xmlns:converters="clr-namespace:EOMobile"
              xmlns:xaml="http://xamarin.com/schemas/2014/forms"
              xmlns:FFImg="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              mc:Ignorable="d"
-             x:Class="EOMobile.ImagePage" Title="Saved Images">
+             x:Class="EOMobile.ImagePage" 
+             xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData" Title="Saved Images">
     <!--<ContentPage.Resources>
         <ResourceDictionary>
             <converters:ByteArrayToImageConverter x:Key="ByteArrayToImageConverter"></converters:ByteArrayToImageConverter>
         </ResourceDictionary>
     </ContentPage.Resources>-->
+    
+    <NavigationPage.TitleView>
+        <StackLayout Orientation="Horizontal" BackgroundColor="CornflowerBlue">
+            
+            <Button x:Name="Logout" Text="Logout" BackgroundColor="CornflowerBlue"
+                TextColor="White"  FontSize="Large"  HorizontalOptions="CenterAndExpand"  VerticalOptions="Center" 
+                     Clicked="Logout_Clicked" />
+            
+            <Button x:Name="Help_ContainersPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center"
+                    Clicked="Help_Clicked"  CommandParameter="ImagePage"/>
+            
+        </StackLayout>    
+   </NavigationPage.TitleView>
     
     <ContentPage.Content>
         <StackLayout>
@@ -33,4 +49,4 @@
             
         </StackLayout>
     </ContentPage.Content>
-</ContentPage>
+</local:EOBasePage>

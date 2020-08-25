@@ -1,12 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<d:EOBasePage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="clr-namespace:EOMobile"
              x:Class="EOMobile.MainPage"
              xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
     
     <NavigationPage.TitleView>
-         <Button x:Name="Help_MainPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
-                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center" Clicked="Help_MainPage_Clicked" />
+        <StackLayout Orientation="Horizontal" BackgroundColor="CornflowerBlue">
+            <Button x:Name="Logout" Text="Logout" TextColor="White"  FontSize="Large"  HorizontalOptions="CenterAndExpand"  
+                    BackgroundColor="CornflowerBlue" VerticalOptions="Center"  Clicked="Logout_Clicked" />
+        
+             <Button x:Name="Help_MainPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" 
+                    FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End" 
+                    BackgroundColor="CornflowerBlue" VerticalOptions="Center" Clicked="Help_Clicked" CommandParameter="MainPage" />
+         </StackLayout>
    </NavigationPage.TitleView>
     
     <ContentPage.Content>
@@ -34,7 +41,7 @@
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand" />
             
-            <Button x:Name="Inventory" Text="Inventory"  Clicked="OnInventoryClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="1"/>
+            <Button x:Name="Inventory" Text="Products"  Clicked="OnInventoryClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="1"/>
             <Button x:Name="Arrangements" Text="Arrangements"  Clicked="OnArrangementsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="1"/>
             <Button x:Name="WorkOrders" Text="Work Orders" Clicked="OnWorkOrdersClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="2"/>
             <Button x:Name="Customers" Text="Customers" Clicked="OnCustomersClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="2"/>
@@ -46,4 +53,4 @@
             <Button x:Name="Bugs" Text="Bugs" Clicked="Bugs_Clicked"  HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="5"/>
         </Grid>
     </ContentPage.Content>
-</ContentPage>
+</d:EOBasePage>

@@ -1,10 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+<local:EOBasePage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             x:Class="EOMobile.SiteServicePage" Title="On Site Service">
+             xmlns:local="clr-namespace:EOMobile"
+             x:Class="EOMobile.SiteServicePage"
+             xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData" Title="On Site Service">
+    
+    <NavigationPage.TitleView>
+        <StackLayout Orientation="Horizontal" BackgroundColor="CornflowerBlue">
+            
+            <Button x:Name="Logout" Text="Logout" BackgroundColor="CornflowerBlue"
+                TextColor="White"  FontSize="Large"  HorizontalOptions="CenterAndExpand"  VerticalOptions="Center" 
+                     Clicked="Logout_Clicked" />
+            
+            <Button x:Name="Help_ContainersPage" Text="{x:Static fontawesome:FontAwesomeIcons.Question}" BackgroundColor="CornflowerBlue"
+                FontFamily="{StaticResource FontAwesomeSolid}" TextColor="White"  FontSize="Large"  HorizontalOptions="End"  VerticalOptions="Center"
+                    Clicked="Help_Clicked"  CommandParameter="SiteServicePage"/>
+            
+        </StackLayout>    
+   </NavigationPage.TitleView>
     
     <ContentPage.Content>
         <ScrollView>
@@ -142,4 +158,4 @@
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>
-</ContentPage>
+</local:EOBasePage>

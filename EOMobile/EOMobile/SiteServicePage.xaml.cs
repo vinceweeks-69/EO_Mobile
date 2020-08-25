@@ -15,7 +15,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SiteServicePage : ContentPage
+    public partial class SiteServicePage : EOBasePage
     {
         List<WorkOrderInventoryItemDTO> siteServiceInventoryList = new List<WorkOrderInventoryItemDTO>();
         List<UserDTO> users = new List<UserDTO>();

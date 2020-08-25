@@ -25,7 +25,7 @@ namespace EOMobile
     /// state, if set, will be lost when navigating to the camera page and back. 
     /// </summary>
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ShipmentPage : ContentPage
+    public partial class ShipmentPage : EOBasePage
     {
         private List<VendorDTO> vendorList;
         ShipmentInventoryDTO shipment = new ShipmentInventoryDTO();

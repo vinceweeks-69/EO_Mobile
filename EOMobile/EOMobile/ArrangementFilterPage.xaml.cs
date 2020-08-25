@@ -11,7 +11,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ArrangementFilterPage : ContentPage
+    public partial class ArrangementFilterPage : EOBasePage
     {
         List<InventoryTypeDTO> inventoryTypeList = new List<InventoryTypeDTO>();
 
@@ -125,7 +125,7 @@ namespace EOMobile
                 }
             }
 
-            Navigation.PopModalAsync();
+            Navigation.PopAsync();
         }
 
         private void InventoryType_SelectedIndexChanged(object sender, EventArgs e)
@@ -433,6 +433,11 @@ namespace EOMobile
 
                 ArrangementInventoryList.ItemsSource = list1;
             }
+        }
+
+        private void ArrangementFilterCancel_Clicked(object sender, EventArgs e)
+        {
+            Navigation.PopModalAsync();
         }
     }
 }

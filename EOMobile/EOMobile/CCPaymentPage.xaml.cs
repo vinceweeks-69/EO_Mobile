@@ -19,7 +19,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class CCPaymentPage : ContentPage
+    public partial class CCPaymentPage : EOBasePage
     {
         WorkOrderPaymentDTO workOrderPayment;
 

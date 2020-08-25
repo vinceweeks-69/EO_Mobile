@@ -12,7 +12,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class PersonFilterPage : ContentPage
+	public partial class PersonFilterPage : EOBasePage
 	{
         PersonAndAddressDTO person { get; set;}
 
@@ -112,7 +112,7 @@ namespace EOMobile
                     int debug = 1;
                 }
 
-                Navigation.PopModalAsync();
+                Navigation.PopAsync();
             }
         }
     }

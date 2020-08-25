@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Android.Views;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -13,20 +14,33 @@ namespace EOMobile
     {
         EOImgData image;
 
+        public ActivityIndicator Spinner { get { return spinner; } }
+               
         public PopupImagePage(EOImgData img, string extra = "")
         {
             InitializeComponent();
-
+                       
             if(!String.IsNullOrEmpty(extra))
             {
                 extra1.Text = extra;
             }
 
-            image = img;
+            if (img != null)
+            {
+                image = img;
 
-            ImageSource imgSource = ImageSource.FromStream(() => new MemoryStream(image.imgData));
+                ImageSource imgSource = ImageSource.FromStream(() => new MemoryStream(image.imgData));
 
-            PopupImage.Source = imgSource;
+                PopupImage.Source = imgSource;
+            }
+            else
+            {
+                this.BackgroundColor = Color.Transparent;
+                PopupImage.IsVisible = false;
+                spinner.IsEnabled = true;
+                spinner.IsRunning = true;
+                spinner.IsVisible = true;
+            }
         }
 
         protected override void OnAppearing()
@@ -90,15 +104,30 @@ namespace EOMobile
         // Invoked when a hardware back button is pressed
         protected override bool OnBackButtonPressed()
         {
-            // Return true if you don't want to close this popup page when a back button is pressed
-            return base.OnBackButtonPressed();
+            if (!spinner.IsRunning)
+            {
+                // Return true if you don't want to close this popup page when a back button is pressed
+                return base.OnBackButtonPressed();
+            }
+            else
+            {
+                return true;
+            }
         }
 
-        // Invoked when background is clicked
+        //Invoked when background is clicked
         protected override bool OnBackgroundClicked()
         {
-            // Return false if you don't want to close this popup page when a background of the popup page is clicked
-            return base.OnBackgroundClicked();
+
+            if (!spinner.IsRunning)
+            {
+                // Return false if you don't want to close this popup page when a background of the popup page is clicked
+                return base.OnBackgroundClicked();
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

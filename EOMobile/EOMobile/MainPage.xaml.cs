@@ -11,7 +11,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class MainPage : ContentPage
+	public partial class MainPage : EOBasePage
 	{
 		public MainPage ()
 		{

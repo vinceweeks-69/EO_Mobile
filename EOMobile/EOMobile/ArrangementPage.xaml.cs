@@ -14,7 +14,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class ArrangementPage : ContentPage
+	public partial class ArrangementPage : EOBasePage
 	{
         List<ArrangementInventoryDTO> arrangementInventoryList = new List<ArrangementInventoryDTO>();
         List<GetSimpleArrangementResponse> arrangementList = new List<GetSimpleArrangementResponse>();

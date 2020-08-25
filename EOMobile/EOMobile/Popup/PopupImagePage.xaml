@@ -25,5 +25,7 @@
         Padding="20, 20, 20, 20">
         <Label x:Name="extra1" Text="" TextColor="White" HorizontalTextAlignment="Center" FontSize="Header"  FontAttributes="Bold" />
         <Image x:Name="PopupImage"  Aspect="AspectFit" WidthRequest="300" HeightRequest="600" />
+        <ActivityIndicator x:Name="spinner" Color="Blue" IsRunning="false" IsVisible="false" IsEnabled="False"
+              WidthRequest="300" HeightRequest="600" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
     </StackLayout>
 </pages:PopupPage>

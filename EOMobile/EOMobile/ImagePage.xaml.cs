@@ -17,7 +17,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ImagePage : ContentPage
+    public partial class ImagePage : EOBasePage
     {
         //public List<ImageResponse> Images = new List<ImageResponse>();
 

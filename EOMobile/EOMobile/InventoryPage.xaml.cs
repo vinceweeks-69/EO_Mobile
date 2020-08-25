@@ -11,7 +11,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class InventoryPage : ContentPage
+	public partial class InventoryPage : EOBasePage
 	{
 		public InventoryPage ()
 		{

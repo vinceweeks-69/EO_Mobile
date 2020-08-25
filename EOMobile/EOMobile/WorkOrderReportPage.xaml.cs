@@ -12,7 +12,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class WorkOrderReportPage : ContentPage
+    public partial class WorkOrderReportPage : EOBasePage
     {
         public List<WorkOrderResponse> workOrderList;
         public List<WorkOrderDTO> workOrder = new List<WorkOrderDTO>();

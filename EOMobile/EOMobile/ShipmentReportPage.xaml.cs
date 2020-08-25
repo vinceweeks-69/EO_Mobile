@@ -12,8 +12,8 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class ShipmentReportPage : ContentPage
-	{
+	public partial class ShipmentReportPage : EOBasePage
+    {
         public List<ShipmentInventoryDTO> shipmentList;
 
         public List<ShipmentDTO> shipment = new List<ShipmentDTO>();

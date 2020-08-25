@@ -13,7 +13,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class CameraPage : ContentPage
+    public partial class CameraPage : EOBasePage
     {
         public CameraPage()
         {

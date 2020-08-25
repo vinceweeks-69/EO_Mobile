@@ -19,7 +19,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class CustomerPage : ContentPage
+	public partial class CustomerPage : EOBasePage
 	{
         List<PersonAndAddressDTO> customerList = new List<PersonAndAddressDTO>();
         ObservableCollection<PersonAndAddressDTO> list1 = new ObservableCollection<PersonAndAddressDTO>();

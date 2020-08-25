@@ -17,7 +17,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class MaterialsPage : ContentPage
+	public partial class MaterialsPage : EOBasePage
 	{
         public string User
         {

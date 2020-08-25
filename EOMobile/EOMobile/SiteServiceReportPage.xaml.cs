@@ -12,7 +12,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class SiteServiceReportPage : ContentPage
+    public partial class SiteServiceReportPage : EOBasePage
     {
         List<UserDTO> users = new List<UserDTO>();
         List<KeyValuePair<long, string>> employeeDDL = new List<KeyValuePair<long, string>>();

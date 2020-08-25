@@ -12,7 +12,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class DashboardPage : ContentPage
+    public partial class DashboardPage : EOBasePage
     {
         ObservableCollection<WorkOrderResponse> pickupList;
         ObservableCollection<WorkOrderResponse> deliveryList;
