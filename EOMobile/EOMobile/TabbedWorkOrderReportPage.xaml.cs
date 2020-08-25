@@ -10,7 +10,7 @@ using Xamarin.Forms.Xaml;
 namespace EOMobile
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class TabbedWorkOrderReportPage : TabbedPage
+    public partial class TabbedWorkOrderReportPage : EOBaseTabbedPage
     {
         public TabbedWorkOrderReportPage()
         {

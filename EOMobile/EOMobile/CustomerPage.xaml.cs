@@ -34,6 +34,8 @@ namespace EOMobile
             CustomerListView.ItemSelected += CustomerListView_ItemSelected;
 
             State.ItemsSource = ((App)App.Current).GetStateNames();
+
+            History.IsEnabled = false;
 		}
 
         public CustomerPage(ContentPage initiator) : this()
@@ -52,6 +54,8 @@ namespace EOMobile
             City.Text = String.Empty;
             State.SelectedIndex = -1;
             Zip.Text = String.Empty;
+
+            History.IsEnabled = false;
         }
         private void CustomerListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
@@ -72,6 +76,8 @@ namespace EOMobile
                     City.Text = item.Address != null ? item.Address.city : String.Empty;
                     State.SelectedItem = item.Address != null ? item.Address.state : String.Empty;
                     Zip.Text = item.Address != null ? item.Address.zipcode : String.Empty;
+
+                    History.IsEnabled = true;
                 }
             }
         }
@@ -240,6 +246,11 @@ namespace EOMobile
         private void Help_CustomerPage_Clicked(object sender, EventArgs e)
         {
             TaskAwaiter t = Navigation.PushAsync(new HelpPage("CustomerPage")).GetAwaiter();
+        }
+
+        private void History_Clicked(object sender, EventArgs e)
+        {
+
         }
     }
 }

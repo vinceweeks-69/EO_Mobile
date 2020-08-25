@@ -6,7 +6,7 @@
              xmlns:fontawesome="clr-namespace:FontAwesome;assembly=SharedData">
     
     <NavigationPage.TitleView>
-        <StackLayout BackgroundColor="CornflowerBlue">
+        <StackLayout Orientation="Horizontal" BackgroundColor="CornflowerBlue">
          
          <Button x:Name="Logout" Text="Logout" BackgroundColor="CornflowerBlue"
                 TextColor="White"  FontSize="Large"  HorizontalOptions="CenterAndExpand"  VerticalOptions="Center" 
@@ -44,10 +44,13 @@
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
    
-                <Button x:Name="Search" Clicked="OnCustomerSearchClicked" Text="Search" Grid.Column="0" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="ShowAll" Clicked="OnShowAllCustomersClicked" Text="Show All" Grid.Column="0" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
+               
+                <Button x:Name="Search" Clicked="OnCustomerSearchClicked" Text="Search" Grid.Column="1" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
 
-                <Button x:Name="ShowAll" Clicked="OnShowAllCustomersClicked" Text="Show All" Grid.Column="2" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
-                
+                <Button x:Name="History" Clicked="History_Clicked" Text="History" Grid.Column="2" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
+
+                 
                 <Label Text="First Name"
                         Grid.Column="0"
                         Grid.Row="1"
