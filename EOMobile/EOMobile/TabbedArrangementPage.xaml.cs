@@ -13,8 +13,12 @@ namespace EOMobile
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class TabbedArrangementPage : EOBaseTabbedPage
     {
-        public TabbedArrangementPage()
+        bool forWorkOrder;
+        public bool ForWorkOrder { get { return forWorkOrder; } }
+        public TabbedArrangementPage(bool forWorkOrder = false)
         {
+            this.forWorkOrder = forWorkOrder;
+
             Children.Add(new ArrangementPage(this));
             Children.Add(new ImagePage());
             InitializeComponent();

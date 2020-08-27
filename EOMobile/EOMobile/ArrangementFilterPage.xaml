@@ -23,7 +23,7 @@
     <ContentPage.Content>
         
         <StackLayout>
-             <Label Text="Seach Inventory Filter"
+             <Label Text="Seach Product Filter"
                    FontSize="Medium"
                     VerticalOptions="CenterAndExpand" 
                      HorizontalOptions="CenterAndExpand" />
@@ -41,7 +41,7 @@
                     <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
 
-                <Label Text="Inventory Type"
+                <Label Text="Product Type"
                     Grid.Column="0"
                     Grid.Row="0"
                     FontSize="Default"
@@ -85,9 +85,10 @@
                     <ListView.Header>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="33*" />
-                                <ColumnDefinition Width="33*"/>
-                                <ColumnDefinition Width="33*"/>
+                                <ColumnDefinition Width="25*" />
+                                <ColumnDefinition Width="25*"/>
+                                <ColumnDefinition Width="25*"/>
+                                <ColumnDefinition Width="25*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -103,19 +104,18 @@
                             <ViewCell>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="33*" />
-                                        <ColumnDefinition Width="33*"/>
-                                        <ColumnDefinition Width="33*"/>
+                                        <ColumnDefinition Width="25*" />
+                                        <ColumnDefinition Width="25*"/>
+                                        <ColumnDefinition Width="25*"/>
+                                        <ColumnDefinition Width="25*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-
-
                                     <Label Grid.Column="0" Text="{Binding Type}" VerticalOptions ="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
                                     <Label Grid.Column="1" Text="{Binding Name}" VerticalOptions ="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
                                     <Label Grid.Column="2" Text="{Binding Size}" VerticalOptions ="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
-
+                                    <Button x:Name="ViewImage" Grid.Column="3" Text="View" HorizontalOptions="Start" VerticalOptions="Start"  HeightRequest="40" WidthRequest="132" Clicked="ViewImage_Clicked" />
                                 </Grid>
                             </ViewCell>
                         </DataTemplate>

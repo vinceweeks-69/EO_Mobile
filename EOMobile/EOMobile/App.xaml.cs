@@ -59,6 +59,8 @@ namespace EOMobile
 
         public PersonAndAddressDTO searchedForDeliveryRecipient { get; set; }
 
+        public AddArrangementRequest searchedForArrangement { get; set; }
+
         public static List<EOImgData> imageDataList = new List<EOImgData>();
 
         List<string> pngFileNames;
@@ -90,7 +92,7 @@ namespace EOMobile
             //Stripe.StripeConfiguration.ApiKey = "sk_test_6vJyMV6NxHArGV6kI2EL6R7V00kzjXJ72u";
 
             MainPage = new NavigationPage(new LoginPage());
-
+           
             MessagingCenter.Subscribe<ArrangementInventoryDTO>(this, "SearchArrangementInventory", (arg) =>
             {
                 LoadArrangementInventory(arg);
@@ -144,6 +146,11 @@ namespace EOMobile
             MessagingCenter.Subscribe<MaterialInventoryDTO>(this, "MaterialMissingImage", async (arg) =>
             {
                 NotifyMissingImage(arg);
+            });
+
+            MessagingCenter.Subscribe<AddArrangementRequest>(this, "AddArrangementToWorkOrder", (arg) =>
+            {
+                AddArrangementToWorkOrder(arg);
             });
 
             InitStateList();
@@ -251,10 +258,11 @@ namespace EOMobile
             SendInfoEmail(emailHelper.ComposeMissingImage(arg));
         }
 
-        public void ClearNavigationStacks()
+        public void AddArrangementToWorkOrder(AddArrangementRequest arg)
         {
-
+            searchedForArrangement = arg;
         }
+
         private void SendInfoEmail(string emailHtml)
         {
             try

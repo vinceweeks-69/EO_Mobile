@@ -43,5 +43,39 @@ namespace EOMobile
                 Navigation.PopModalAsync();
             }
         }
+
+        public void PopToPage(string targetPageName)
+        {
+            bool targetPageFound = false;
+
+            Type t = Type.GetType("EOMobile." + targetPageName);
+            object o = Activator.CreateInstance(t);
+
+            foreach (Page p in Navigation.NavigationStack)
+            {
+                if(p.GetType() ==  o.GetType())
+                {
+                    targetPageFound = true;
+                }
+            }
+
+            if (targetPageFound)
+            {
+                int pagesToPop = 0;
+
+                for (int a =  Navigation.NavigationStack.Count - 1;  a >= 0;  a--)
+                {
+                    if (Navigation.NavigationStack[a].GetType() == o.GetType())
+                        break;
+                    else
+                        pagesToPop++;
+                }
+
+                for(int a = 0; a < pagesToPop; a++)
+                {
+                    Navigation.PopAsync();
+                } 
+            }
+        }
     }
 }

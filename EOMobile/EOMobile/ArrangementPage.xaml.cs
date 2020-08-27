@@ -39,7 +39,38 @@ namespace EOMobile
 
             ArrangementListView.ItemsSource = arrangementListOC;
 
+            ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
+            list1.Add(new KeyValuePair<long, string>(1, "Vicky"));
+            list1.Add(new KeyValuePair<long, string>(2, "Marguerita"));
+
+            Designer.ItemsSource = list1;
+
+            ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
+            list2.Add(new KeyValuePair<long, string>(1, "180"));
+            list2.Add(new KeyValuePair<long, string>(2, "360"));
+
+            Style.ItemsSource = list2;
+
+
+            ObservableCollection<KeyValuePair<long, string>> list3 = new ObservableCollection<KeyValuePair<long, string>>();
+            list3.Add(new KeyValuePair<long, string>(1, "Customer container at EO"));  
+            list3.Add(new KeyValuePair<long, string>(2, "Customer container at customer site")); //means use liner
+            list3.Add(new KeyValuePair<long, string>(3, "New container"));
+
+            Container.ItemsSource = list3;
+
+            Container.SelectedIndexChanged += Container_SelectedIndexChanged;
+
             TabParent = tabParent;
+        }
+
+        private void Container_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //if container type is "Customer container at EO" pick from  customer containers on site
+
+            //if container type is "Customer container at customer site" means use liner
+
+            //if container type is "New container" pick container from inventory
         }
 
         protected override void OnAppearing()
@@ -83,7 +114,7 @@ namespace EOMobile
 
         public void OnInventorySearchClicked(object sender, EventArgs e)
         {
-            Navigation.PushModalAsync(new ArrangementFilterPage(this));
+            Navigation.PushAsync(new ArrangementFilterPage(this, false));
         }
 
         public void OnSearchArrangementsClicked(object sender, EventArgs e)
@@ -130,7 +161,29 @@ namespace EOMobile
             {
                 long arrangementId = 0;  //(long)((Button)sender).CommandParameter;
 
-                if (!String.IsNullOrEmpty(Name.Text) && arrangementInventoryList.Count > 0)
+                if (TabParent.ForWorkOrder)
+                {
+                    AddArrangementRequest request = new AddArrangementRequest();
+                    request.Arrangement = new ArrangementDTO();
+                    request.Arrangement.ArrangementName = Name.Text;
+                    request.Arrangement.UpdateDate = DateTime.Now;
+                    request.ArrangementInventory = arrangementInventoryList;
+
+                    request.Inventory = new InventoryDTO()
+                    {
+                        InventoryName = Name.Text,
+                        InventoryTypeId = 5,
+                    };
+
+                    MessagingCenter.Send<AddArrangementRequest>(request, "AddArrangementToWorkOrder");
+
+                    PopToPage("TabbedWorkOrderPage");
+
+                    return;
+                }
+
+               // !String.IsNullOrEmpty(Name.Text) &&
+                if (arrangementInventoryList.Count > 0)
                 {
                     foreach (ArrangementInventoryDTO dto in arrangementInventoryList)
                     {
@@ -217,7 +270,8 @@ namespace EOMobile
                 }
                 else
                 {
-                    DisplayAlert("Error", "Please enter an arrangement name and add at least one inventory item.", "OK");
+                    //DisplayAlert("Error", "Please enter an arrangement name and add at least one inventory item.", "OK");
+                    DisplayAlert("Error", "Please add at least one inventory item.", "OK");
                 }
             }
             catch(Exception ex)

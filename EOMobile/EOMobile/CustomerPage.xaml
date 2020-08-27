@@ -42,6 +42,7 @@
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
    
                 <Button x:Name="ShowAll" Clicked="OnShowAllCustomersClicked" Text="Show All" Grid.Column="0" Grid.Row="0"  HeightRequest="50" WidthRequest="200"/>
@@ -156,10 +157,12 @@
                         HorizontalOptions="Start" />
                 
                 <Picker x:Name="Community"   Grid.Column="0" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
-
-                <Button x:Name="Clear"  Text="Clear" Clicked="Clear_Clicked" Grid.Column="1" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
                 
-                <Button x:Name="Save"  Text="Save" Clicked="OnSaveCustomerClicked" Grid.Column="2" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Containers" Text="Containers" Grid.Column="1" Grid.Row="8" HeightRequest="50" WidthRequest="200" Clicked="Containers_Clicked" />
+
+                <Button x:Name="Clear"  Text="Clear" Clicked="Clear_Clicked" Grid.Column="1" Grid.Row="9"  HeightRequest="50" WidthRequest="200"/>
+                
+                <Button x:Name="Save"  Text="Save" Clicked="OnSaveCustomerClicked" Grid.Column="2" Grid.Row="9"  HeightRequest="50" WidthRequest="200"/>
 
             </Grid>
 

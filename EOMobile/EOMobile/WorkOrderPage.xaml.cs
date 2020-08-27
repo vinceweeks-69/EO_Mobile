@@ -1,4 +1,5 @@
 ﻿using EOMobile.Interfaces;
+using EOMobile.ViewModels;
 using Newtonsoft.Json;
 using Stripe;
 using System;
@@ -222,19 +223,28 @@ namespace EOMobile
 
             WorkOrderDate.Date = workOrder.WorkOrder.CreateDate;
 
-            foreach(var x in workOrder.WorkOrderList)
+            ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
+
+            foreach (var x in workOrder.WorkOrderList)
             {
-                workOrderInventoryList.Add(new WorkOrderInventoryItemDTO()
-                {
-                    WorkOrderId = x.WorkOrderId,
-                    InventoryId = x.InventoryId,
-                    InventoryName = x.InventoryName,
-                    Quantity = x.Quantity,
-                    Size = x.Size
-                });
+                WorkOrderInventoryItemDTO dto =
+                    new WorkOrderInventoryItemDTO()
+                    {
+                        WorkOrderId = x.WorkOrderId,
+                        InventoryId = x.InventoryId,
+                        InventoryName = x.InventoryName,
+                        Quantity = x.Quantity,
+                        Size = x.Size,
+                        //GroupId = x.GroupId
+                    };
+
+                
+                workOrderInventoryList.Add(dto);
+
+                list1.Add(new WorkOrderViewModel(dto));
             }
 
-            ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>(workOrderInventoryList);
+            //ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>(workOrderInventoryList);
 
             InventoryItemsListView.ItemsSource = list1;
 
@@ -313,11 +323,12 @@ namespace EOMobile
                     if (!workOrderInventoryList.Contains(searchedForInventory))
                     {
                         workOrderInventoryList.Add(searchedForInventory);
-                        ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>();
+
+                        ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
 
                         foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
                         {
-                            list1.Add(wo);
+                            list1.Add(new WorkOrderViewModel(wo));
                         }
 
                         InventoryItemsListView.ItemsSource = list1;
@@ -340,6 +351,8 @@ namespace EOMobile
             GetSearchedPerson();
 
             GetSearchedDeliveryRecipient();
+
+            GetSearchedArrangement();
         }
 
         void GetSearchedPerson()
@@ -367,6 +380,52 @@ namespace EOMobile
                 ((App)App.Current).searchedForDeliveryRecipient = null;
 
                 deliveryRecipientId = searchedForDeliveryRecipient.Person.person_id;
+            }
+        }
+
+        void GetSearchedArrangement()
+        {
+            if(((App)App.Current).searchedForArrangement != null)
+            {
+                AddArrangementRequest aar = ((App)App.Current).searchedForArrangement;
+
+                var rand = new Random();
+                long groupId = rand.Next(255);
+
+                //add blank row at start
+                WorkOrderInventoryItemDTO blankFirst = new WorkOrderInventoryItemDTO();
+                blankFirst.GroupId = groupId;
+                workOrderInventoryList.Add(blankFirst);
+
+                //add a "Header" row
+                WorkOrderInventoryItemDTO header = new WorkOrderInventoryItemDTO();
+                header.GroupId = groupId;
+                header.InventoryName = "Arrangement";
+                workOrderInventoryList.Add(header);
+
+                //translate bewteen the two inventory types
+                foreach (ArrangementInventoryDTO dto in aar.ArrangementInventory)
+                {
+                    WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO(dto);
+                    wdto.GroupId = groupId;
+                    workOrderInventoryList.Add(wdto);
+                }
+
+                //add blank row at end
+                WorkOrderInventoryItemDTO blankLast = new WorkOrderInventoryItemDTO();
+                blankLast.GroupId = groupId;
+                workOrderInventoryList.Add(blankLast);
+
+                ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
+
+                foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
+                {
+                    list1.Add(new WorkOrderViewModel(wo));
+                }
+
+                InventoryItemsListView.ItemsSource = list1;
+
+                ((App)App.Current).searchedForArrangement = null;
             }
         }
 

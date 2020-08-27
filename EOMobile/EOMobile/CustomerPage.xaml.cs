@@ -252,5 +252,10 @@ namespace EOMobile
         {
 
         }
+
+        private void Containers_Clicked(object sender, EventArgs e)
+        {
+            TaskAwaiter t = Navigation.PushAsync(new CustomerContainerPage()).GetAwaiter();
+        }
     }
 }

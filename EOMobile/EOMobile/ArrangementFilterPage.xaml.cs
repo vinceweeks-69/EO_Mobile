@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Rg.Plugins.Popup.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,9 +39,13 @@ namespace EOMobile
         List<KeyValuePair<long, string>> containerSizes = new List<KeyValuePair<long, string>>();
 
         ContentPage Initiator;
-        public ArrangementFilterPage(ContentPage initiator)
+
+        bool showArrangements;
+        public ArrangementFilterPage(ContentPage initiator, bool showArrangements = true)
         {
             Initiator = initiator;
+
+            this.showArrangements = showArrangements;
 
             InitializeComponent();
 
@@ -48,7 +54,7 @@ namespace EOMobile
             ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
             foreach (InventoryTypeDTO type in inventoryTypeList)
             {
-                if(type.InventoryTypeName == "Arrangements")
+                if(type.InventoryTypeName == "Arrangements" && !showArrangements)
                 {
                     continue;
                 }
@@ -173,6 +179,12 @@ namespace EOMobile
                             foreach (FoliageTypeDTO foliage in foliageTypes)
                             {
                                 list1.Add(new KeyValuePair<long, string>(foliage.FoliageTypeId, foliage.FoliageTypeName));
+                            }
+                            break;
+
+                        case "Arrangements":
+                            {
+                                Navigation.PushAsync(new TabbedArrangementPage(true));
                             }
                             break;
 
@@ -362,7 +374,9 @@ namespace EOMobile
                                 Type = p.Inventory.InventoryName,
                                 Name = p.Plant.PlantName,
                                 Size = p.Plant.PlantSize,
-                                ServiceCode = p.Inventory.ServiceCodeName
+                                ServiceCodeId = p.Inventory.ServiceCodeId,
+                                ServiceCode = p.Inventory.ServiceCodeName,
+                                ImageId = p.ImageId
                             });
                         }
                         break;
@@ -383,7 +397,9 @@ namespace EOMobile
                                 Type = f.Inventory.InventoryName,
                                 Name = f.Foliage.FoliageName,
                                 Size = f.Foliage.FoliageSize,
-                                ServiceCode = f.Inventory.ServiceCodeName
+                                ServiceCodeId = f.Inventory.ServiceCodeId,
+                                ServiceCode = f.Inventory.ServiceCodeName,
+                                ImageId = f.ImageId
                             });
                         }
                         break;
@@ -404,7 +420,9 @@ namespace EOMobile
                                 Type = m.Inventory.InventoryName,
                                 Name = m.Material.MaterialName,
                                 Size = m.Material.MaterialSize,
-                                ServiceCode = m.Inventory.ServiceCodeName
+                                ServiceCodeId = m.Inventory.ServiceCodeId,
+                                ServiceCode = m.Inventory.ServiceCodeName,
+                                ImageId = m.ImageId
                             });
                         }
                         break;
@@ -425,7 +443,9 @@ namespace EOMobile
                                 Type = c.Container.ContainerTypeName,
                                 Name = c.Inventory.InventoryName,
                                 Size = c.Container.ContainerSize,
-                                ServiceCode = c.Inventory.ServiceCodeName
+                                ServiceCodeId = c.Inventory.ServiceCodeId,
+                                ServiceCode = c.Inventory.ServiceCodeName,
+                                ImageId = c.ImageId
                             });
                         }
                         break;
@@ -438,6 +458,56 @@ namespace EOMobile
         private void ArrangementFilterCancel_Clicked(object sender, EventArgs e)
         {
             Navigation.PopModalAsync();
+        }
+
+        private void ViewImage_Clicked(object sender, EventArgs e)
+        {
+            IReadOnlyList<Rg.Plugins.Popup.Pages.PopupPage> popupStack = Rg.Plugins.Popup.Services.PopupNavigation.Instance.PopupStack;
+
+            //One at a time, please
+            if (popupStack != null && popupStack.Count > 0)
+            {
+                return;
+            }
+
+            Button b = sender as Button;
+            b.IsEnabled = false;
+
+            try
+            {
+                ArrangementInventoryFilteredItem item = (ArrangementInventoryFilteredItem)((Button)sender).BindingContext;
+
+                if (item != null)
+                {
+                    long itemImageId = ((App)App.Current).MissingImageId;
+                    if (item.ImageId != 0)
+                    {
+                        itemImageId = item.ImageId;
+                    }
+
+                    EOImgData img = ((App)App.Current).GetImage(itemImageId);
+
+                    ServiceCodeDTO serviceCode = ((App)App.Current).GetServiceCodeById(item.ServiceCodeId);
+
+                    string price = string.Empty;
+                    if (serviceCode.ServiceCodeId > 0)
+                    {
+                        price = (serviceCode.Price.HasValue ? serviceCode.Price.Value.ToString("C2", CultureInfo.CurrentCulture) : String.Empty);
+                    }
+
+                    PopupImagePage popup = new PopupImagePage(img, price);
+
+                    Navigation.PushPopupAsync(popup);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                b.IsEnabled = true;
+            }
         }
     }
 }
