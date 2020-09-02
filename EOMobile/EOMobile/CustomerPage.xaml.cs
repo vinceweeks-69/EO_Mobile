@@ -15,28 +15,56 @@ using ViewModels.ControllerModels;
 using ViewModels.DataModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using System.Threading.Tasks;
+using System.Net;
+using System.Collections;
 
 namespace EOMobile
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class CustomerPage : EOBasePage
-	{
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class CustomerPage : EOBasePage
+    {
         List<PersonAndAddressDTO> customerList = new List<PersonAndAddressDTO>();
-        ObservableCollection<PersonAndAddressDTO> list1 = new ObservableCollection<PersonAndAddressDTO>();
+        ObservableCollection<PersonAndAddressDTO> customersOC = new ObservableCollection<PersonAndAddressDTO>();
         ContentPage Initiator;
+        long currentCustomerId;
 
-        public CustomerPage ()
-		{
-			InitializeComponent ();
-
-            GetAllCustomers();
-
-            CustomerListView.ItemSelected += CustomerListView_ItemSelected;
+        public CustomerPage()
+        {
+            InitializeComponent();
 
             State.ItemsSource = ((App)App.Current).GetStateNames();
 
             History.IsEnabled = false;
-		}
+
+            Containers.IsEnabled = false; //turn it on once the user selects a customer
+
+            LoadCustomerData();
+        }
+
+        public async void LoadCustomerData()
+        {
+            ((App)App.Current).GetCustomer(0).ContinueWith(a => ShowCustomerData(a.Result));
+        }
+
+        public void ShowCustomerData(GetPersonResponse r)
+        {
+            ClearForm();
+
+            customerList = r.PersonAndAddress;
+
+            customersOC.Clear();
+
+            foreach (PersonAndAddressDTO p in customerList)
+            {
+                customersOC.Add(p);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                CustomerListView.ItemsSource = customersOC;
+            });
+        }
 
         public CustomerPage(ContentPage initiator) : this()
         {
@@ -56,6 +84,8 @@ namespace EOMobile
             Zip.Text = String.Empty;
 
             History.IsEnabled = false;
+            Containers.IsEnabled = false;
+            currentCustomerId = 0;
         }
         private void CustomerListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
@@ -78,28 +108,15 @@ namespace EOMobile
                     Zip.Text = item.Address != null ? item.Address.zipcode : String.Empty;
 
                     History.IsEnabled = true;
+                    Containers.IsEnabled = true;
+                    currentCustomerId = item.Person.person_id;
                 }
             }
         }
 
-        void GetAllCustomers()
-        {
-            ClearForm();
-
-            customerList = ((App)App.Current).GetCustomers(new GetPersonRequest());
-
-            list1.Clear();
-
-            foreach (PersonAndAddressDTO p in customerList)
-            {
-                list1.Add(p);
-            }
-
-            CustomerListView.ItemsSource = list1;
-        }
         public void OnShowAllCustomersClicked(object sender, EventArgs e)
         {
-            GetAllCustomers();
+            LoadCustomerData();
         }
 
         public void OnCustomerSearchClicked(object sender, EventArgs e)
@@ -113,14 +130,14 @@ namespace EOMobile
 
             customerList = ((App)App.Current).GetCustomers(request);
 
-            list1.Clear();
+            customersOC.Clear();
 
             foreach (PersonAndAddressDTO p in customerList)
             {
-                list1.Add(p);
+                customersOC.Add(p);
             }
 
-            CustomerListView.ItemsSource = list1;
+            CustomerListView.ItemsSource = customersOC;
         }
 
         public void OnSaveCustomerClicked(object sender, EventArgs e)
@@ -158,7 +175,6 @@ namespace EOMobile
             {
                 HttpClient client = new HttpClient();
                 client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                //client.DefaultRequestHeaders.Add("appkey", "myapp_key");
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -187,8 +203,6 @@ namespace EOMobile
                                 sb.AppendLine(msg);
                             }
                         }
-
-                        //MessageBox.Show(sb.ToString());
                     }
                     else
                     {
@@ -199,8 +213,7 @@ namespace EOMobile
                             MessagingCenter.Send<PersonAndAddressDTO>(request.Customer, "SearchCustomer");
 
                             Navigation.PopModalAsync();
-                        }    
-                        //this.WorkOrderInventoryListView.ItemsSource = null;
+                        }
                     }
                 }
                 else
@@ -223,9 +236,9 @@ namespace EOMobile
             if (button != null)
             {
                 long itemId = Int64.Parse(button.CommandParameter.ToString());
-                var c = list1.Where(a => a.Person.person_id == itemId).First();
+                var c = customersOC.Where(a => a.Person.person_id == itemId).First();
 
-                list1.Remove(c);
+                customersOC.Remove(c);
             }
         }
 
@@ -250,12 +263,20 @@ namespace EOMobile
 
         private void History_Clicked(object sender, EventArgs e)
         {
-
+            //show customer report page - load with currently selected customer's ID
         }
 
         private void Containers_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new CustomerContainerPage()).GetAwaiter();
+            if (currentCustomerId != 0l)
+            {
+                PersonAndAddressDTO p = customersOC.Where(a => a.Person.person_id == currentCustomerId).FirstOrDefault();
+
+                if (p.Person.person_id != 0)
+                {
+                    TaskAwaiter t = Navigation.PushAsync(new CustomerContainerPage(p)).GetAwaiter();
+                }
+            }
         }
     }
 }

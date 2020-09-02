@@ -53,7 +53,14 @@ namespace EOMobile
             WorkOrderSiteService.ItemsSource = siteServiceList;
             WorkOrderSiteService.SelectedIndex = 0;
 
-            users = ((App)App.Current).GetUsers();
+            if (TabParent.CustomerId == 0)
+            {
+                users = ((App)App.Current).GetUsers();
+            }
+            else
+            {
+                users.Add(((App)App.Current).GetUsers().Where(a => a.UserId == TabParent.CustomerId).FirstOrDefault());
+            }
 
             foreach (UserDTO user in users)
             {
@@ -68,6 +75,12 @@ namespace EOMobile
         {
             string message = String.Empty;
 
+            if(TabParent.CustomerId != 0)
+            {
+                WorkOrderFromDate.Date = DateTime.Now.AddMonths(-6);
+                WorkOrderToDate.Date = DateTime.Now;
+            }
+
             if (WorkOrderFromDate.Date == DateTime.MinValue || WorkOrderToDate.Date == DateTime.MinValue)
             {
                 message = "Please enter a 'To' and a 'From' date for this report.";
@@ -78,6 +91,12 @@ namespace EOMobile
             if (String.IsNullOrEmpty(message))
             {
                 WorkOrderListFilter filter = new WorkOrderListFilter();
+
+                if(TabParent.CustomerId != 0)
+                {
+                    filter.CustomerId = TabParent.CustomerId;
+                }
+
                 filter.FromDate = this.WorkOrderFromDate.Date;
                 filter.ToDate = this.WorkOrderToDate.Date;
 

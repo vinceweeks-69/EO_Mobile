@@ -13,6 +13,14 @@ using Xamarin.Forms.Xaml;
 
 namespace EOMobile
 {
+    //This page is used in multiple modes - Arrangements can be accessed from the Home page - this is used to create / modify arrangements
+    //in this mode, an arrangement MUST be named  and when the "Save" button is pressed, the arrangement data is saved to the db.
+    //This page can be accessed from the Work Orders page as well. In this mode, an arrangement can be "constructed" and NOT named 
+    //(when the "Save" button is pressed, program flow goes back to the Work Order Page and the current arrangement is 
+    //passed as part of the change in page navigation) - the constituent parts of the arrangement to be added to the work order are passed back 
+    //to the Work Order page and kept in memory. A container value MUST be set. For arrangement creation, the type MUST be new container. 
+    //For work order mode, Container can be any of the 3 possible values. The "save " button will not work unless these conditions are met.
+
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class ArrangementPage : EOBasePage
 	{
@@ -155,17 +163,91 @@ namespace EOMobile
             inventoryImageIdsLoaded.Clear();
             TabParent.ClearArrangementImages();
         }
+
+        public bool ValidateArrangement(ref string validationMessage)
+        {
+            if(arrangementInventoryList.Count < 2)
+            {
+                validationMessage += "Please add at least one container or container value and one inventory item. \n";
+            }
+            else
+            {
+                 if (!TabParent.ForWorkOrder)
+                {
+                    if(String.IsNullOrEmpty(Name.Text))
+                    {
+                        validationMessage += "Please pick a name for this arrangement. \n";
+                    }
+                    else
+                    {
+                        ArrangementDTO arrangement = new ArrangementDTO();
+                        arrangement.ArrangementId = arrangementInventoryList[0].ArrangementId;
+                        arrangement.ArrangementName = Name.Text;
+                        //check for duplication
+                        if (!((App)App.Current).ArrangementNameIsNotUnique(arrangement))
+                        {
+                            validationMessage += "This arrangement name is being used. Please choose another. \n";
+                        }
+                    }
+                }
+
+                if (Container.SelectedItem == null)
+                {
+                    validationMessage += "Please pick a Container value. \n";
+                }
+                else
+                {
+                    int containerVal = (int)((KeyValuePair<long, string>)Container.SelectedItem).Key;
+
+                    if (containerVal == 3) // "new container"
+                    {
+                        //check inventory for an inventory item of type container
+                        if(!arrangementInventoryList.Where(a => a.Type.Equals("Containers")).Any())
+                        {
+                            validationMessage += "Please pick a Container. \n";
+                        }
+                        else
+                        {
+                            if (arrangementInventoryList.Where(a => a.Type.Equals("Containers")).Count() > 1)
+                            {
+                                validationMessage += "An arrangement can have only one container. \n";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //make sure CustomerContainerId is not null
+                        validationMessage += "Please choose the customer container to be used \n";
+                    }
+                }
+            }
+
+            return String.IsNullOrEmpty(validationMessage) ? true : false;
+        }
+
         public void OnSaveArrangementsClicked(object sender, EventArgs e)
         {
             try
             {
+                string validationMessage = String.Empty;
+
                 long arrangementId = 0;  //(long)((Button)sender).CommandParameter;
+               
+                if(!ValidateArrangement(ref validationMessage))
+                {
+                    DisplayAlert("Error",validationMessage,"Cancel");
+                    return;
+                }
 
                 if (TabParent.ForWorkOrder)
                 {
                     AddArrangementRequest request = new AddArrangementRequest();
                     request.Arrangement = new ArrangementDTO();
                     request.Arrangement.ArrangementName = Name.Text;
+                    request.Arrangement.DesignerName = Designer.SelectedItem != null ? ((KeyValuePair<long,string>)Designer.SelectedItem).Value : String.Empty;
+                    request.Arrangement._180or360 = Style.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;
+                    request.Arrangement.Container = Container.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 3;   //3 = new container (db default)
+                    request.Arrangement.LocationName = Location.Text;
                     request.Arrangement.UpdateDate = DateTime.Now;
                     request.ArrangementInventory = arrangementInventoryList;
 
@@ -182,7 +264,6 @@ namespace EOMobile
                     return;
                 }
 
-               // !String.IsNullOrEmpty(Name.Text) &&
                 if (arrangementInventoryList.Count > 0)
                 {
                     foreach (ArrangementInventoryDTO dto in arrangementInventoryList)
@@ -199,6 +280,12 @@ namespace EOMobile
                         AddArrangementRequest request = new AddArrangementRequest();
                         request.Arrangement = new ArrangementDTO();
                         request.Arrangement.ArrangementName = Name.Text;
+                        request.Arrangement._180or360 = (int)((KeyValuePair<long,string>)Style.SelectedItem).Key;
+                        request.Arrangement.Container = (int)((KeyValuePair<long, string>)Container.SelectedItem).Key;
+                        request.Arrangement.CustomerContainerId = null;
+                        request.Arrangement.DesignerName = ((KeyValuePair<long, string>)Designer.SelectedItem).Value;
+                        request.Arrangement.LocationName = Location.Text;
+
                         request.Arrangement.UpdateDate = DateTime.Now;
                         request.ArrangementInventory = arrangementInventoryList;
 
@@ -237,6 +324,11 @@ namespace EOMobile
                         request.Arrangement = new ArrangementDTO();
                         request.Arrangement.ArrangementId = arrangementId;
                         request.Arrangement.ArrangementName = Name.Text;
+                        request.Arrangement._180or360 = (int)((KeyValuePair<long, string>)Style.SelectedItem).Key;
+                        request.Arrangement.Container = (int)((KeyValuePair<long, string>)Container.SelectedItem).Key;
+                        request.Arrangement.CustomerContainerId = null;
+                        request.Arrangement.DesignerName = ((KeyValuePair<long, string>)Designer.SelectedItem).Value;
+                        request.Arrangement.LocationName = Location.Text;
                         request.Arrangement.UpdateDate = DateTime.Now;
 
                         request.Inventory = simpleArrangement.Inventory;
@@ -268,11 +360,6 @@ namespace EOMobile
 
                     ClearArrangements();
                 }
-                else
-                {
-                    //DisplayAlert("Error", "Please enter an arrangement name and add at least one inventory item.", "OK");
-                    DisplayAlert("Error", "Please add at least one inventory item.", "OK");
-                }
             }
             catch(Exception ex)
             {
@@ -280,34 +367,34 @@ namespace EOMobile
             }
         }
 
-        public async void StartCamera()
-        {
-            try
-            {
-                var action = await DisplayActionSheet("Add Photo", "Cancel", null, "Choose Existing", "Take Photo");
+        //public async void StartCamera()
+        //{
+        //    try
+        //    {
+        //        var action = await DisplayActionSheet("Add Photo", "Cancel", null, "Choose Existing", "Take Photo");
 
-                if (action == "Choose Existing")
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        var fileName = ((App)App.Current).SetImageFileName();
-                        DependencyService.Get<ICameraInterface>().LaunchGallery(FileFormatEnum.JPEG, fileName);
-                    });
-                }
-                else if (action == "Take Photo")
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        var fileName = ((App)App.Current).SetImageFileName();
-                        DependencyService.Get<ICameraInterface>().LaunchCamera(FileFormatEnum.JPEG, fileName);
-                    });
-                }
-            }
-            catch(Exception ex)
-            {
+        //        if (action == "Choose Existing")
+        //        {
+        //            Device.BeginInvokeOnMainThread(() =>
+        //            {
+        //                var fileName = ((App)App.Current).SetImageFileName();
+        //                DependencyService.Get<ICameraInterface>().LaunchGallery(FileFormatEnum.JPEG, fileName);
+        //            });
+        //        }
+        //        else if (action == "Take Photo")
+        //        {
+        //            Device.BeginInvokeOnMainThread(() =>
+        //            {
+        //                var fileName = ((App)App.Current).SetImageFileName();
+        //                DependencyService.Get<ICameraInterface>().LaunchCamera(FileFormatEnum.JPEG, fileName);
+        //            });
+        //        }
+        //    }
+        //    catch(Exception ex)
+        //    {
 
-            }
-        }
+        //    }
+        //}
 
         public void OnAddImageClicked(object sender, EventArgs e)
         {

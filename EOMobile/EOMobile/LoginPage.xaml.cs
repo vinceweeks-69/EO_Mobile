@@ -47,7 +47,7 @@ namespace EOMobile
             {
                 HttpClient client = new HttpClient();
 
-                //client.Timeout = new TimeSpan(0, 0, 0, 3, 0);
+                client.Timeout = new TimeSpan(0, 0, 0, 3, 0);
 
                 client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
 
@@ -64,11 +64,11 @@ namespace EOMobile
                 string jsonData = JsonConvert.SerializeObject(request);
                 var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
                                 
-                await Navigation.PushPopupAsync(waiting);
+                Navigation.PushPopupAsync(waiting);
 
                 httpResponse = await client.PostAsync("api/Login/Login", content);
 
-                await Navigation.PopPopupAsync();
+                Navigation.PopPopupAsync();
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
@@ -93,7 +93,7 @@ namespace EOMobile
             }
             catch (Exception ex)
             {
-                await Navigation.PopPopupAsync();
+                Navigation.PopPopupAsync();
 
                 if (ex.Message.Contains("failed to connect"))
                 {

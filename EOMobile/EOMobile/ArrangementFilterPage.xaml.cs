@@ -119,7 +119,7 @@ namespace EOMobile
                 }
                 else if (Initiator is ArrangementPage)
                 {
-                    ArrangementInventoryDTO ao = new ArrangementInventoryDTO(0, item.Id, item.Name, item.Size, 0);
+                    ArrangementInventoryDTO ao = new ArrangementInventoryDTO(0, item.Id, item.Name, item.Type, item.Size, 0);
 
                     MessagingCenter.Send<ArrangementInventoryDTO>(ao, "SearchArrangementInventory");
                 }

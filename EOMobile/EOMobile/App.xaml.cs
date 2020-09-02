@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using ViewModels.ControllerModels;
 using ViewModels.DataModels;
 using Xamarin.Forms;
@@ -73,13 +74,15 @@ namespace EOMobile
 
             pngFileNames = new List<string>();
 
-            //LAN_Address = "http://10.0.0.5:9000/";   //Me Fl
+            //LAN_Address = "http://99.125.200.187:9000"; //Me Royalwood IP
+
+            LAN_Address = "http://10.0.0.5:9000/";   //Me Royalwood router
 
             //LAN_Address = "http://10.1.10.148:9000/";   //Me EO
 
             //LAN_Address = "http://10.1.10.1:9000/";   //router EO
 
-            LAN_Address = "http://10.1.10.36:9000/";   //Roseanne EO
+            //LAN_Address = "http://10.1.10.36:9000/";   //Roseanne EO when hardwired to eohome network
 
             //LAN_Address = "http://elegantsystem3.ddns.net:9000";   //The farm NoIP ( I had to add port number)
 
@@ -283,6 +286,98 @@ namespace EOMobile
             imageDataList.Clear();
         }
 
+        public async Task<TOut> PostRequest<TIn, TOut>(string uri, TIn content)
+        {
+            try
+            {
+                string webServiceAdx = "api/login/" + uri;
+
+                var client = new HttpClient();
+                client.BaseAddress = new Uri(LAN_Address);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
+
+                var serialized = new StringContent(JsonConvert.SerializeObject(content), Encoding.UTF8, "application/json");
+
+                using(HttpResponseMessage response = await client.PostAsync(webServiceAdx, serialized))
+                {
+                    response.EnsureSuccessStatusCode();
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+                    return JsonConvert.DeserializeObject<TOut>(responseBody);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return default(TOut);
+            }
+        }
+
+        public async Task<GetPersonResponse> GetCustomer(long customerId)
+        {
+            GetPersonRequest request = new GetPersonRequest();
+            request.PersonId = customerId;
+
+            GetPersonResponse taskResponse = await PostRequest<GetPersonRequest, GetPersonResponse>("GetPerson", request);
+
+            return taskResponse;
+        }
+
+        public async Task<ApiResponse>AddImage(AddImageRequest request)
+        {
+            ApiResponse taskResponse = await PostRequest<AddImageRequest, ApiResponse>("AddImage", request);
+
+            return taskResponse;
+        }
+
+        public CustomerContainerResponse GetCustomerContainers(long customerId)
+        {
+
+            CustomerContainerRequest request = new CustomerContainerRequest();
+            request.CustomerContainer.CustomerId = customerId;
+            CustomerContainerResponse response = new CustomerContainerResponse();
+
+            try
+            {
+                HttpClient client = new HttpClient();
+                client.BaseAddress = new Uri(LAN_Address);
+                client.DefaultRequestHeaders.Accept.Add(
+                   new MediaTypeWithQualityHeaderValue("application/json"));
+
+                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
+
+                string jsonData = JsonConvert.SerializeObject(request);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                HttpResponseMessage httpResponse = client.PostAsync("api/Login/GetCustomerContainers", content).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
+                    response = JsonConvert.DeserializeObject<CustomerContainerResponse>(strData);
+                }
+                else
+                {
+                    List<string> errorMsgs = new List<string>();
+                    errorMsgs.Add(httpResponse.ReasonPhrase);
+                    response.Messages.Add("ArrangementNameIsUnique", errorMsgs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Exception ex2 = new Exception("GetCustomerContainers", ex);
+                //LogError(ex2.Message, "customerId = " + request.CustomerContainer.CustomerId.ToString());
+            }
+
+            return response;
+        }
+
+        public ApiResponse AddUpdateCustomerContainers(CustomerContainerRequest request)
+        {
+            ApiResponse response = new ApiResponse();
+
+            return response;
+        }
+
         public ServiceCodeDTO GetServiceCodeById(long serviceCodeId)
         {
             ServiceCodeDTO serviceCode = new ServiceCodeDTO();
@@ -356,6 +451,44 @@ namespace EOMobile
             }
 
             return sizes;
+        }
+
+        public bool ArrangementNameIsNotUnique(ArrangementDTO arrangement)
+        {
+            ApiResponse response = new ApiResponse();
+
+            try
+            {
+                HttpClient client = new HttpClient();
+                client.BaseAddress = new Uri(LAN_Address);
+                //client.DefaultRequestHeaders.Add("appkey", "myapp_key");
+                client.DefaultRequestHeaders.Accept.Add(
+                   new MediaTypeWithQualityHeaderValue("application/json"));
+
+                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
+
+                string jsonData = JsonConvert.SerializeObject(arrangement);
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                HttpResponseMessage httpResponse = client.PostAsync("api/Login/ArrangementNameIsNotUnique", content).Result;
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
+                    response = JsonConvert.DeserializeObject<ApiResponse>(strData);
+                }
+                else
+                {
+                    List<string> errorMsgs = new List<string>();
+                    errorMsgs.Add(httpResponse.ReasonPhrase);
+                    response.Messages.Add("ArrangementNameIsUnique", errorMsgs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Exception ex2 = new Exception("ArrangementNameIsNotUnique", ex);
+                LogError(ex2.Message, "arrangementId = " + arrangement.ArrangementId.ToString());
+            }
+
+            return response.Success;
         }
 
         public GetArrangementResponse GetArrangement(long arrangementId)
@@ -587,7 +720,6 @@ namespace EOMobile
             {
                 HttpClient client = new HttpClient();
                 client.BaseAddress = new Uri(LAN_Address);
-                //client.DefaultRequestHeaders.Add("appkey", "myapp_key");
                 client.DefaultRequestHeaders.Accept.Add(
                    new MediaTypeWithQualityHeaderValue("application/json"));
 

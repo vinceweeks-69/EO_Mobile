@@ -23,9 +23,120 @@
     
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+            <Label Text="Elegant Orchids Customer Containers"
+                   FontSize="Medium"
+                VerticalOptions="Center" 
+                HorizontalOptions="Center" />
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="33*"/>
+                    <ColumnDefinition Width="33*"/>
+                    <ColumnDefinition Width="33*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                
+                <Label Text="First Name"
+                        Grid.Column="0"
+                        Grid.Row="1"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="FirstName"  Text="" Grid.Column="0" Grid.Row="2"  IsReadOnly="True"  HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Last Name"
+                        Grid.Column="1"
+                        Grid.Row="1"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="LastName"  Text="" Grid.Column="1" Grid.Row="2"  IsReadOnly="True" HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Phone"
+                        Grid.Column="2"
+                        Grid.Row="1"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="Phone"  Text="" Grid.Column="2" Grid.Row="2"  IsReadOnly="True" HeightRequest="50" WidthRequest="200" />
+
+                
+                 <Label Text="Label"
+                        Grid.Column="0"
+                        Grid.Row="4"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Entry x:Name="Label"  Text="" Grid.Column="0" Grid.Row="5"  HeightRequest="50" WidthRequest="200"/>
+                
+                <Label Text="Image"
+                        Grid.Column="1"
+                        Grid.Row="4"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="CenterAndExpand" 
+                        HorizontalOptions="Start" />
+                <Button x:Name="Camera"  Text="Camera" Grid.Column="1" Grid.Row="5"  Clicked="Camera_Clicked"  HeightRequest="50" WidthRequest="200"/>
+                
+                <Button x:Name="Save"  Text="Save" Grid.Column="2" Grid.Row="5"  Clicked="Save_Clicked"  HeightRequest="50" WidthRequest="200"/>
+             </Grid>
+            
+             <Frame Padding="10,10,10,10">
+                <ListView  x:Name="CustomerContainerListView" ItemsSource="{Binding customerContainersOC}">
+
+                    <ListView.Header>
+                        <Grid >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Text="Label"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                            <Label Text="Image"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                            <!--<Label Text="New Image"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                            <Button x:Name="AddCustomerContainer" Text="Add"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" Clicked="AddCustomerContainer_Clicked"/>-->
+                         </Grid>
+                    </ListView.Header>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Label Grid.Column="0" Text="{Binding Label}" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                    <Button x:Name="ViewCustomerContainerImage" Text="View" Grid.Column="1"  HorizontalOptions="Start" Clicked="ViewCustomerContainerImage_Clicked"/>
+                                    <Button x:Name="DeleteCustomerContainer" Text="Delete"  Grid.Column="2"  HorizontalOptions="Start" Clicked="DeleteCustomerContainer_Clicked"/>
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Frame>
         </StackLayout>
     </ContentPage.Content>
 </local:EOBasePage>

@@ -1,13 +1,44 @@
-﻿using System;
+﻿using EOMobile.Interfaces;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Xamarin.Forms;
 
 namespace EOMobile
 {
-    public class EOBasePage : ContentPage
+    public class EOBasePage : ContentPage 
     {
+        public async void StartCamera()
+        {
+            try
+            {
+                var action = await DisplayActionSheet("Add Photo", "Cancel", null, "Choose Existing", "Take Photo");
+
+                if (action == "Choose Existing")
+                {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        var fileName = ((App)App.Current).SetImageFileName();
+                        DependencyService.Get<ICameraInterface>().LaunchGallery(FileFormatEnum.JPEG, fileName);
+                    });
+                }
+                else if (action == "Take Photo")
+                {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        var fileName = ((App)App.Current).SetImageFileName();
+                        DependencyService.Get<ICameraInterface>().LaunchCamera(FileFormatEnum.JPEG, fileName);
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
         public void Help_Clicked(object sender, EventArgs e)
         {
             Button b = sender as Button;
