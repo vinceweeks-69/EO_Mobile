@@ -43,6 +43,7 @@
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
                 </Grid.RowDefinitions>
                 
                 <Label Text="First Name"
@@ -80,22 +81,24 @@
                         FontAttributes="Bold"
                         VerticalOptions="CenterAndExpand" 
                         HorizontalOptions="Start" />
-                <Entry x:Name="Label"  Text="" Grid.Column="0" Grid.Row="5"  HeightRequest="50" WidthRequest="200"/>
+                <Entry x:Name="Label"  Text="" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5"  HeightRequest="50" WidthRequest="200"/>
                 
                 <Label Text="Image"
-                        Grid.Column="1"
+                        Grid.Column="2"
                         Grid.Row="4"
                         FontSize="Default"
                         FontAttributes="Bold"
                         VerticalOptions="CenterAndExpand" 
                         HorizontalOptions="Start" />
-                <Button x:Name="Camera"  Text="Camera" Grid.Column="1" Grid.Row="5"  Clicked="Camera_Clicked"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Camera"  Text="Camera" Grid.Column="2" Grid.Row="5"  Clicked="Camera_Clicked"  HeightRequest="50" WidthRequest="200"/>
                 
-                <Button x:Name="Save"  Text="Save" Grid.Column="2" Grid.Row="5"  Clicked="Save_Clicked"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Clear"  Text="Clear" Grid.Column="0" Grid.Row="6"  Clicked="Clear_Clicked"  HeightRequest="50" WidthRequest="200"/>
+                
+                <Button x:Name="Save"  Text="Save" Grid.Column="2" Grid.Row="6"  Clicked="Save_Clicked"  HeightRequest="50" WidthRequest="200"/>
              </Grid>
             
              <Frame Padding="10,10,10,10">
-                <ListView  x:Name="CustomerContainerListView" ItemsSource="{Binding customerContainersOC}">
+                <ListView  x:Name="CustomerContainerListView" ItemsSource="{Binding customerContainersOC}" ItemSelected="CustomerContainerListView_ItemSelected">
 
                     <ListView.Header>
                         <Grid >
@@ -109,9 +112,9 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Text="Label"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
-                            <Label Text="Image"  Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
-                            <!--<Label Text="New Image"  Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
-                            <Button x:Name="AddCustomerContainer" Text="Add"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" Clicked="AddCustomerContainer_Clicked"/>-->
+                            <Label Text="{x:Static fontawesome:FontAwesomeIcons.Sistrix}"   FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" />
+                            <!--<Label Text="{x:Static fontawesome:FontAwesomeIcons.Camera}"  FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>-->
+                            <Label Text="{x:Static fontawesome:FontAwesomeIcons.TrashAlt}"  FontFamily="{StaticResource FontAwesomeSolid}" TextColor="Red"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" />
                          </Grid>
                     </ListView.Header>
 
@@ -128,9 +131,10 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Column="0" Text="{Binding Label}" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
-                                    <Button x:Name="ViewCustomerContainerImage" Text="View" Grid.Column="1"  HorizontalOptions="Start" Clicked="ViewCustomerContainerImage_Clicked"/>
-                                    <Button x:Name="DeleteCustomerContainer" Text="Delete"  Grid.Column="2"  HorizontalOptions="Start" Clicked="DeleteCustomerContainer_Clicked"/>
+                                    <Label Grid.Column="0" Text="{Binding Label}" HorizontalOptions="Start" HorizontalTextAlignment="Start" VerticalOptions="Center"/>
+                                    <Button x:Name="ViewCustomerContainerImage" Text="View" Grid.Column="1"  HorizontalOptions="Start" VerticalOptions="Start" Clicked="ViewCustomerContainerImage_Clicked"/>
+                                    <!--<Button x:Name="AddCustomerContainerImage" Text="Add" Grid.Column="2"  HorizontalOptions="Start" VerticalOptions="Start" Clicked="AddCustomerContainerImage_Clicked"/>-->
+                                    <Button x:Name="DeleteCustomerContainer" Text="Delete"  Grid.Column="3"  HorizontalOptions="Start" VerticalOptions="Start" Clicked="DeleteCustomerContainer_Clicked"/>
                                 </Grid>
                             </ViewCell>
                         </DataTemplate>

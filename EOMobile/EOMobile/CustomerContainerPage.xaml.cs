@@ -16,6 +16,8 @@ namespace EOMobile
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class CustomerContainerPage : EOBasePage
     {
+        long selectedCustomerContainerId = 0;
+        long selectedCustomerContainerImageId = 0;
         PersonAndAddressDTO  Person;
         List<CustomerContainerDTO> customerContainers;
         ObservableCollection<CustomerContainerDTO> customerContainersOC;
@@ -32,23 +34,33 @@ namespace EOMobile
 
             //get data - bind to list view
             customerContainers = new List<CustomerContainerDTO>();
+            customerContainersOC = new ObservableCollection<CustomerContainerDTO>();
 
             LoadCustomerContainerData();
         }
 
-        private void LoadCustomerContainerData()
+        private async void LoadCustomerContainerData()
         {
-            customerContainers = ((App)App.Current).GetCustomerContainers(Person.Person.person_id).CustomerContainers;
+            ((App)App.Current).GetCustomerContainers(Person.Person.person_id).ContinueWith(a => ShowCustomerContainerData(a.Result));
+        }
+
+        private void ShowCustomerContainerData(CustomerContainerResponse response)
+        {
+            customerContainers = response.CustomerContainers;
+            customerContainersOC.Clear();
 
             foreach (CustomerContainerDTO cc in customerContainers)
             {
                 customerContainersOC.Add(cc);
             }
 
-            CustomerContainerListView.ItemsSource = customerContainersOC;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                CustomerContainerListView.ItemsSource = customerContainersOC;
+            });
         }
-
-        private void ViewImage_Clicked(object sender, EventArgs e)
+        
+        private void ViewCustomerContainerImage_Clicked(object sender, EventArgs e)
         {
             IReadOnlyList<Rg.Plugins.Popup.Pages.PopupPage> popupStack = Rg.Plugins.Popup.Services.PopupNavigation.Instance.PopupStack;
 
@@ -103,11 +115,6 @@ namespace EOMobile
             }
         }
 
-        private void ViewCustomerContainerImage_Clicked(object sender, EventArgs e)
-        {
-
-        }
-
         private void Camera_Clicked(object sender, EventArgs e)
         {
             StartCamera();
@@ -123,57 +130,98 @@ namespace EOMobile
             {
                 string errorMsg = String.Empty;
 
-                List<EOImgData> images = ((App)App.Current).GetImageData();
-
                 //save the customer container object first - if successful, save image, if successful, update customer container with newly minted image id
                 CustomerContainerRequest request = new CustomerContainerRequest();
+                request.CustomerContainer.CustomerContainerId = selectedCustomerContainerId;
                 request.CustomerContainer.CustomerId = Person.Person.person_id;
                 request.CustomerContainer.Label = Label.Text;
+                request.CustomerContainer.ImageId = selectedCustomerContainerImageId;
+                ((App)App.Current).AddUpdateCustomerContainers(request).ContinueWith(a => AddCustomerContainerImage(request, a.Result));
+            }
+        }
 
-                ApiResponse response = ((App)App.Current).AddUpdateCustomerContainers(request);
+        private void AddCustomerContainerImage(CustomerContainerRequest request, ApiResponse response)
+        {
+            if (response.Success)
+            {
+                request.CustomerContainer.CustomerContainerId = response.Id;
 
-                if(response.Success && images != null && images.Count > 0)
+                List<EOImgData> images = ((App)App.Current).GetImageData();
+
+                if(images != null && images.Count > 0)
                 {
                     AddImageRequest imageRequest = new AddImageRequest();
                     imageRequest.imgBytes = images[0].imgData;
-                    ApiResponse imageResponse =  ((App)App.Current).AddImage(imageRequest).Result;
-
-                    if(imageResponse.Success)
-                    {
-                        request.CustomerContainer.CustomerContainerId = response.Id;
-                        request.CustomerContainer.ImageId = imageResponse.Id;
-
-                        response = ((App)App.Current).AddUpdateCustomerContainers(request);
-
-                        if(!response.Success)
-                        {
-                            errorMsg += "Error updating customer container record with image data. \n";
-                        }
-                    }
-                    else
-                    {
-                        errorMsg += "Error adding image data for customer container record. \n";
-                    }
+                    ((App)App.Current).AddImage(imageRequest).ContinueWith(a => UpdateCustomerContainerWithImage(request, response, a.Result));
                 }
-                else
-                {
-                    errorMsg += "Error add customer container record. \n";
-                }
+            }
+        }
 
-                if(!String.IsNullOrEmpty(errorMsg))
-                {
-                    DisplayAlert("Error", errorMsg, "OK");
-                }
-                else
-                {
-                    LoadCustomerContainerData();
-                }
+        private void UpdateCustomerContainerWithImage(CustomerContainerRequest request, ApiResponse containerResponse, ApiResponse imageResponse)
+        {
+            //request has customerID - containerResponse has CustomerContainerId, imageResponse has ImageId
+
+            if(imageResponse.Success)
+            {
+                request.CustomerContainer.ImageId = imageResponse.Id;
+                ((App)App.Current).AddUpdateCustomerContainers(request).ContinueWith(a => CustomerContainerSaveComplete(a.Result));
+            }
+        }
+
+        private void CustomerContainerSaveComplete(ApiResponse response)
+        {
+            if(response.Success)
+            {
+                selectedCustomerContainerId = 0;
+                selectedCustomerContainerImageId = 0;
+                ((App)App.Current).ClearImageData();
+                ((App)App.Current).ClearImageDataList();
+                LoadCustomerContainerData();
             }
         }
 
         private void DeleteCustomerContainer_Clicked(object sender, EventArgs e)
         {
+            CustomerContainerDTO customerContainer = (CustomerContainerDTO)((Button)sender).BindingContext;
 
+            if (customerContainer != null)
+            {
+                CustomerContainerRequest request = new CustomerContainerRequest();
+                request.CustomerContainer.CustomerContainerId = customerContainer.CustomerContainerId;
+                request.CustomerContainer.CustomerId = customerContainer.CustomerId;
+                ((App)App.Current).DeleteCustomerContainer(request).ContinueWith(a => CustomerContainerSaveComplete(a.Result));
+            }
+        }
+
+        private void AddCustomerContainerImage_Clicked(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CustomerContainerListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            //populate the top part of the form with the selected data and enable the ability to add a new image
+            ListView lv = sender as ListView;
+
+            if (lv != null)
+            {
+                CustomerContainerDTO item = lv.SelectedItem as CustomerContainerDTO;
+
+                if (item != null)
+                {
+                    selectedCustomerContainerId = item.CustomerContainerId;
+                    selectedCustomerContainerImageId = item.ImageId;
+                    Label.Text = item.Label;
+                }
+            }
+        }
+
+        private void Clear_Clicked(object sender, EventArgs e)
+        {
+            Label.Text = String.Empty;
+            selectedCustomerContainerId = 0;
+            selectedCustomerContainerImageId = 0;
+            CustomerContainerListView.SelectedItem = null;
         }
     }
 }

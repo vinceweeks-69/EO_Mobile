@@ -274,7 +274,9 @@ namespace EOMobile
 
                 if (p.Person.person_id != 0)
                 {
-                    TaskAwaiter t = Navigation.PushAsync(new CustomerContainerPage(p)).GetAwaiter();
+                    //TaskAwaiter t = Navigation.PushAsync(new CustomerContainerPage(p)).GetAwaiter();
+
+                    Navigation.PushAsync(new CustomerContainerPage(p));
                 }
             }
         }

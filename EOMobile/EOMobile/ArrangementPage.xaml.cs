@@ -67,9 +67,15 @@ namespace EOMobile
 
             Container.ItemsSource = list3;
 
-            Container.SelectedIndexChanged += Container_SelectedIndexChanged;
+            EnableCustomerContainerSecondaryControls(false);
 
             TabParent = tabParent;
+        }
+
+        private void EnableCustomerContainerSecondaryControls(bool shouldShow)
+        {
+            CustomerContainerLabel.IsVisible = shouldShow;
+            CustomerContainerLabelEntry.IsVisible = shouldShow;
         }
 
         private void Container_SelectedIndexChanged(object sender, EventArgs e)
@@ -79,6 +85,28 @@ namespace EOMobile
             //if container type is "Customer container at customer site" means use liner
 
             //if container type is "New container" pick container from inventory
+
+            Picker p = sender as Picker;
+
+            if(p != null)
+            {
+                if(p.SelectedIndex == 2)
+                {
+                    EnableCustomerContainerSecondaryControls(false);
+                }
+                else
+                {
+                    PickCustomerContainer();
+
+                    EnableCustomerContainerSecondaryControls(true);
+                }
+            }
+        }
+
+        private void PickCustomerContainer()
+        {
+            //if this is WorkOrder mode AND a customer ID is present, show CustomerContainerPage
+            //If this is WorkOrder mode AND no customer ID, show Customer Page
         }
 
         protected override void OnAppearing()

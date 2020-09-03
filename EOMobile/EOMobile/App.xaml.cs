@@ -288,6 +288,8 @@ namespace EOMobile
 
         public async Task<TOut> PostRequest<TIn, TOut>(string uri, TIn content)
         {
+            string serializedContent = String.Empty;
+
             try
             {
                 string webServiceAdx = "api/login/" + uri;
@@ -297,7 +299,8 @@ namespace EOMobile
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
 
-                var serialized = new StringContent(JsonConvert.SerializeObject(content), Encoding.UTF8, "application/json");
+                serializedContent = JsonConvert.SerializeObject(content);
+                StringContent serialized = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
                 using(HttpResponseMessage response = await client.PostAsync(webServiceAdx, serialized))
                 {
@@ -309,7 +312,8 @@ namespace EOMobile
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Exception ex2 = new Exception(uri, ex);
+                LogError(ex2.Message, serializedContent);
                 return default(TOut);
             }
         }
@@ -327,54 +331,26 @@ namespace EOMobile
         public async Task<ApiResponse>AddImage(AddImageRequest request)
         {
             ApiResponse taskResponse = await PostRequest<AddImageRequest, ApiResponse>("AddImage", request);
-
             return taskResponse;
         }
 
-        public CustomerContainerResponse GetCustomerContainers(long customerId)
+        public async Task<CustomerContainerResponse> GetCustomerContainers(long customerId)
         {
-
             CustomerContainerRequest request = new CustomerContainerRequest();
             request.CustomerContainer.CustomerId = customerId;
-            CustomerContainerResponse response = new CustomerContainerResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(
-                   new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                string jsonData = JsonConvert.SerializeObject(request);
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                HttpResponseMessage httpResponse = client.PostAsync("api/Login/GetCustomerContainers", content).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    response = JsonConvert.DeserializeObject<CustomerContainerResponse>(strData);
-                }
-                else
-                {
-                    List<string> errorMsgs = new List<string>();
-                    errorMsgs.Add(httpResponse.ReasonPhrase);
-                    response.Messages.Add("ArrangementNameIsUnique", errorMsgs);
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetCustomerContainers", ex);
-                //LogError(ex2.Message, "customerId = " + request.CustomerContainer.CustomerId.ToString());
-            }
-
+            CustomerContainerResponse response = await PostRequest<CustomerContainerRequest, CustomerContainerResponse>("GetCustomerContainers", request);
             return response;
         }
 
-        public ApiResponse AddUpdateCustomerContainers(CustomerContainerRequest request)
+        public async Task<ApiResponse> AddUpdateCustomerContainers(CustomerContainerRequest request)
         {
-            ApiResponse response = new ApiResponse();
+            ApiResponse response = await PostRequest<CustomerContainerRequest, CustomerContainerResponse>("AddUpdateCustomerContainer", request);
+            return response;
+        }
 
+        public async Task<ApiResponse> DeleteCustomerContainer(CustomerContainerRequest request)
+        {
+            ApiResponse response = await PostRequest<CustomerContainerRequest, CustomerContainerResponse>("DeleteCustomerContainer", request);
             return response;
         }
 
