@@ -34,6 +34,8 @@ namespace EOMobile
 
         List<long> inventoryImageIdsLoaded = new List<long>();
 
+        long? customerContainerId = null;
+
         public ArrangementPage (TabbedArrangementPage tabParent)
 		{
 			InitializeComponent ();
@@ -61,9 +63,14 @@ namespace EOMobile
 
 
             ObservableCollection<KeyValuePair<long, string>> list3 = new ObservableCollection<KeyValuePair<long, string>>();
-            list3.Add(new KeyValuePair<long, string>(1, "Customer container at EO"));  
-            list3.Add(new KeyValuePair<long, string>(2, "Customer container at customer site")); //means use liner
-            list3.Add(new KeyValuePair<long, string>(3, "New container"));
+
+            list3.Add(new KeyValuePair<long, string>(1, "New container"));
+
+            if (tabParent.Customer != null)
+            {
+                list3.Add(new KeyValuePair<long, string>(2, "Customer container at EO"));
+                list3.Add(new KeyValuePair<long, string>(3, "Customer container at customer site")); //means use liner
+            }
 
             Container.ItemsSource = list3;
 
@@ -90,15 +97,15 @@ namespace EOMobile
 
             if(p != null)
             {
-                if(p.SelectedIndex == 2)
+                if(p.SelectedIndex == 0)
                 {
                     EnableCustomerContainerSecondaryControls(false);
                 }
                 else
                 {
-                    PickCustomerContainer();
-
                     EnableCustomerContainerSecondaryControls(true);
+
+                    Navigation.PushAsync(new CustomerContainerPage(TabParent.Customer, TabParent.ForWorkOrder));
                 }
             }
         }
@@ -136,6 +143,17 @@ namespace EOMobile
 
                     ((App)App.Current).searchedForArrangementInventory = null;
                 }
+            }
+
+            CustomerContainerDTO searchedForCustomerContainer = ((App)App.Current).searchedForCustomerContainer;
+
+            if(searchedForCustomerContainer != null && searchedForCustomerContainer.CustomerContainerId != 0)
+            {
+                customerContainerId = searchedForCustomerContainer.CustomerContainerId;
+
+                CustomerContainerLabelEntry.Text = searchedForCustomerContainer.Label;
+
+                ((App)App.Current).searchedForCustomerContainer = null;
             }
         }
 
@@ -190,6 +208,9 @@ namespace EOMobile
             ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
             inventoryImageIdsLoaded.Clear();
             TabParent.ClearArrangementImages();
+            customerContainerId = null;
+            CustomerContainerLabelEntry.Text = String.Empty;
+            EnableCustomerContainerSecondaryControls(false);
         }
 
         public bool ValidateArrangement(ref string validationMessage)
@@ -274,7 +295,7 @@ namespace EOMobile
                     request.Arrangement.ArrangementName = Name.Text;
                     request.Arrangement.DesignerName = Designer.SelectedItem != null ? ((KeyValuePair<long,string>)Designer.SelectedItem).Value : String.Empty;
                     request.Arrangement._180or360 = Style.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;
-                    request.Arrangement.Container = Container.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 3;   //3 = new container (db default)
+                    request.Arrangement.Container = Container.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;   //1 = new container (db default)
                     request.Arrangement.LocationName = Location.Text;
                     request.Arrangement.UpdateDate = DateTime.Now;
                     request.ArrangementInventory = arrangementInventoryList;
@@ -394,35 +415,6 @@ namespace EOMobile
 
             }
         }
-
-        //public async void StartCamera()
-        //{
-        //    try
-        //    {
-        //        var action = await DisplayActionSheet("Add Photo", "Cancel", null, "Choose Existing", "Take Photo");
-
-        //        if (action == "Choose Existing")
-        //        {
-        //            Device.BeginInvokeOnMainThread(() =>
-        //            {
-        //                var fileName = ((App)App.Current).SetImageFileName();
-        //                DependencyService.Get<ICameraInterface>().LaunchGallery(FileFormatEnum.JPEG, fileName);
-        //            });
-        //        }
-        //        else if (action == "Take Photo")
-        //        {
-        //            Device.BeginInvokeOnMainThread(() =>
-        //            {
-        //                var fileName = ((App)App.Current).SetImageFileName();
-        //                DependencyService.Get<ICameraInterface>().LaunchCamera(FileFormatEnum.JPEG, fileName);
-        //            });
-        //        }
-        //    }
-        //    catch(Exception ex)
-        //    {
-
-        //    }
-        //}
 
         public void OnAddImageClicked(object sender, EventArgs e)
         {

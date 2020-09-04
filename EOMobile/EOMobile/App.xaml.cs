@@ -62,6 +62,8 @@ namespace EOMobile
 
         public AddArrangementRequest searchedForArrangement { get; set; }
 
+        public CustomerContainerDTO searchedForCustomerContainer { get; set; }
+
         public static List<EOImgData> imageDataList = new List<EOImgData>();
 
         List<string> pngFileNames;
@@ -154,6 +156,11 @@ namespace EOMobile
             MessagingCenter.Subscribe<AddArrangementRequest>(this, "AddArrangementToWorkOrder", (arg) =>
             {
                 AddArrangementToWorkOrder(arg);
+            });
+
+            MessagingCenter.Subscribe<CustomerContainerDTO>(this, "AddCustomerContainerToWorkOrder", (arg) =>
+            {
+                AddCustomerContainerToWorkOrder(arg);
             });
 
             InitStateList();
@@ -264,6 +271,11 @@ namespace EOMobile
         public void AddArrangementToWorkOrder(AddArrangementRequest arg)
         {
             searchedForArrangement = arg;
+        }
+
+        public void AddCustomerContainerToWorkOrder(CustomerContainerDTO arg)
+        {
+            searchedForCustomerContainer = arg;
         }
 
         private void SendInfoEmail(string emailHtml)

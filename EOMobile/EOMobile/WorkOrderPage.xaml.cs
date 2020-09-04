@@ -58,6 +58,12 @@ namespace EOMobile
             get { return searchedForPersonType; }
             set { searchedForPersonType = value; }
         }
+
+        public PersonAndAddressDTO Customer
+        {
+            get { return searchedForPerson; }
+        }
+
         public bool EnablePayment()
         {
             bool result = false;
@@ -255,28 +261,6 @@ namespace EOMobile
         private void TakePictureClicked(object sender, EventArgs e)
         {
             StartCamera();
-        }
-
-        public async void StartCamera()
-        {
-            var action = await DisplayActionSheet("Add Photo", "Cancel", null, "Choose Existing", "Take Photo");
-
-            if (action == "Choose Existing")
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    var fileName = ((App)App.Current).SetImageFileName();
-                    DependencyService.Get<ICameraInterface>().LaunchGallery(FileFormatEnum.JPEG, fileName);
-                });
-            }
-            else if (action == "Take Photo")
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    var fileName = ((App)App.Current).SetImageFileName();
-                    DependencyService.Get<ICameraInterface>().LaunchCamera(FileFormatEnum.JPEG, fileName);
-                });
-            }
         }
 
         private string SetImageFileName(string fileName = null)

@@ -16,16 +16,18 @@ namespace EOMobile
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class CustomerContainerPage : EOBasePage
     {
+        bool forWorkOrder;
         long selectedCustomerContainerId = 0;
         long selectedCustomerContainerImageId = 0;
         PersonAndAddressDTO  Person;
         List<CustomerContainerDTO> customerContainers;
         ObservableCollection<CustomerContainerDTO> customerContainersOC;
         
-        public CustomerContainerPage(PersonAndAddressDTO person)
+        public CustomerContainerPage(PersonAndAddressDTO person, bool forWorkOrder = false)
         {
             Person = person;
 
+            this.forWorkOrder = forWorkOrder;
             InitializeComponent();
 
             FirstName.Text = person.Person.first_name;
@@ -122,21 +124,37 @@ namespace EOMobile
 
         private void Save_Clicked(object sender, EventArgs e)
         {
-            if(String.IsNullOrEmpty(Label.Text))
+            if (forWorkOrder)
             {
-                DisplayAlert("Error","To save a customer container, you must have a label value","OK");
+                if (selectedCustomerContainerId != 0)
+                {
+                    CustomerContainerDTO cc = customerContainersOC.Where(a => a.CustomerContainerId == selectedCustomerContainerId).FirstOrDefault();
+                    MessagingCenter.Send<CustomerContainerDTO>(cc, "AddCustomerContainerToWorkOrder");
+                    Navigation.PopAsync();
+                }
+                else
+                {
+                    DisplayAlert("?", "Please select a customer container", "OK");
+                }
             }
             else
             {
-                string errorMsg = String.Empty;
+                if (String.IsNullOrEmpty(Label.Text))
+                {
+                    DisplayAlert("Error", "To save a customer container, you must have at least, a label value", "OK");
+                }
+                else
+                {
+                    string errorMsg = String.Empty;
 
-                //save the customer container object first - if successful, save image, if successful, update customer container with newly minted image id
-                CustomerContainerRequest request = new CustomerContainerRequest();
-                request.CustomerContainer.CustomerContainerId = selectedCustomerContainerId;
-                request.CustomerContainer.CustomerId = Person.Person.person_id;
-                request.CustomerContainer.Label = Label.Text;
-                request.CustomerContainer.ImageId = selectedCustomerContainerImageId;
-                ((App)App.Current).AddUpdateCustomerContainers(request).ContinueWith(a => AddCustomerContainerImage(request, a.Result));
+                    //save the customer container object first - if successful, save image, if successful, update customer container with newly minted image id
+                    CustomerContainerRequest request = new CustomerContainerRequest();
+                    request.CustomerContainer.CustomerContainerId = selectedCustomerContainerId;
+                    request.CustomerContainer.CustomerId = Person.Person.person_id;
+                    request.CustomerContainer.Label = Label.Text;
+                    request.CustomerContainer.ImageId = selectedCustomerContainerImageId;
+                    ((App)App.Current).AddUpdateCustomerContainers(request).ContinueWith(a => AddCustomerContainerImage(request, a.Result));
+                }
             }
         }
 

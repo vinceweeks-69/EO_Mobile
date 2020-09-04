@@ -112,7 +112,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Label Text="Label"  Grid.Column="0" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
-                            <Label Text="{x:Static fontawesome:FontAwesomeIcons.Sistrix}"   FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" />
+                            <Label Text="{x:Static fontawesome:FontAwesomeIcons.Binoculars}"   FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="1" Grid.Row="0" HorizontalOptions="Start" />
                             <!--<Label Text="{x:Static fontawesome:FontAwesomeIcons.Camera}"  FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="2" Grid.Row="0" HorizontalOptions="Start" HorizontalTextAlignment="Center" VerticalOptions="Center"/>-->
                             <Label Text="{x:Static fontawesome:FontAwesomeIcons.TrashAlt}"  FontFamily="{StaticResource FontAwesomeSolid}" TextColor="Red"  Grid.Column="3" Grid.Row="0" HorizontalOptions="Start" />
                          </Grid>

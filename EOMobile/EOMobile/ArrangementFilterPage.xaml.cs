@@ -15,6 +15,9 @@ namespace EOMobile
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ArrangementFilterPage : EOBasePage
     {
+        //if in WorkOrder mode, use this value to pick customer container
+        PersonAndAddressDTO customer = null;
+
         List<InventoryTypeDTO> inventoryTypeList = new List<InventoryTypeDTO>();
 
         List<PlantInventoryDTO> plants = new List<PlantInventoryDTO>();
@@ -44,6 +47,11 @@ namespace EOMobile
         public ArrangementFilterPage(ContentPage initiator, bool showArrangements = true)
         {
             Initiator = initiator;
+
+            if(initiator is WorkOrderPage)
+            {
+                customer = ((WorkOrderPage)initiator).Customer;
+            }
 
             this.showArrangements = showArrangements;
 
@@ -184,7 +192,7 @@ namespace EOMobile
 
                         case "Arrangements":
                             {
-                                Navigation.PushAsync(new TabbedArrangementPage(true));
+                                Navigation.PushAsync(new TabbedArrangementPage(true,customer));
                             }
                             break;
 
