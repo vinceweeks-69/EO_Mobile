@@ -36,7 +36,7 @@ namespace EOMobile.ViewModels
 
         public string Size { get; set; }
 
-        public long GroupId { get; set; }
+        public long? GroupId { get; set; }
 
         private bool shouldShow;
         public bool ShouldShow

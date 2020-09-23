@@ -23,6 +23,9 @@ namespace EOMobile
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class WorkOrderPage : EOBasePage
 	{
+        //if a work order contains an arrangement, save that data here
+        private List<AddArrangementRequest> arrangementList = new List<AddArrangementRequest>();
+
         private List<InventoryTypeDTO> inventoryTypeList = new List<InventoryTypeDTO>();
         List<WorkOrderInventoryItemDTO> workOrderInventoryList = new List<WorkOrderInventoryItemDTO>();
         ObservableCollection<KeyValuePair<long, string>> deliveryTypeList = new ObservableCollection<KeyValuePair<long, string>>();
@@ -133,32 +136,40 @@ namespace EOMobile
 
             BuyerChoice.SelectedIndexChanged += BuyerChoice_SelectedIndexChanged;
 
-            users = ((App)App.Current).GetUsers();
-
-            foreach(UserDTO user in users)
-            {
-                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
-            }
-
-            DeliveryPerson.ItemsSource = employeeDDL;
-
-            DeliveryPersonLabel.Text = "";
-            DeliveryPerson.IsVisible = false;
-
-            DeliverToLabel.Text = "";
-            DeliverTo.IsVisible = false;
-
-            DeliveryDateLabel.Text = "Pickup Date";
-            DeliveryDate.IsVisible = true;
-
-            Seller.ItemsSource = employeeDDL;
-            Seller.SelectedIndex = -1;
+            ((App)App.Current).GetUsers().ContinueWith(a => LoadUsers(a.Result));
 
             Save.IsEnabled = true;
 
             //both buttons are disabled until the work order data is saved
             Payment.IsEnabled = false;
             //PaymentType.IsEnabled = false;
+        }
+
+        private void LoadUsers(GetUserResponse userResponse)
+        {
+            users = userResponse.Users;
+
+            foreach (UserDTO user in users)
+            {
+                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                DeliveryPerson.ItemsSource = employeeDDL;
+
+                DeliveryPersonLabel.Text = "";
+                DeliveryPerson.IsVisible = false;
+
+                DeliverToLabel.Text = "";
+                DeliverTo.IsVisible = false;
+
+                DeliveryDateLabel.Text = "Pickup Date";
+                DeliveryDate.IsVisible = true;
+
+                Seller.ItemsSource = employeeDDL;
+                Seller.SelectedIndex = -1;
+            });
         }
 
         public WorkOrderPage()
@@ -171,16 +182,34 @@ namespace EOMobile
             Initialize(tabParent);
         }
 
+        /// <summary>
+        /// Special handling for arrangements so that they display nicely
+        /// </summary>
+        /// <param name="tabParent"></param>
+        /// <param name="workOrderId"></param>
         public WorkOrderPage(TabbedWorkOrderPage tabParent, long workOrderId) 
         {
             Initialize(tabParent);
 
             //load work order data for the id passed
-            WorkOrderResponse workOrder = ((App)App.Current).GetWorkOrder(workOrderId);
-            currentWorkOrderId = workOrder.WorkOrder.WorkOrderId;
+            ((App)App.Current).GetWorkOrder(workOrderId).ContinueWith(a => WorkOrderLoaded(a.Result));
             
-            WorkOrderPaymentDTO workOrderPayment = ((App)App.Current).GetWorkOrderPayment(workOrderId);
-            currentWorkOrderPaymentId = workOrderPayment.WorkOrderPaymentId;
+            //load all inventory item images
+            //tabParent.LoadWorkOrderImages(workOrderId);
+        }
+
+        private void WorkOrderLoaded(WorkOrderResponse workOrderResponse)
+        {
+            
+            currentWorkOrderId = workOrderResponse.WorkOrder.WorkOrderId;
+
+            ((App)App.Current).GetWorkOrderPayment(currentWorkOrderId).ContinueWith(a => WorkOrderPaymentLoaded(workOrderResponse, a.Result));
+
+        }
+
+        private void WorkOrderPaymentLoaded(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment)
+        {
+            currentWorkOrderPaymentId = payment.WorkOrderPaymentId;
 
             if (currentWorkOrderPaymentId == 0)
             {
@@ -214,12 +243,12 @@ namespace EOMobile
             Buyer.Text = workOrder.WorkOrder.Buyer;
 
             sellerId = workOrder.WorkOrder.SellerId;
-            Seller.SelectedIndex = ((App)App.Current).GetPickerIndex(Seller,workOrder.WorkOrder.SellerId);
+            Seller.SelectedIndex = ((App)App.Current).GetPickerIndex(Seller, workOrder.WorkOrder.SellerId);
 
             DeliveryType.SelectedIndex = workOrder.WorkOrder.DeliveryType;
 
             deliveryUserId = workOrder.WorkOrder.DeliveryUserId;
-            DeliveryPerson.SelectedIndex = ((App)App.Current).GetPickerIndex(DeliveryPerson,workOrder.WorkOrder.DeliveryUserId);
+            DeliveryPerson.SelectedIndex = ((App)App.Current).GetPickerIndex(DeliveryPerson, workOrder.WorkOrder.DeliveryUserId);
 
             DeliveryDate.Date = workOrder.WorkOrder.DeliveryDate;
 
@@ -241,21 +270,18 @@ namespace EOMobile
                         InventoryName = x.InventoryName,
                         Quantity = x.Quantity,
                         Size = x.Size,
-                        //GroupId = x.GroupId
+                        GroupId = x.GroupId
                     };
 
-                
                 workOrderInventoryList.Add(dto);
 
                 list1.Add(new WorkOrderViewModel(dto));
             }
 
-            //ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>(workOrderInventoryList);
-
-            InventoryItemsListView.ItemsSource = list1;
-
-            //load all inventory item images
-            //tabParent.LoadWorkOrderImages(workOrderId);
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                InventoryItemsListView.ItemsSource = list1;
+            });
         }
 
         private void TakePictureClicked(object sender, EventArgs e)
@@ -367,14 +393,46 @@ namespace EOMobile
             }
         }
 
+        /// <summary>
+        /// Called when arrangement data is "added" to a work order - need to use groupId variable in arrangement DTOs if PKs don't yet exist
+        /// </summary>
         void GetSearchedArrangement()
         {
             if(((App)App.Current).searchedForArrangement != null)
             {
                 AddArrangementRequest aar = ((App)App.Current).searchedForArrangement;
 
+                //when an arrangement is being created "on the fly" for a work order,
+                //we need a way to group all the arrangement parts so that we can go back and forth
+                // between the work order page and the arrangement page, if we need to.
+
+                long? groupId = null;
                 var rand = new Random();
-                long groupId = rand.Next(255);
+
+                if (aar.Arrangement.ArrangementId == 0)
+                {
+                    if (!aar.GroupId.HasValue)
+                    {
+                        groupId = rand.Next(255);
+                        aar.GroupId = groupId;
+                    }
+                    else
+                    {
+                        groupId = aar.GroupId;
+                    }
+                }
+                else
+                {
+                    groupId = aar.Arrangement.ArrangementId;
+                }
+
+                //if the arrangement data was passed back to the Arrangement page for any reason, clean the local store
+                List<WorkOrderInventoryItemDTO> toRemove = workOrderInventoryList.Where(a => a.GroupId == groupId).ToList();
+                
+                foreach(WorkOrderInventoryItemDTO remove in toRemove)
+                {
+                    workOrderInventoryList.Remove(remove);
+                }
 
                 //add blank row at start
                 WorkOrderInventoryItemDTO blankFirst = new WorkOrderInventoryItemDTO();
@@ -387,7 +445,7 @@ namespace EOMobile
                 header.InventoryName = "Arrangement";
                 workOrderInventoryList.Add(header);
 
-                //translate bewteen the two inventory types
+                //translate between the two inventory types
                 foreach (ArrangementInventoryDTO dto in aar.ArrangementInventory)
                 {
                     WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO(dto);
@@ -405,6 +463,20 @@ namespace EOMobile
                 foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
                 {
                     list1.Add(new WorkOrderViewModel(wo));
+                }
+
+                if(!arrangementList.Where(a => a.GroupId == groupId).Any())
+                {
+                    arrangementList.Add(aar);
+                }
+                else
+                {
+                    AddArrangementRequest old = arrangementList.Where(a => a.GroupId == groupId).FirstOrDefault();
+                    int index = arrangementList.IndexOf(old);
+                    if(index >= 0 && index < arrangementList.Count)
+                    {
+                        arrangementList[index] = aar;
+                    }
                 }
 
                 InventoryItemsListView.ItemsSource = list1;
@@ -447,7 +519,7 @@ namespace EOMobile
         public void OnCustomerSearchClicked(object sender, EventArgs e)
         {
             SearchedForPersonType = 0;
-            Navigation.PushModalAsync(new PersonFilterPage(this));
+            Navigation.PushAsync(new PersonFilterPage(this));
         }
 
         private string ValidateSaveWorkOrder()
@@ -456,18 +528,18 @@ namespace EOMobile
 
             if(workOrderInventoryList.Count == 0)
             {
-                errorMessage += "Please add at least one inventory item \n";
+                errorMessage += "Please add at least one product. \n";
             }
 
-            if(Seller.SelectedIndex < 0)
-            {
-                errorMessage += "Please add the seller's name \n";
-            }
+            //if(Seller.SelectedIndex < 0)
+            //{
+            //    errorMessage += "Please add the seller's name. \n";
+            //}
 
-            if (String.IsNullOrEmpty(Buyer.Text))
-            {
-                errorMessage += "Please add the buyer's name \n";
-            }
+            //if (String.IsNullOrEmpty(Buyer.Text))
+            //{
+            //    errorMessage += "Please add the buyer's name. \n";
+            //}
 
             return errorMessage;
         }
@@ -482,7 +554,7 @@ namespace EOMobile
             }
             else
             {
-                DisplayAlert("Can't save work order", errorMessage, "Ok");
+                DisplayAlert("Error saving work order", errorMessage, "Ok");
             }
         }
 
@@ -545,7 +617,8 @@ namespace EOMobile
                 {
                     InventoryId = woii.InventoryId,
                     InventoryName = woii.InventoryName,
-                    Quantity = woii.Quantity
+                    Quantity = woii.Quantity,
+                    GroupId = woii.GroupId
                 });
             }
 
@@ -590,6 +663,7 @@ namespace EOMobile
         {
             int debug = 1;
         }
+
         private void Payment_Clicked(object sender, EventArgs e)
         {
             if (currentWorkOrderId > 0)
@@ -626,29 +700,6 @@ namespace EOMobile
                     DeliveryDateLabel.Text = "Delivery Date";
                     DeliveryDate.IsVisible = true;
                 }
-
-                //if(p.SelectedIndex == 1)
-                //{
-                //    DeliveryPersonLabel.Text = "Delivery Person";
-                //    DeliveryPerson.IsVisible = true;
-
-                //    DeliverToLabel.Text = "Deliver To";
-                //    DeliverTo.IsVisible = true;
-
-                //    DeliveryDateLabel.Text = "Delivery Date";
-                //    DeliveryDate.IsVisible = true;
-                //}
-                //else
-                //{
-                //    DeliveryPersonLabel.Text = "";
-                //    DeliveryPerson.IsVisible = false;
-
-                //    DeliverToLabel.Text = "";
-                //    DeliverTo.IsVisible = false;
-
-                //    DeliveryDateLabel.Text = "";
-                //    DeliveryDate.IsVisible = false;
-                //}
             }
         }
 
@@ -692,6 +743,30 @@ namespace EOMobile
                 else if(p.SelectedIndex == 2)
                 {
                     Navigation.PushAsync(new CustomerPage(this));
+                }
+            }
+        }
+
+        private void InventoryItemsListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            //if the item selected has GroupId != null - the clicked on item is a member in an arrangement
+            //reload the entire arrangement back to the Arrangement page.
+
+            ListView lv = sender as ListView;
+
+            if(lv != null && lv.SelectedItem != null)
+            {
+                WorkOrderViewModel dto = lv.SelectedItem as WorkOrderViewModel;
+
+                if(dto != null)
+                {
+                    if(dto.GroupId.HasValue)
+                    {
+                        AddArrangementRequest aar = arrangementList.Where(a => a.GroupId == dto.GroupId).FirstOrDefault();
+
+                        //get all members with same group id and load Arrangement page
+                        Navigation.PushAsync(new TabbedArrangementPage(aar));
+                    }
                 }
             }
         }

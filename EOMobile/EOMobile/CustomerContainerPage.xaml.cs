@@ -194,7 +194,11 @@ namespace EOMobile
                 selectedCustomerContainerImageId = 0;
                 ((App)App.Current).ClearImageData();
                 ((App)App.Current).ClearImageDataList();
-                LoadCustomerContainerData();
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    LoadCustomerContainerData();
+                });
             }
         }
 

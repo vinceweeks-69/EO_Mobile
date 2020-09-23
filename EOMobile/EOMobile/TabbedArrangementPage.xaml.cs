@@ -13,9 +13,11 @@ namespace EOMobile
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class TabbedArrangementPage : EOBaseTabbedPage
     {
+        AddArrangementRequest aar;
         PersonAndAddressDTO customer;
         bool forWorkOrder;
 
+        public AddArrangementRequest CurrentArrangement { get { return aar; } } 
         public PersonAndAddressDTO Customer {  get { return customer; } }
         public bool ForWorkOrder { get { return forWorkOrder; } }
 
@@ -24,6 +26,20 @@ namespace EOMobile
             this.customer = customer;
             this.forWorkOrder = forWorkOrder;
 
+            Initialize();
+        }
+
+        public TabbedArrangementPage(AddArrangementRequest aar, PersonAndAddressDTO customer = null)
+        {
+            this.forWorkOrder = true;
+            this.aar = aar;
+            this.customer = customer;
+
+            Initialize();
+        }
+
+        private void Initialize()
+        {
             Children.Add(new ArrangementPage(this));
             Children.Add(new ImagePage());
             InitializeComponent();

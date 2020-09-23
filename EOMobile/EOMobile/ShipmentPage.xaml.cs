@@ -62,7 +62,52 @@ namespace EOMobile
 
         public ShipmentPage(TabbedShipmentPage tabParent, long shipmentId) : this(tabParent)
         {
-            shipment = ((App)(App.Current)).GetShipment(shipmentId);
+            ((App)(App.Current)).GetShipment(shipmentId).ContinueWith(a => LoadShipment(a.Result));
+        }
+
+        private void Initialize(TabbedShipmentPage tabParent)
+        {
+            InitializeComponent();
+
+            TabParent = tabParent;
+
+            ((App)App.Current).GetUsers().ContinueWith(a => LoadUsers(a.Result));
+
+            ((App)(App.Current)).GetVendors(new GetPersonRequest()).ContinueWith(a => LoadVendors(a.Result));
+        }
+
+        private void LoadUsers(GetUserResponse userResponse)
+        {
+            foreach (UserDTO user in userResponse.Users)
+            {
+                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Receiver.ItemsSource = employeeDDL;
+            });
+        }
+
+        private void LoadVendors(GetVendorResponse response)
+        {
+            vendorList = response.VendorList;
+
+            ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
+            foreach (VendorDTO v in vendorList)
+            {
+                list1.Add(new KeyValuePair<long, string>(v.VendorId, v.VendorName));
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Vendor.ItemsSource = list1;
+            });
+        }
+
+        private void LoadShipment(ShipmentInventoryDTO shipmentDTO)
+        {
+            shipment = shipmentDTO;
 
             shipmentInventoryList.Clear();
 
@@ -85,38 +130,15 @@ namespace EOMobile
             {
                 list1.Add(wo);
             }
-
-            ShipmentItemsListView.ItemsSource = list1;
-
+            
             Vendor.SelectedIndex = ((App)App.Current).GetPickerIndex(Vendor, shipment.Shipment.VendorId);
 
             Receiver.SelectedIndex = ((App)App.Current).GetPickerIndex(Receiver, shipment.Shipment.ReceiverId);
-        }
 
-        private void Initialize(TabbedShipmentPage tabParent)
-        {
-            InitializeComponent();
-
-            TabParent = tabParent;
-
-            vendorList = ((App)(App.Current)).GetVendors(new GetPersonRequest());
-
-            ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
-            foreach (VendorDTO v in vendorList)
+            Device.BeginInvokeOnMainThread(() =>
             {
-                list1.Add(new KeyValuePair<long, string>(v.VendorId, v.VendorName));
-            }
-
-            Vendor.ItemsSource = list1;
-
-            users = ((App)App.Current).GetUsers();
-
-            foreach (UserDTO user in users)
-            {
-                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
-            }
-
-            Receiver.ItemsSource = employeeDDL;
+                ShipmentItemsListView.ItemsSource = list1;
+            });
         }
 
         //called by TabbedShipmentPage to load images to the Image page

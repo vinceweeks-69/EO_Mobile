@@ -32,8 +32,25 @@ namespace EOMobile
         public SiteServicePage(TabbedSiteServicePage tabParent)
         {
             TabParent = tabParent;
-            InitializeComponent();
+            
             Initialize();
+
+            ((App)App.Current).GetUsers().ContinueWith(a => LoadUsers(a.Result));
+        }
+
+        //Two constructors because we need to wait for async data load of users before we can accurately set UI state when workOrderId is passed
+        public SiteServicePage(TabbedSiteServicePage tabParent, long siteServiceId)
+        {
+            TabParent = tabParent;
+
+            Initialize();
+
+            ((App)App.Current).GetUsers().ContinueWith(a => LoadUsersAndWorkOrder(siteServiceId,a.Result));
+        }
+
+        public void Initialize()
+        {
+            InitializeComponent();
 
             MessagingCenter.Subscribe<PersonAndAddressDTO>(this, "SearchCustomer", (arg) =>
             {
@@ -47,15 +64,44 @@ namespace EOMobile
             });
         }
 
-        public SiteServicePage(TabbedSiteServicePage tabParent, long siteServiceId) : this(tabParent)
+        private void LoadUsers(GetUserResponse userResponse)
         {
+            foreach (UserDTO user in userResponse.Users)
+            {
+                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                CreatedBy.ItemsSource = employeeDDL;
+
+                ServicedBy.ItemsSource = employeeDDL;
+            });
+        }
+
+        private void LoadUsersAndWorkOrder(long workOrderId, GetUserResponse userResponse)
+        {
+            foreach (UserDTO user in userResponse.Users)
+            {
+                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                CreatedBy.ItemsSource = employeeDDL;
+
+                ServicedBy.ItemsSource = employeeDDL;
+            });
+
             //load data with passed id
-            workOrder = ((App)App.Current).GetWorkOrder(siteServiceId);
+            ((App)App.Current).GetWorkOrder(workOrderId).ContinueWith(a => WorkOrderLoaded(a.Result));
+        }
+
+        private void WorkOrderLoaded(WorkOrderResponse response)
+        {
+            workOrder = response;
+
             currentSiteServiceId = workOrder.WorkOrder.WorkOrderId;
-
-            CreatedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(CreatedBy, workOrder.WorkOrder.SellerId);
-
-            ServicedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(ServicedBy, workOrder.WorkOrder.DeliveryUserId);
 
             Customer.Text = workOrder.WorkOrder.Buyer;
 
@@ -77,45 +123,23 @@ namespace EOMobile
 
             ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>(siteServiceInventoryList);
 
-            SiteServiceInventoryItemsListView.ItemsSource = list1;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                SiteServiceInventoryItemsListView.ItemsSource = list1;
+            });
 
-            foreach(WorkOrderImageMapDTO imgData in workOrder.ImageMap)
+            foreach (WorkOrderImageMapDTO imgData in workOrder.ImageMap)
             {
                 imageData.Add(new EOImgData()
                 {
-                   ImageId = imgData.ImageId,
-                   imgData = imgData.ImageData
+                    ImageId = imgData.ImageId,
+                    imgData = imgData.ImageData
                 });
             }
-        }
 
-        public void Initialize()
-        {
-            users = ((App)App.Current).GetUsers();
+            CreatedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(CreatedBy, workOrder.WorkOrder.SellerId);
 
-            foreach (UserDTO user in users)
-            {
-                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
-            }
-
-            CreatedBy.ItemsSource = employeeDDL;
-
-            ServicedBy.ItemsSource = employeeDDL;
-                        
-            Completed.IsEnabled = false;
-
-            if (workOrder.WorkOrder.WorkOrderId != 0)
-            {
-                if(workOrder.WorkOrder.Paid)
-                {
-                    Pay.IsEnabled = false;
-
-                    if(!workOrder.WorkOrder.Delivered)
-                    {
-                        Completed.IsEnabled = true;
-                    }
-                }
-            }
+            ServicedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(ServicedBy, workOrder.WorkOrder.DeliveryUserId);
         }
 
         public int SearchedForPersonType
@@ -327,13 +351,13 @@ namespace EOMobile
 
         private void AddInventory_Clicked(object sender, EventArgs e)
         {
-            Navigation.PushModalAsync(new ArrangementFilterPage(this));
+            Navigation.PushAsync(new ArrangementFilterPage(this));
         }
 
         private void Customer_Focused(object sender, FocusEventArgs e)
         {
             SearchedForPersonType = 0;
-            Navigation.PushModalAsync(new PersonFilterPage(this));
+            Navigation.PushAsync(new PersonFilterPage(this));
         }
 
         private void Completed_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -345,7 +369,7 @@ namespace EOMobile
         {
             if (currentSiteServiceId > 0)
             {
-                Navigation.PushModalAsync(new PaymentPage(currentSiteServiceId, siteServiceInventoryList));
+                Navigation.PushAsync(new PaymentPage(currentSiteServiceId, siteServiceInventoryList));
             }
         }
     }

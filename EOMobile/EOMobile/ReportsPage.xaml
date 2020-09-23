@@ -25,8 +25,8 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="60" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
+                    <RowDefinition Height="80" />
+                    <RowDefinition Height="80" />
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
@@ -40,9 +40,9 @@
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="CenterAndExpand" />
 
-                <Button Text="Work Orders" Grid.Column="0" Grid.Row="1" Clicked="OnWorkOrderReportClicked" HeightRequest="100" WidthRequest="300"/>
-                <Button Text="Shipments" Grid.Column="1" Grid.Row="1" Clicked="OnShipmentReportClicked" HeightRequest="50" WidthRequest="200"/>
-                <Button Text="Site Service" Grid.Column="0" Grid.Row="2" Clicked="OnSiteServiceClicked" HeightRequest="50" WidthRequest="200"/>
+                <Button Text="Work Orders" FontSize="Medium" Grid.Column="0" Grid.Row="1" Clicked="OnWorkOrderReportClicked" HeightRequest="80" WidthRequest="200"/>
+                <Button Text="Shipments" FontSize="Medium" Grid.Column="1" Grid.Row="1" Clicked="OnShipmentReportClicked" HeightRequest="80" WidthRequest="200"/>
+                <Button Text="Site Service" FontSize="Medium" Grid.Column="0" Grid.Row="2" Clicked="OnSiteServiceClicked" HeightRequest="80" WidthRequest="200"/>
             </Grid>
         </StackLayout>
         </ScrollView>

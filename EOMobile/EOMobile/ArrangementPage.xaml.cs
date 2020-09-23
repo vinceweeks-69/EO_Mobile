@@ -36,6 +36,10 @@ namespace EOMobile
 
         long? customerContainerId = null;
 
+        /// <summary>
+        /// If the TabbedParent has a CurrentArrangement value, load the form with these values
+        /// </summary>
+        /// <param name="tabParent"></param>
         public ArrangementPage (TabbedArrangementPage tabParent)
 		{
 			InitializeComponent ();
@@ -77,6 +81,61 @@ namespace EOMobile
             EnableCustomerContainerSecondaryControls(false);
 
             TabParent = tabParent;
+
+            if(TabParent.CurrentArrangement != null)
+            {
+                LoadWorkOrderArrangement();
+            }
+        }
+
+        private void LoadWorkOrderArrangement()
+        {
+            //load data passed from parent
+            Name.Text = TabParent.CurrentArrangement.Arrangement.ArrangementName;
+
+            Location.Text = TabParent.CurrentArrangement.Arrangement.LocationName;
+
+            int index = 0;
+            foreach(KeyValuePair<long,string> kvp in Designer.ItemsSource)
+            {
+                if(kvp.Value == TabParent.CurrentArrangement.Arrangement.DesignerName)
+                {
+                    Designer.SelectedIndex = index;
+                    break;
+                }
+                index++;
+            }
+
+            index = 0;
+            foreach (KeyValuePair<long, string> kvp in Style.ItemsSource)
+            {
+                if (kvp.Key == TabParent.CurrentArrangement.Arrangement._180or360)
+                {
+                    Style.SelectedIndex = index;
+                    break;
+                }
+                index++;
+            }
+
+            index = 0;
+            foreach (KeyValuePair<long, string> kvp in Container.ItemsSource)
+            {
+                if (kvp.Key == TabParent.CurrentArrangement.Arrangement.Container)
+                {
+                    Container.SelectedIndex = index;
+                    break;
+                }
+                index++;
+            }
+
+            arrangementInventoryList = TabParent.CurrentArrangement.ArrangementInventory;
+
+            foreach (ArrangementInventoryDTO a in arrangementInventoryList)
+            {
+                arrangementInventoryListOC.Add(a);
+            }
+
+            ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
         }
 
         private void EnableCustomerContainerSecondaryControls(bool shouldShow)
@@ -115,11 +174,12 @@ namespace EOMobile
             //if this is WorkOrder mode AND a customer ID is present, show CustomerContainerPage
             //If this is WorkOrder mode AND no customer ID, show Customer Page
         }
-
+               
         protected override void OnAppearing()
         {
             base.OnAppearing();
 
+            //called when we return from an "Inventory Search"
             ArrangementInventoryDTO searchedForInventory = ((App)App.Current).searchedForArrangementInventory;
 
             if (searchedForInventory != null && searchedForInventory.InventoryId != 0)
@@ -145,6 +205,7 @@ namespace EOMobile
                 }
             }
 
+            //called when we return from a "Customer Search"
             CustomerContainerDTO searchedForCustomerContainer = ((App)App.Current).searchedForCustomerContainer;
 
             if(searchedForCustomerContainer != null && searchedForCustomerContainer.CustomerContainerId != 0)
@@ -155,6 +216,8 @@ namespace EOMobile
 
                 ((App)App.Current).searchedForCustomerContainer = null;
             }
+
+            //called when we return from a  Work Order page click on a previously created arrangement item 
         }
 
         private void SetWorkOrderSalesData()
@@ -178,19 +241,27 @@ namespace EOMobile
                 arrangementList.Clear();
                 arrangementListOC.Clear();
 
-                arrangementList = ((App)App.Current).GetArrangements(Name.Text);
-
-                foreach (GetSimpleArrangementResponse ar in arrangementList)
-                {
-                    arrangementListOC.Add(ar);
-                }
-
-                ArrangementListView.ItemsSource = arrangementListOC;
+                ((App)App.Current).GetArrangements(Name.Text).ContinueWith(a => ArrangementSearchComplete(a.Result));
             }
             else
             {
                 DisplayAlert("Error", "To search arrangements, enter an arrangement name", "Ok");
             }
+        }
+
+        private void ArrangementSearchComplete(List<GetSimpleArrangementResponse> getResult)
+        {
+            arrangementList = getResult;
+
+            foreach (GetSimpleArrangementResponse ar in arrangementList)
+            {
+                arrangementListOC.Add(ar);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                ArrangementListView.ItemsSource = arrangementListOC;
+            });
         }
 
         public void OnClearArrangementsClicked(object sender, EventArgs e)
@@ -248,16 +319,17 @@ namespace EOMobile
                 {
                     int containerVal = (int)((KeyValuePair<long, string>)Container.SelectedItem).Key;
 
-                    if (containerVal == 3) // "new container"
+                    if (containerVal == 1) // "new container"
                     {
                         //check inventory for an inventory item of type container
-                        if(!arrangementInventoryList.Where(a => a.Type.Equals("Containers")).Any())
+                        //if(!arrangementInventoryList.Where(a => a.Type.Equals("Containers")).Any())
+                        if(!arrangementInventoryList.Where(a => a.InventoryTypeId == 2).Any())
                         {
                             validationMessage += "Please pick a Container. \n";
                         }
                         else
                         {
-                            if (arrangementInventoryList.Where(a => a.Type.Equals("Containers")).Count() > 1)
+                            if (arrangementInventoryList.Where(a => a.InventoryTypeId == 2).Count() > 1)
                             {
                                 validationMessage += "An arrangement can have only one container. \n";
                             }
@@ -292,6 +364,10 @@ namespace EOMobile
                 {
                     AddArrangementRequest request = new AddArrangementRequest();
                     request.Arrangement = new ArrangementDTO();
+
+                    if (TabParent.CurrentArrangement != null)
+                        request = TabParent.CurrentArrangement;
+                                        
                     request.Arrangement.ArrangementName = Name.Text;
                     request.Arrangement.DesignerName = Designer.SelectedItem != null ? ((KeyValuePair<long,string>)Designer.SelectedItem).Value : String.Empty;
                     request.Arrangement._180or360 = Style.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;
@@ -308,7 +384,10 @@ namespace EOMobile
 
                     MessagingCenter.Send<AddArrangementRequest>(request, "AddArrangementToWorkOrder");
 
-                    PopToPage("TabbedWorkOrderPage");
+                    if(!PopToPage("TabbedWorkOrderPage"))
+                    {
+                        Navigation.PopAsync();
+                    }
 
                     return;
                 }
@@ -481,8 +560,11 @@ namespace EOMobile
             GetSimpleArrangementResponse item = lv.SelectedItem as GetSimpleArrangementResponse;
 
             //call GetArrangementsById() and populate form
-            GetArrangementResponse response = ((App)App.Current).GetArrangement(item.Arrangement.ArrangementId);
+            ((App)App.Current).GetArrangement(item.Arrangement.ArrangementId).ContinueWith(a => SelectedArrangementLoaded(lv,item, a.Result));
+        }
 
+        private void SelectedArrangementLoaded(ListView lv,GetSimpleArrangementResponse item, GetArrangementResponse response)
+        {
             ClearArrangements();
 
             Name.Text = response.Arrangement.ArrangementName;
@@ -498,11 +580,13 @@ namespace EOMobile
                 arrangementInventoryListOC.Add(a);
             }
 
-            ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                lv.SelectedItem = null;
+            });
 
             TabParent.LoadArrangmentImages(response.Images);
-
-            lv.SelectedItem = null;
         }
 
         private void ShowImage_Clicked(object sender, EventArgs e)

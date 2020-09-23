@@ -35,16 +35,24 @@ namespace EOMobile
             request.Email = Email.Text;
             request.PhonePrimary = Phone.Text;
 
-            Persons = ((App)App.Current).GetCustomers(request);
+            ((App)App.Current).GetCustomers(request).ContinueWith(a => CustomersLoaded(a.Result));
+        }
+
+        private void CustomersLoaded(GetPersonResponse response)
+        {
+            Persons = response.PersonAndAddress;
 
             ObservableCollection<PersonAndAddressDTO> list1 = new ObservableCollection<PersonAndAddressDTO>();
 
-            foreach(PersonAndAddressDTO p in Persons)
+            foreach (PersonAndAddressDTO p in Persons)
             {
                 list1.Add(p);
             }
 
-            PersonListView.ItemsSource = list1;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                PersonListView.ItemsSource = list1;
+            });
         }
 
         private void PersonListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)

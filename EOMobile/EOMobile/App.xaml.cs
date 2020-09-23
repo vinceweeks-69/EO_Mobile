@@ -6,7 +6,9 @@ using SharedData;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Management;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
@@ -48,6 +50,8 @@ namespace EOMobile
 
         public string Pwd { get; set; }
 
+        public long Role { get; set; }
+
         public long MissingImageId { get { return 264L; } }
 
         public ArrangementInventoryDTO searchedForArrangementInventory { get; set; }
@@ -78,7 +82,7 @@ namespace EOMobile
 
             //LAN_Address = "http://99.125.200.187:9000"; //Me Royalwood IP
 
-            LAN_Address = "http://10.0.0.5:9000/";   //Me Royalwood router
+            LAN_Address = "http://10.0.0.4:9000/";   //Me Royalwood router
 
             //LAN_Address = "http://10.1.10.148:9000/";   //Me EO
 
@@ -95,6 +99,16 @@ namespace EOMobile
             //LAN_Address = "http://192.168.1.134:9000/";  //Thom
 
             //Stripe.StripeConfiguration.ApiKey = "sk_test_6vJyMV6NxHArGV6kI2EL6R7V00kzjXJ72u";
+
+            //List<string> wtf = GetLocalIPv4(NetworkInterfaceType.Ethernet);
+
+            //List<string> wtf2 = GetLocalIPv4(NetworkInterfaceType.Wireless80211);
+
+            //var addresses = Dns.GetHostEntry((Dns.GetHostName()))
+            //        .AddressList
+            //        .Where(x => x.AddressFamily == AddressFamily.InterNetwork)
+            //        .Select(x => x.ToString())
+            //        .ToArray();
 
             MainPage = new NavigationPage(new LoginPage());
            
@@ -166,42 +180,24 @@ namespace EOMobile
             InitStateList();
         }
 
-        public List<UserDTO> GetUsers()
+
+        public List<string> GetLocalIPv4(NetworkInterfaceType _type)
         {
-            List<UserDTO> users = new List<UserDTO>();
-
-            try
+            List<string> ipAddrList = new List<string>();
+            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
             {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetUsers").Result;
-                if (httpResponse.IsSuccessStatusCode)
+                if (item.NetworkInterfaceType == _type && item.OperationalStatus == OperationalStatus.Up)
                 {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-
-                    GetUserResponse userResponse = JsonConvert.DeserializeObject<GetUserResponse>(strData);
-                    users = userResponse.Users;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plants");
+                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            ipAddrList.Add(ip.Address.ToString());
+                        }
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetUsers", ex);
-                LogError(ex2.Message, String.Empty);
-            }
-
-            return users;
+            return ipAddrList;
         }
 
         public List<string> GetStateNames()
@@ -298,6 +294,51 @@ namespace EOMobile
             imageDataList.Clear();
         }
 
+        //where the call you want make is paramName = objectPkId, objectName (string)  OR leave paramName and paramID empty for "Get All"
+        public async Task<T> GetRequest<T>(GenericGetRequest getRequest)
+        {
+            try
+            {
+                string webServiceAdx = "api/login/" + getRequest.Uri;
+
+                if(!String.IsNullOrEmpty(getRequest.ParamName))
+                {
+                    webServiceAdx += "?" + getRequest.ParamName + "=";
+
+                    if (!String.IsNullOrEmpty(getRequest.ParamValue))
+                    {
+                        webServiceAdx += getRequest.ParamValue;
+                    }
+                    else
+                    {
+                        webServiceAdx += getRequest.ParamId.ToString();
+                    }
+                }
+
+                var client = new HttpClient();
+                client.BaseAddress = new Uri(LAN_Address);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
+
+                using (HttpResponseMessage httpResponse = await
+                    client.GetAsync(webServiceAdx))
+                {
+                    httpResponse.EnsureSuccessStatusCode();
+                    
+                    Stream streamData = await httpResponse.Content.ReadAsStreamAsync();
+                    StreamReader strReader = new StreamReader(streamData);
+                    string strData = strReader.ReadToEnd();
+                    return JsonConvert.DeserializeObject<T>(strData);
+                }
+            }
+            catch (Exception ex)
+            {
+                Exception ex2 = new Exception(getRequest.Uri, ex);
+                LogError(ex2.Message, JsonConvert.SerializeObject(getRequest));
+                return default(T);
+            }
+        }
+
         public async Task<TOut> PostRequest<TIn, TOut>(string uri, TIn content)
         {
             string serializedContent = String.Empty;
@@ -330,6 +371,15 @@ namespace EOMobile
             }
         }
 
+
+        public async Task<GetUserResponse> GetUsers()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetUsers",String.Empty, 0); 
+            GetUserResponse response = await GetRequest<GetUserResponse>(request);
+            return response;
+        }   
+
+        //Called Get - actually a Post
         public async Task<GetPersonResponse> GetCustomer(long customerId)
         {
             GetPersonRequest request = new GetPersonRequest();
@@ -366,79 +416,23 @@ namespace EOMobile
             return response;
         }
 
-        public ServiceCodeDTO GetServiceCodeById(long serviceCodeId)
+        public async Task<ServiceCodeDTO> GetServiceCodeById(long serviceCodeId)
         {
-            ServiceCodeDTO serviceCode = new ServiceCodeDTO();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetServiceCodeById?serviceCodeId=" + serviceCodeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-
-                    serviceCode = JsonConvert.DeserializeObject<ServiceCodeDTO>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plants");
-                }
-            }
-            catch(Exception ex)
-            {
-                Exception ex2 = new Exception("GetServiceCodeById", ex);
-                LogError(ex2.Message, "serviceCodeId = " + serviceCodeId.ToString());
-            }
-
-            return serviceCode;
+            GenericGetRequest request = new GenericGetRequest("GetServiceCodeById", "serviceCodeId", serviceCodeId);
+            ServiceCodeDTO response = await GetRequest<ServiceCodeDTO>(request);
+            return response;
         }
 
-        public List<string> GetSizeByInventoryType(long inventoryTypeId)
+        public async Task<GetSizeResponse> GetSizeByInventoryType(GenericGetRequest request)
         {
-            List<string> sizes = new List<string>();
+            GetSizeResponse response = await GetRequest<GetSizeResponse>(request);
+            return response;
+        }
 
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetSizeByInventoryType?inventoryTypeId=" + inventoryTypeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-
-                    GetSizeResponse sizeResponse = JsonConvert.DeserializeObject<GetSizeResponse>(strData);
-                    sizes = sizeResponse.Sizes;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plants");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetSizeByInventoryType", ex);
-                LogError(ex2.Message, "inventoryTypeId = " + inventoryTypeId.ToString());
-            }
-
-            return sizes;
+        public async Task<GetPlantTypeResponse> GetPlantTypes(GenericGetRequest request)
+        {
+            GetPlantTypeResponse response = await GetRequest<GetPlantTypeResponse>(request);
+            return response;
         }
 
         public bool ArrangementNameIsNotUnique(ArrangementDTO arrangement)
@@ -479,81 +473,18 @@ namespace EOMobile
             return response.Success;
         }
 
-        public GetArrangementResponse GetArrangement(long arrangementId)
+        public async Task<GetArrangementResponse> GetArrangement(long arrangementId)
         {
-            GetArrangementResponse response = new GetArrangementResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetArrangement?arrangementId=" + arrangementId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    response = JsonConvert.DeserializeObject<GetArrangementResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving arrangements");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetArrangement", ex);
-                LogError(ex2.Message, "arrangementId = " + arrangementId.ToString());
-            }
-
+            GenericGetRequest request = new GenericGetRequest("GetArrangement", "arrangementId", arrangementId);
+            GetArrangementResponse response = await GetRequest<GetArrangementResponse>(request);
             return response;
         }
 
-        public List<GetSimpleArrangementResponse> GetArrangements(string arrangementName)
+        public async Task<List<GetSimpleArrangementResponse>> GetArrangements(string arrangementName)
         {
-            //List<ArrangementInventoryDTO> arrangements = new List<ArrangementInventoryDTO>();
-
-            List<GetSimpleArrangementResponse> arrangements = new List<GetSimpleArrangementResponse>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetArrangements?arrangementName=" + arrangementName).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    List<GetSimpleArrangementResponse> response = JsonConvert.DeserializeObject<List<GetSimpleArrangementResponse>>(strData);
-
-                    //arrangements = response.ArrangementList;
-                    arrangements = response;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving arrangements");
-                }
-            }
-            catch(Exception ex)
-            {
-                Exception ex2 = new Exception("GetArrangements", ex);
-                LogError(ex2.Message, "arrangementName = " + arrangementName);
-            }
-
-            return arrangements;
+            GenericGetRequest request = new GenericGetRequest("GetArrangements", "arrangementName", arrangementName);
+            List<GetSimpleArrangementResponse> response = await GetRequest<List<GetSimpleArrangementResponse>>(request);
+            return response;
         }
 
         public EOImgData GetImage(long imageId)
@@ -591,114 +522,23 @@ namespace EOMobile
             return imageData;
         }
 
-        public List<InventoryTypeDTO> GetInventoryTypes()
+        public async Task<List<InventoryTypeDTO>> GetInventoryTypes()
         {
-            List<InventoryTypeDTO> dtoList = new List<InventoryTypeDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-
-                client.DefaultRequestHeaders.Accept.Add(
-                   new MediaTypeWithQualityHeaderValue("application/json"));
-
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                   client.GetAsync("api/Login/GetInventoryTypes").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetInventoryTypeResponse response = JsonConvert.DeserializeObject<GetInventoryTypeResponse>(strData);
-                    dtoList = response.InventoryType;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving inventory types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetInventoryTypes", ex);
-                LogError(ex2.Message, String.Empty);
-            }
-            return dtoList;
+            GenericGetRequest request = new GenericGetRequest("GetInventoryTypes", String.Empty, 0);
+            List<InventoryTypeDTO> response = await GetRequest<List<InventoryTypeDTO>>(request);
+            return response;
         }
 
-        public List<PersonAndAddressDTO> GetCustomers(GetPersonRequest request)
+        public async Task<GetPersonResponse> GetCustomers(GetPersonRequest request)
         {
-            List<PersonAndAddressDTO> people = new List<PersonAndAddressDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
-
-                HttpResponseMessage httpResponse =
-                    client.PostAsync("api/Login/GetPerson",content).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetPersonResponse resp = JsonConvert.DeserializeObject<GetPersonResponse>(strData);
-                    people= resp.PersonAndAddress;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving people");
-                }
-            }
-            catch(Exception ex)
-            {
-                Exception ex2 = new Exception("GetCustomers", ex);
-                LogError(ex2.Message, JsonConvert.SerializeObject(request));
-            }
-
-            return people;
+            GetPersonResponse response = await PostRequest<GetPersonRequest, GetPersonResponse>("GetPerson", request);
+            return response;
         }
 
-        public List<VendorDTO> GetVendors(GetPersonRequest request)
+        public async Task<GetVendorResponse> GetVendors(GetPersonRequest request)
         {
-            List<VendorDTO> vDTO = new List<VendorDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                string jsonData = JsonConvert.SerializeObject(request);
-                StringContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                HttpResponseMessage httpResponse =
-                    client.PostAsync("api/Login/GetVendors",content).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetVendorResponse resp = JsonConvert.DeserializeObject<GetVendorResponse>(strData);
-                    vDTO = resp.VendorList;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving vendors");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetVendors", ex);
-                LogError(ex2.Message, JsonConvert.SerializeObject(request));
-            }
-
-            return vDTO;
+            GetVendorResponse response = await PostRequest<GetPersonRequest, GetVendorResponse>("GetVendors", request);
+            return response;
         }
 
         public long AddShipment(AddShipmentRequest request)
@@ -758,161 +598,30 @@ namespace EOMobile
             return newShipmentId;
         }
 
-        public ShipmentInventoryDTO GetShipment(long shipmentId)
+        public async Task<ShipmentInventoryDTO> GetShipment(long shipmentId)
         {
-            ShipmentInventoryDTO response = new ShipmentInventoryDTO();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                //string jsonData = JsonConvert.SerializeObject(filter);
-                //var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetShipment?shipmentId=" + Convert.ToString(shipmentId)).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    response = JsonConvert.DeserializeObject<ShipmentInventoryDTO>(strData);
-                }
-            }
-            catch(Exception ex)
-            {
-                Exception ex2 = new Exception("GetShipment", ex);
-                LogError(ex2.Message, "shipmentId = " + shipmentId.ToString());
-            }
-
+            GenericGetRequest request = new GenericGetRequest("GetShipment", "shipmentId",shipmentId);
+            ShipmentInventoryDTO response = await GetRequest<ShipmentInventoryDTO>(request);
+            return response;
+        }
+        public async Task<GetShipmentResponse> GetShipments(ShipmentFilter filter)
+        {
+            GetShipmentResponse response = await PostRequest<ShipmentFilter, GetShipmentResponse>("GetShipments", filter);
             return response;
         }
 
-        public List<ShipmentInventoryDTO> GetShipments(ShipmentFilter filter)
+
+        public async Task<WorkOrderResponse> GetWorkOrder(long workOrderId)
         {
-            List<ShipmentInventoryDTO> shipments = new List<ShipmentInventoryDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                string jsonData = JsonConvert.SerializeObject(filter);
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                HttpResponseMessage httpResponse =
-                    client.PostAsync("api/Login/GetShipments", content).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    GetShipmentResponse response = JsonConvert.DeserializeObject<GetShipmentResponse>(strData);
-                    shipments = response.ShipmentList;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving Work Orders");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetShipments", ex);
-                LogError(ex2.Message, JsonConvert.SerializeObject(filter));
-            }
-
-            return shipments;
-        }
-
-        public WorkOrderResponse GetWorkOrder(long workOrderId)
-        {
-            WorkOrderResponse response = new WorkOrderResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                //string jsonData = JsonConvert.SerializeObject(filter);
-                //var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetWorkOrder?workOrderId=" + Convert.ToString(workOrderId)).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    response = JsonConvert.DeserializeObject<WorkOrderResponse>(strData);
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetWorkOrder", ex);
-                LogError(ex2.Message, "workOrderId = " + workOrderId.ToString());
-            }
-
+            GenericGetRequest request = new GenericGetRequest("GetWorkOrder", "workOrderId", workOrderId);
+            WorkOrderResponse response = await GetRequest<WorkOrderResponse>(request);
             return response;
         }
 
-        public List<WorkOrderResponse> GetWorkOrders(WorkOrderListFilter filter)
+        public async Task<List<WorkOrderResponse>> GetWorkOrders(WorkOrderListFilter filter)
         {
-            List<WorkOrderResponse> workOrders = new List<WorkOrderResponse>();
-
-            try
-            {
-                //WorkOrderListFilter filter = new WorkOrderListFilter();
-                //filter.FromDate = this.FromDatePicker.SelectedDate.Value;
-                //filter.ToDate = this.ToDatePicker.SelectedDate.Value;
-
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                string jsonData = JsonConvert.SerializeObject(filter);
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                HttpResponseMessage httpResponse =
-                    client.PostAsync("api/Login/GetWorkOrders", content).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    workOrders = JsonConvert.DeserializeObject<List<WorkOrderResponse>>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving Work Orders");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetWorkOrders", ex);
-                LogError(ex2.Message, JsonConvert.SerializeObject(filter));
-            }
-
-            return workOrders;
+            List<WorkOrderResponse> response = await PostRequest<WorkOrderListFilter, List<WorkOrderResponse>>("GetWorkOrders", filter);
+            return response;
         }
 
         public long AddWorkOrder(AddWorkOrderRequest request)
@@ -1009,40 +718,11 @@ namespace EOMobile
             return newWorkOrderPaymentId;
         }
 
-        public WorkOrderPaymentDTO GetWorkOrderPayment(long workOrderId)
+        public async Task<WorkOrderPaymentDTO> GetWorkOrderPayment(long workOrderId)
         {
-            WorkOrderPaymentDTO workOrderPayment = new WorkOrderPaymentDTO();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetWorkOrderPayment?workOrderId=" + workOrderId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    workOrderPayment = JsonConvert.DeserializeObject<WorkOrderPaymentDTO>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving materials");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetWorkOrderPayment", ex);
-                LogError(ex2.Message, "workOrderId = " + workOrderId.ToString());
-            }
-
-            return workOrderPayment;
+            GenericGetRequest request = new GenericGetRequest("GetWorkOrderPayment", "workOrderId", workOrderId);
+            WorkOrderPaymentDTO response = await GetRequest<WorkOrderPaymentDTO>(request);
+            return response;
         }
 
         public List<long> GetWorkOrderImageIds(long workOrderId)
@@ -1270,453 +950,115 @@ namespace EOMobile
             return arrangementDeleted;
         }
 
-        public List<MaterialTypeDTO> GetMaterialTypes()
+        public async Task<GetMaterialTypeResponse> GetMaterialTypes()
         {
-            List<MaterialTypeDTO> materialTypes = new List<MaterialTypeDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                //client.BaseAddress = new Uri("http://localhost:9000/");
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse = client.GetAsync("api/Login/GetMaterialTypes").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetMaterialTypeResponse response = JsonConvert.DeserializeObject<GetMaterialTypeResponse>(strData);
-                    materialTypes = response.MaterialTypes;
-                }
-                else
-                {
-                    // MessageBox.Show("There was an error retreiving plant types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetMaterialTypes", ex);
-                LogError(ex2.Message, String.Empty);
-            }
-            return materialTypes;
-        }
-
-        public List<FoliageTypeDTO> GetFoliageTypes()
-        {
-            List<FoliageTypeDTO> foliageTypes = new List<FoliageTypeDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                //client.BaseAddress = new Uri("http://localhost:9000/");
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse = client.GetAsync("api/Login/GetFoliageTypes").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetFoliageTypeResponse response = JsonConvert.DeserializeObject<GetFoliageTypeResponse>(strData);
-                    foliageTypes = response.FoliageTypes;
-                }
-                else
-                {
-                    // MessageBox.Show("There was an error retreiving plant types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetFoliageTypes", ex);
-                LogError(ex2.Message, String.Empty);
-            }
-            return foliageTypes;
-        }
-        public GetMaterialResponse GetMaterialByType(long materialTypeId)
-        {
-            GetMaterialResponse materials = new GetMaterialResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetMaterialsByType?materialTypeId=" + materialTypeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    materials = JsonConvert.DeserializeObject<GetMaterialResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving materials");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetMaterialByType", ex);
-                LogError(ex2.Message, "materialTypeId = " + materialTypeId.ToString());
-            }
-
-            return materials;
-        }
-        public List<MaterialNameDTO> GetMaterialNamesByType(long materialTypeId)
-        {
-            List<MaterialNameDTO> materialNameList = new List<MaterialNameDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetMaterialNamesByType?materialTypeId=" + materialTypeId.ToString()).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetMaterialNameResponse response = JsonConvert.DeserializeObject<GetMaterialNameResponse>(strData);
-
-                    materialNameList = response.MaterialNames;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plant names");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetMaterialNamesByType", ex);
-                LogError(ex2.Message, "materialTypeId = " + materialTypeId.ToString());
-            }
-
-            return materialNameList;
-        }
-
-        public GetFoliageResponse GetFoliageByType(long foliageTypeId)
-        {
-            GetFoliageResponse foliage = new GetFoliageResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetFoliageByType?foliageTypeId=" + foliageTypeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    foliage = JsonConvert.DeserializeObject<GetFoliageResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving materials");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetFoliageByType", ex);
-                LogError(ex2.Message, "foliageTypeId = " + foliageTypeId.ToString());
-            }
-
-            return foliage;
-        }
-
-        public List<FoliageNameDTO> GetFoliageNamesByType(long foliageTypeId)
-        {
-            List<FoliageNameDTO> foliageNameList = new List<FoliageNameDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetFoliageNamesByType?foliageTypeId=" + foliageTypeId.ToString()).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetFoliageNameResponse response = JsonConvert.DeserializeObject<GetFoliageNameResponse>(strData);
-
-                    foliageNameList = response.FoliageNames;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plant names");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetFoliageNamesByType", ex);
-                LogError(ex2.Message, "foliageTypeId = " + foliageTypeId.ToString());
-            }
-
-            return foliageNameList;
-        }
-
-        public GetPlantResponse GetPlants()
-        {
-            GetPlantResponse response = new GetPlantResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetPlants").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    response = JsonConvert.DeserializeObject<GetPlantResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plant types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetPlants", ex);
-                LogError(ex2.Message, String.Empty);
-            }
+            GenericGetRequest request = new GenericGetRequest("GetMaterialTypes", String.Empty, 0);
+            GetMaterialTypeResponse response = await GetRequest<GetMaterialTypeResponse>(request);
             return response;
         }
 
-        public List<PlantTypeDTO> GetPlantTypes()
+        public async Task<List<FoliageTypeDTO>> GetFoliageTypes()
         {
-            List<PlantTypeDTO> plantTypes = new List<PlantTypeDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetPlantTypes").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetPlantTypeResponse response = JsonConvert.DeserializeObject<GetPlantTypeResponse>(strData);
-                    plantTypes = response.PlantTypes;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plant types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetPlantTypes", ex);
-                LogError(ex2.Message, String.Empty);
-            }
-
-            return plantTypes;
+            GenericGetRequest request = new GenericGetRequest("GetFoliageTypes", String.Empty, 0);
+            List<FoliageTypeDTO> response = await GetRequest<List<FoliageTypeDTO>>(request);
+            return response;
         }
 
-        public List<PlantNameDTO> GetPlantNamesByType(long plantTypeId)
+        public async Task<GetMaterialResponse> GetMaterialByType(long typeId)
         {
-            List<PlantNameDTO> plantNameList = new List<PlantNameDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetPlantNamesByType?plantTypeId=" + plantTypeId.ToString()).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetPlantNameResponse response = JsonConvert.DeserializeObject<GetPlantNameResponse>(strData);
-
-                    plantNameList = response.PlantNames;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plant names");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetPlantNamesByType", ex);
-                LogError(ex2.Message, "plantTypeId = " + plantTypeId.ToString());
-            }
-
-            return plantNameList;
+            GenericGetRequest request = new GenericGetRequest("GetMaterialsByType", "materialTypeId", typeId);
+            GetMaterialResponse response = await GetRequest<GetMaterialResponse>(request);
+            return response;
         }
 
-        public GetPlantResponse GetPlantsByType(long plantTypeId)
+        public async Task<GetMaterialResponse> GetMaterials()
         {
-            GetPlantResponse plants = new GetPlantResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetPlantsByType?plantTypeId=" + plantTypeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    plants = JsonConvert.DeserializeObject<GetPlantResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plants");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetPlantsByType", ex);
-                LogError(ex2.Message, "plantTypeId = " + plantTypeId.ToString());
-            }
-
-            return plants;
+            GenericGetRequest request = new GenericGetRequest("GetMaterials", String.Empty, 0);
+            GetMaterialResponse response = await GetRequest<GetMaterialResponse>(request);
+            return response;
         }
 
-        public List<ContainerNameDTO> GetContainerNamesByType(long containerTypeId)
+        public async Task<GetMaterialResponse> GetMaterialsByType(long typeId)
         {
-            List<ContainerNameDTO> containerNameList = new List<ContainerNameDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetContainerNamesByType?containerTypeId=" + containerTypeId.ToString()).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    containerNameList = JsonConvert.DeserializeObject<List<ContainerNameDTO>>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving container names");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetContainerNamesByType", ex);
-                LogError(ex2.Message, "containerTypeId = " + containerTypeId.ToString());
-            }
-
-            return containerNameList;
+            GenericGetRequest request = new GenericGetRequest("GetMaterialsByType", "materialTypeId", typeId);
+            GetMaterialResponse response = await GetRequest<GetMaterialResponse>(request);
+            return response;
         }
 
-        public List<ContainerTypeDTO> GetContainerTypes()
+        public async Task<List<MaterialNameDTO>> GetMaterialNamesByType(long typeId)
         {
-            List<ContainerTypeDTO> containerTypes = new List<ContainerTypeDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetContainerTypes").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetContainerTypeResponse response = JsonConvert.DeserializeObject<GetContainerTypeResponse>(strData);
-                    containerTypes = response.ContainerTypeList;
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving container types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetContainerTypes", ex);
-                LogError(ex2.Message, String.Empty);
-            }
-            return containerTypes;
+            GenericGetRequest request = new GenericGetRequest("GetMaterialNamesByType", "materialTypeId", typeId);
+            List<MaterialNameDTO> response = await GetRequest<List<MaterialNameDTO>>(request);
+            return response;
         }
 
-        public GetContainerResponse GetContainersByType(long typeId)
+        public async Task<GetFoliageResponse> GetFoliageByType(long typeId)
         {
-            GetContainerResponse containers = new GetContainerResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetContainersByType?containerTypeId=" + typeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    containers = JsonConvert.DeserializeObject<GetContainerResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plants");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogError(ex.Message, "typeId = " + typeId.ToString());
-            }
-
-            return containers;
+            GenericGetRequest request = new GenericGetRequest("GetFoliageByType", "foliageTypeId", typeId);
+            GetFoliageResponse response = await GetRequest<GetFoliageResponse>(request);
+            return response;
         }
+
+        public async Task<List<FoliageNameDTO>> GetFoliageNamesByType(long typeId)
+        {
+            GenericGetRequest request = new GenericGetRequest("GetFoliageNamesByType", "foliageTypeId", typeId);
+            List<FoliageNameDTO> response = await GetRequest<List<FoliageNameDTO>>(request);
+            return response;
+        }
+
+        public async Task<GetPlantResponse> GetPlants()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetPlants", String.Empty, 0);
+            GetPlantResponse response = await GetRequest<GetPlantResponse>(request);
+            return response;
+        }
+ 
+        public async Task<List<PlantTypeDTO>> GetPlantTypes()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetPlantTypes", String.Empty, 0);
+            List<PlantTypeDTO> response = await GetRequest<List<PlantTypeDTO>>(request);
+            return response;
+        }
+
+        public async Task<List<PlantNameDTO>> GetPlantNamesByType(long typeId)
+        {
+            GenericGetRequest request = new GenericGetRequest("GetPlantNamesByType", "plantTypeId", typeId);
+            List<PlantNameDTO> response = await GetRequest<List<PlantNameDTO>>(request);
+            return response;
+        }
+
+        public async Task<GetPlantResponse> GetPlantsByType(long typeId)
+        {
+            GenericGetRequest request = new GenericGetRequest("GetPlantsByType", "plantTypeId", typeId);
+            GetPlantResponse response = await GetRequest<GetPlantResponse>(request);
+            return response;
+        }
+
+ 
+        public async Task<List<ContainerNameDTO>> GetContainerNamesByType(long typeId)
+        {
+            GenericGetRequest request = new GenericGetRequest("GetContainerNamesByType", "containerTypeId", typeId);
+            List<ContainerNameDTO> response = await GetRequest<List<ContainerNameDTO>>(request);
+            return response;
+        }
+
+ 
+
+        public async Task<List<ContainerTypeDTO>> GetContainerTypes()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetContainerTypes", String.Empty, 0);
+            List<ContainerTypeDTO> response = await GetRequest<List<ContainerTypeDTO>>(request);
+            return response;
+        }
+
+        public async Task<GetContainerResponse> GetContainersByType(long typeId)
+        {
+            GenericGetRequest request = new GenericGetRequest("GetContainersByType", "containerTypeId", typeId);
+            GetContainerResponse response = await GetRequest<GetContainerResponse>(request);
+            return response;
+        }
+
+   
 
         public void LogError(string message, string payload)
         {

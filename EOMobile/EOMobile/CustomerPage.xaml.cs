@@ -128,7 +128,12 @@ namespace EOMobile
             request.LastName = LastName.Text;
             request.PhonePrimary = Phone.Text;
 
-            customerList = ((App)App.Current).GetCustomers(request);
+            ((App)App.Current).GetCustomers(request).ContinueWith(a => CustomersLoaded(a.Result));
+        }
+
+        private void CustomersLoaded(GetPersonResponse response)
+        {
+            customerList = response.PersonAndAddress;
 
             customersOC.Clear();
 
@@ -137,7 +142,10 @@ namespace EOMobile
                 customersOC.Add(p);
             }
 
-            CustomerListView.ItemsSource = customersOC;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                CustomerListView.ItemsSource = customersOC;
+            });
         }
 
         public void OnSaveCustomerClicked(object sender, EventArgs e)

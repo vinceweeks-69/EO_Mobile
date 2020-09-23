@@ -75,7 +75,7 @@
                     FontAttributes="Bold"
                     HorizontalOptions="Start" 
                     HorizontalTextAlignment="Start" />
-                <Picker x:Name="Size"  Grid.Column="2" Grid.Row="3" HeightRequest="50" WidthRequest="200"/>
+                <Picker x:Name="Size"  Grid.Column="2" Grid.Row="3"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="50" WidthRequest="200"/>
 
                 <!--<Button x:Name="Search" Text="Search" Grid.Column="1" Grid.Row="4" Clicked="SearchButton_Click"/>-->
             </Grid>

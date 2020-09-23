@@ -37,29 +37,61 @@ namespace EOMobile
             workOrderFilter.Delivery = false;
             workOrderFilter.SiteService = false;
 
-            ((App)App.Current).GetWorkOrders(workOrderFilter).ForEach(item => 
-            {
-                pickupList.Add(item);
-            });
-
-            PickupsListView.ItemsSource = pickupList;
+            ((App)App.Current).GetWorkOrders(workOrderFilter).ContinueWith(a => LoadPickups(a.Result)); 
+            
 
             workOrderFilter.Delivery = true;
-            ((App)App.Current).GetWorkOrders(workOrderFilter).ForEach(item => 
-            {
-                deliveryList.Add(item);
-            });
-
-            DeliveriesListView.ItemsSource = deliveryList;
+            ((App)App.Current).GetWorkOrders(workOrderFilter).ContinueWith(a => LoadDeliveries(a.Result));
+           
 
             workOrderFilter.Delivery = true;
             workOrderFilter.SiteService = true;
-            ((App)App.Current).GetWorkOrders(workOrderFilter).ForEach(item => 
-            {
-                siteServiceList.Add(item);
-            });
+            ((App)App.Current).GetWorkOrders(workOrderFilter).ContinueWith(a => LoadSiteService(a.Result));
+        }
 
-            SiteServiceListView.ItemsSource = siteServiceList;
+        private void LoadPickups(List<WorkOrderResponse> response)
+        {
+            pickupList = new ObservableCollection<WorkOrderResponse>();
+
+            foreach(WorkOrderResponse r in response)
+            {
+                pickupList.Add(r);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                PickupsListView.ItemsSource = pickupList;
+            });
+        }
+
+        private void LoadDeliveries(List<WorkOrderResponse> response)
+        {
+            deliveryList = new ObservableCollection<WorkOrderResponse>();
+
+            foreach(WorkOrderResponse r in response)
+            {
+                deliveryList.Add(r);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                DeliveriesListView.ItemsSource = deliveryList;
+            });
+        }
+
+        private void LoadSiteService(List<WorkOrderResponse> response)
+        {
+            siteServiceList = new ObservableCollection<WorkOrderResponse>();
+
+            foreach(WorkOrderResponse r in response)
+            {
+                siteServiceList.Add(r);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                SiteServiceListView.ItemsSource = siteServiceList;
+            });
         }
 
         protected override void OnAppearing()

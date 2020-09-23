@@ -53,13 +53,18 @@ namespace EOMobile
             WorkOrderSiteService.ItemsSource = siteServiceList;
             WorkOrderSiteService.SelectedIndex = 0;
 
+            ((App)App.Current).GetUsers().ContinueWith(a => LoadUserData(a.Result));
+        }
+
+        private void LoadUserData(GetUserResponse userResponse)
+        {
             if (TabParent.CustomerId == 0)
             {
-                users = ((App)App.Current).GetUsers();
+                users = ((App)App.Current).GetUsers().Result.Users;
             }
             else
             {
-                users.Add(((App)App.Current).GetUsers().Where(a => a.UserId == TabParent.CustomerId).FirstOrDefault());
+                users.Add(((App)App.Current).GetUsers().Result.Users.Where(a => a.UserId == TabParent.CustomerId).FirstOrDefault());
             }
 
             foreach (UserDTO user in users)
@@ -67,8 +72,10 @@ namespace EOMobile
                 employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
             }
 
-            DeliveredBy.ItemsSource = employeeDDL;
-
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                DeliveredBy.ItemsSource = employeeDDL;
+            });
         }
 
         public void OnShowReportsClicked(object sender, EventArgs e)
@@ -100,25 +107,33 @@ namespace EOMobile
                 filter.FromDate = this.WorkOrderFromDate.Date;
                 filter.ToDate = this.WorkOrderToDate.Date;
 
-                workOrderList = ((App)App.Current).GetWorkOrders(filter);
-
-                ObservableCollection<WorkOrderDTO> list1 = new ObservableCollection<WorkOrderDTO>();
-
-                foreach (WorkOrderResponse wo in workOrderList)
-                {
-                    workOrder.Add(wo.WorkOrder);
-
-                    inventoryList.Add(wo.WorkOrderList);
-
-                    list1.Add(wo.WorkOrder);
-                }
-
-                WorkOrderList.ItemsSource = list1;
+                ((App)App.Current).GetWorkOrders(filter).ContinueWith(a => WorkOrdersLoaded(a.Result));
             }
             else
             {
                 DisplayAlert("Error", message, "Ok");
             }
+        }
+
+        private void WorkOrdersLoaded(List<WorkOrderResponse> response)
+        {
+            workOrderList = response;
+
+            ObservableCollection<WorkOrderDTO> list1 = new ObservableCollection<WorkOrderDTO>();
+
+            foreach (WorkOrderResponse wo in workOrderList)
+            {
+                workOrder.Add(wo.WorkOrder);
+
+                inventoryList.Add(wo.WorkOrderList);
+
+                list1.Add(wo.WorkOrder);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                WorkOrderList.ItemsSource = list1;
+            });
         }
 
         public void ShowInventory_Clicked(object sender, EventArgs e)
@@ -132,9 +147,61 @@ namespace EOMobile
 
             ObservableCollection<WorkOrderInventoryMapDTO> list1 = new ObservableCollection<WorkOrderInventoryMapDTO>();
 
+            //if there are arrangements that are part of this work order, group the inventory items together add blank lines start and
+            //end and add a "header" row so Melissa will be happy
+
+            Dictionary<long, List<WorkOrderInventoryMapDTO>> arrangements = new Dictionary<long, List<WorkOrderInventoryMapDTO>>();
+            
             foreach (WorkOrderInventoryMapDTO i in inventory)
             {
-                list1.Add(i);
+                if (i.GroupId.HasValue)
+                {
+                    if (arrangements.Keys.Contains(i.GroupId.Value))
+                    {
+                        arrangements[i.GroupId.Value].Add(i);
+                    }
+                    else
+                    {
+                        List<WorkOrderInventoryMapDTO> inventoryItems = new List<WorkOrderInventoryMapDTO>();
+                        inventoryItems.Add(i);
+                        arrangements.Add(i.GroupId.Value, inventoryItems);
+                    }
+                }
+                else
+                {
+                    list1.Add(i);
+                }
+            }
+
+            if(arrangements.Count > 0)
+            {
+                foreach(KeyValuePair<long,List<WorkOrderInventoryMapDTO>> kvp in arrangements)
+                {
+                    //add a blank line 
+                    list1.Add(new WorkOrderInventoryMapDTO()
+                    {
+                        GroupId = kvp.Key
+                    });
+
+                    //add a "header" line
+                    list1.Add(new WorkOrderInventoryMapDTO()
+                    {
+                        InventoryName = "Arrangement",
+                        GroupId = kvp.Key
+                    }); 
+
+                    //add inventory items
+                    foreach(WorkOrderInventoryMapDTO a in kvp.Value)
+                    {
+                        list1.Add(a);
+                    }
+
+                    //add a blank line
+                    list1.Add(new WorkOrderInventoryMapDTO()
+                    {
+                        GroupId = kvp.Key
+                    });
+                }
             }
 
             InventoryList.ItemsSource = list1;
@@ -149,7 +216,7 @@ namespace EOMobile
 
         private void WorkOrderCustomer_Clicked(object sender, EventArgs e)
         {
-            Navigation.PushModalAsync(new PersonFilterPage(this));
+            Navigation.PushAsync(new PersonFilterPage(this));
         }
 
         protected override void OnAppearing()

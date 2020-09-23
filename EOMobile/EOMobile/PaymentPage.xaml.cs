@@ -32,18 +32,11 @@ namespace EOMobile
         List<KeyValuePair<long, string>> payTypeList = new List<KeyValuePair<long, string>>();
         public PaymentPage(long workOrderId, List<WorkOrderInventoryItemDTO> workOrderInventoryList)
         {
-            workOrder = ((App)App.Current).GetWorkOrder(workOrderId);
-            if (workOrder.WorkOrder.CustomerId != 0)
-            {
-                GetPersonRequest personRequest = new GetPersonRequest()
-                {
-                    PersonId = workOrder.WorkOrder.CustomerId
-                };
-                buyer = ((App)App.Current).GetCustomers(personRequest);
-            }
 
             this.workOrderId = workOrderId;
             this.workOrderInventoryList = workOrderInventoryList;
+
+            ((App)App.Current).GetWorkOrder(workOrderId).ContinueWith(a => WorkOrderLoaded(a.Result));
 
             InitializeComponent();
 
@@ -67,6 +60,26 @@ namespace EOMobile
 
             DiscountType.SelectedItem = 0;
             DiscountType.SelectedIndex = 0;
+        }
+
+        private void WorkOrderLoaded(WorkOrderResponse response)
+        {
+            if(response.WorkOrder.CustomerId != 0)
+            {
+                workOrder = response;
+
+                GetPersonRequest personRequest = new GetPersonRequest()
+                {
+                    PersonId = workOrder.WorkOrder.CustomerId
+                };
+
+                ((App)App.Current).GetCustomers(personRequest).ContinueWith(a => BuyerLoaded(a.Result));
+            }
+        }
+
+        private void BuyerLoaded(GetPersonResponse response)
+        {
+            buyer = response.PersonAndAddress;
         }
 
         //Event handler is being called multiple times and will be called after this function
@@ -239,27 +252,20 @@ namespace EOMobile
             {
                 if (buyer.Count == 1)
                 {
-                    EmailHelpers emailHelper = new EmailHelpers();
-
-                    EOMailMessage mailMessage = new EOMailMessage();
-
                     if (!String.IsNullOrEmpty(buyer[0].Person.email))
                     {
-                        WorkOrderPaymentDTO payment = ((App)App.Current).GetWorkOrderPayment(workOrderId);
-
-                        string emailHtml = emailHelper.ComposeReceipt(workOrder, payment);
-
-                        mailMessage = new EOMailMessage("service@elegantorchids.com", buyer[0].Person.email, "Elegant Orchids Receipt", emailHtml, "Orchids@5185");
+                        ((App)App.Current).GetWorkOrderPayment(workOrderId).ContinueWith(a => WorkOrderPaymentLoaded(a.Result));
                     }
                     else //let EO know the customer needs to add an email address
                     {
+                        EmailHelpers emailHelper = new EmailHelpers();
+
+                        EOMailMessage mailMessage = new EOMailMessage();
+
                         string emailHtml = emailHelper.ComposeMissingEmail(buyer[0]);
 
                         mailMessage = new EOMailMessage("service@elegantorchids.com", "information@elegantorchids.com", "Missing Customer Email", emailHtml, "Orchids@5185");
-                    }
 
-                    if (mailMessage.MailMessage != null)
-                    {
                         Email.SendEmail(mailMessage);
                     }
                 }
@@ -268,6 +274,19 @@ namespace EOMobile
             {
 
             }
+        }
+
+        private void WorkOrderPaymentLoaded(WorkOrderPaymentDTO payment)
+        {
+            EmailHelpers emailHelper = new EmailHelpers();
+
+            EOMailMessage mailMessage = new EOMailMessage();
+
+            string emailHtml = emailHelper.ComposeReceipt(workOrder, payment);
+
+            mailMessage = new EOMailMessage("service@elegantorchids.com", buyer[0].Person.email, "Elegant Orchids Receipt", emailHtml, "Orchids@5185");
+
+            Email.SendEmail(mailMessage);
         }
 
         private void PaySuccess_Clicked(object sender, EventArgs e)

@@ -70,7 +70,7 @@
 
                     <Entry x:Name="Vendor" Grid.Column="2" Grid.Row="1" Focused="Vendor_Focused" HeightRequest="50" WidthRequest="200" />
                     
-                    <Button x:Name="ShowShipmentReports"  Text="Show Reports" Clicked="OnShowReportsClicked" Grid.Column="2" Grid.Row="1"  HeightRequest="50" WidthRequest="200"/>
+                    <Button x:Name="ShowShipmentReports"  Text="Show Reports" Clicked="OnShowReportsClicked" Grid.Column="3" Grid.Row="1"  HeightRequest="50" WidthRequest="200"/>
                 </Grid>
 
                 <Frame CornerRadius="1" HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10" HeightRequest="300">

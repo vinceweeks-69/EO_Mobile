@@ -27,5 +27,6 @@
         <Image x:Name="PopupImage"  Aspect="AspectFit" WidthRequest="300" HeightRequest="600" />
         <ActivityIndicator x:Name="spinner" Color="Blue" IsRunning="false" IsVisible="false" IsEnabled="False"
               WidthRequest="300" HeightRequest="600" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
+        <Button x:Name="PopupBack" Text="Back"  TextColor="White" WidthRequest="100" HeightRequest="42" Clicked="OnPopupBackClicked" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
     </StackLayout>
 </pages:PopupPage>

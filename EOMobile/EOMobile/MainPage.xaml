@@ -20,17 +20,17 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="60" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
+                <RowDefinition Height="80" />
+                <RowDefinition Height="80" />
+                <RowDefinition Height="80" />
+                <RowDefinition Height="80" />
+                <RowDefinition Height="80" />
+                <RowDefinition Height="80" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="50*" />
+                <ColumnDefinition Width="50*" />
             </Grid.ColumnDefinitions>
 
 
@@ -41,16 +41,21 @@
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand" />
             
-            <Button x:Name="Inventory" Text="Products"  Clicked="OnInventoryClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="1"/>
-            <Button x:Name="Arrangements" Text="Arrangements"  Clicked="OnArrangementsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="1"/>
-            <Button x:Name="WorkOrders" Text="Work Orders" Clicked="OnWorkOrdersClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="2"/>
-            <Button x:Name="Customers" Text="Customers" Clicked="OnCustomersClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="2"/>
-            <Button x:Name="Vendors" Text="Vendors" Clicked="OnVendorsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="3"/>
-            <Button x:Name="Shipments" Text="Shipments" Clicked="OnShipmentsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="3"/>
-            <Button x:Name="Reports" Text="Reports" Clicked="OnReportsClicked" HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="4"/>
-            <Button x:Name="SiteService" Text="On Site Service" Clicked="OnSiteServiceClicked" HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="4"/>
-            <Button x:Name="Scheduler" Text="Scheduler" Clicked="Scheduler_Clicked"  HeightRequest="100" WidthRequest="300" Grid.Column="0" Grid.Row="5"/>
-            <Button x:Name="Bugs" Text="Bugs" Clicked="Bugs_Clicked"  HeightRequest="100" WidthRequest="300" Grid.Column="1" Grid.Row="5"/>
+            
+            <Button x:Name="WorkOrders" Text="Work Orders" FontSize="Medium" Clicked="OnWorkOrdersClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="1"/>
+            <Button x:Name="Arrangements" Text="Arrangements" FontSize="Medium" Clicked="OnArrangementsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="1"/>
+            
+            <Button x:Name="Inventory" Text="Products" FontSize="Medium" Clicked="OnInventoryClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="2"/>
+            <Button x:Name="Customers" Text="Customers" FontSize="Medium" Clicked="OnCustomersClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="2"/>
+            
+            <Button x:Name="Vendors" Text="Vendors" FontSize="Medium" Clicked="OnVendorsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="3"/>
+            <Button x:Name="Shipments" Text="Shipments" FontSize="Medium" Clicked="OnShipmentsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="3"/>
+            
+            <Button x:Name="Reports" Text="Reports" FontSize="Medium" Clicked="OnReportsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="4"/>
+            <Button x:Name="SiteService" Text="On Site Service" FontSize="Medium" Clicked="OnSiteServiceClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="4"/>
+            
+            <Button x:Name="Scheduler" Text="Scheduler" FontSize="Medium" Clicked="Scheduler_Clicked"  HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="5"/>
+            <Button x:Name="Bugs" Text="Bugs" FontSize="Medium" Clicked="Bugs_Clicked"  HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="5"/>
         </Grid>
     </ContentPage.Content>
 </d:EOBasePage>

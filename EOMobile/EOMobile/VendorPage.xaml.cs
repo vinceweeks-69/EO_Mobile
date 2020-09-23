@@ -79,25 +79,12 @@ namespace EOMobile
         {
             ClearForm();
 
-            vendorList = ((App)App.Current).GetVendors(new GetPersonRequest());
-
-            ObservableCollection<VendorDTO> list1 = new ObservableCollection<VendorDTO>();
-
-            foreach(VendorDTO v in vendorList)
-            {
-                list1.Add(v);
-            }
-
-            VendorListView.ItemsSource = list1;
+            ((App)App.Current).GetVendors(new GetPersonRequest()).ContinueWith(a => LoadVendors(a.Result));
         }
 
-        public void OnSearchPersonClicked(object sender, EventArgs e)
+        private void LoadVendors(GetVendorResponse response)
         {
-            GetPersonRequest request = new GetPersonRequest();
-            request.FirstName = Name.Text;
-            request.Email = Email.Text;
-
-            vendorList = ((App)App.Current).GetVendors(request);
+            vendorList = response.VendorList;
 
             ObservableCollection<VendorDTO> list1 = new ObservableCollection<VendorDTO>();
 
@@ -106,7 +93,19 @@ namespace EOMobile
                 list1.Add(v);
             }
 
-            VendorListView.ItemsSource = list1;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                VendorListView.ItemsSource = list1;
+            });
+        }
+
+        public void OnSearchPersonClicked(object sender, EventArgs e)
+        {
+            GetPersonRequest request = new GetPersonRequest();
+            request.FirstName = Name.Text;
+            request.Email = Email.Text;
+
+            ((App)App.Current).GetVendors(request).ContinueWith(a => LoadVendors(a.Result));
         }
 
         public void OnShowAllPersonsClicked(object sender, EventArgs e)

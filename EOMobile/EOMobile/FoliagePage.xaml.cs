@@ -251,22 +251,12 @@ namespace EOMobile
 
                     EOImgData img = ((App)App.Current).GetImage(foliageImageId);
 
-                    ServiceCodeDTO serviceCode = ((App)App.Current).GetServiceCodeById(foliage.Inventory.ServiceCodeId);
-
-                    string price = string.Empty;
-                    if (serviceCode.ServiceCodeId > 0)
-                    {
-                        price = (serviceCode.Price.HasValue ? serviceCode.Price.Value.ToString("C2", CultureInfo.CurrentCulture) : String.Empty);
-                    }
-
-                    PopupImagePage popup = new PopupImagePage(img,price);
-
-                    Navigation.PushPopupAsync(popup);
-
                     if (foliageImageId == ((App)App.Current).MissingImageId)
                     {
                         MessagingCenter.Send<FoliageInventoryDTO>(foliage, "FoliageMissingImage");
                     }
+
+                    ((App)App.Current).GetServiceCodeById(foliage.Inventory.ServiceCodeId).ContinueWith(a => ShowImage(img, a.Result));
                 }
             }
             catch (Exception ex)
@@ -277,6 +267,19 @@ namespace EOMobile
             {
                 b.IsEnabled = true;
             }
+        }
+
+        private void ShowImage(EOImgData img, ServiceCodeDTO serviceCode)
+        {
+            string price = string.Empty;
+            if (serviceCode.ServiceCodeId > 0)
+            {
+                price = (serviceCode.Price.HasValue ? serviceCode.Price.Value.ToString("C2", CultureInfo.CurrentCulture) : String.Empty);
+            }
+
+            PopupImagePage popup = new PopupImagePage(img, price);
+
+            Navigation.PushPopupAsync(popup);
         }
 
         private void Help_FoliagePage_Clicked(object sender, EventArgs e)

@@ -31,18 +31,26 @@ namespace EOMobile
 
         private void Initialize()
         {
-            users = ((App)App.Current).GetUsers();
+            ((App)App.Current).GetUsers().ContinueWith(a => UsersLoaded(a.Result));
+        }
+        
+        private void UsersLoaded(GetUserResponse response)
+        {
+            users = response.Users;
 
             foreach (UserDTO user in users)
             {
                 employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
             }
 
-            ServicedBy.ItemsSource = employeeDDL;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                ServicedBy.ItemsSource = employeeDDL;
 
-            ServicedBy.SelectedIndex = -1;
+                ServicedBy.SelectedIndex = -1;
+            });
         }
-        
+
         private void OnShowSiteServiceReportsClicked(object sender, EventArgs e)
         {
             string message = String.Empty;
@@ -64,25 +72,33 @@ namespace EOMobile
                     filter.DeliveryUserId = ((KeyValuePair<long, string>)ServicedBy.SelectedItem).Key;
                 }
 
-                workOrderList = ((App)App.Current).GetWorkOrders(filter);
-
-                ObservableCollection<WorkOrderDTO> list1 = new ObservableCollection<WorkOrderDTO>();
-
-                foreach (WorkOrderResponse wo in workOrderList)
-                {
-                    workOrder.Add(wo.WorkOrder);
-
-                    inventoryList.Add(wo.WorkOrderList);
-
-                    list1.Add(wo.WorkOrder);
-                }
-
-                SiteServiceList.ItemsSource = list1;
+                ((App)App.Current).GetWorkOrders(filter).ContinueWith(a => WorkOrdersLoaded(a.Result));
             }
             else
             {
                 DisplayAlert("Error", message, "Ok");
             }
+        }
+
+        private void WorkOrdersLoaded(List<WorkOrderResponse> response)
+        {
+            workOrderList = response;
+
+            ObservableCollection<WorkOrderDTO> list1 = new ObservableCollection<WorkOrderDTO>();
+
+            foreach (WorkOrderResponse wo in workOrderList)
+            {
+                workOrder.Add(wo.WorkOrder);
+
+                inventoryList.Add(wo.WorkOrderList);
+
+                list1.Add(wo.WorkOrder);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                SiteServiceList.ItemsSource = list1;
+            });
         }
 
         private void ShowInventory_Clicked(object sender, EventArgs e)
@@ -98,7 +114,7 @@ namespace EOMobile
         private void SiteServiceCustomer_Clicked(object sender, EventArgs e)
         {
             SearchedForPersonType = 0;
-            Navigation.PushModalAsync(new PersonFilterPage(this));
+            Navigation.PushAsync(new PersonFilterPage(this));
         }
 
         public void EditSiteService_Clicked(object sender, EventArgs e)

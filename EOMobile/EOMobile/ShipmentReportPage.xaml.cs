@@ -34,7 +34,12 @@ namespace EOMobile
             filter.FromDate = this.ShipmentFromDate.Date;
             filter.ToDate = this.ShipmentToDate.Date;
 
-            shipmentList = ((App)App.Current).GetShipments(filter);
+            ((App)App.Current).GetShipments(filter).ContinueWith(a => LoadShipments(a.Result));
+        }
+
+        private void LoadShipments(GetShipmentResponse response)
+        {
+            shipmentList = response.ShipmentList;
 
             ObservableCollection<ShipmentDTO> list1 = new ObservableCollection<ShipmentDTO>();
 
@@ -47,7 +52,11 @@ namespace EOMobile
                 list1.Add(s.Shipment);
             }
 
-            ShipmentList.ItemsSource = list1;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                ShipmentList.ItemsSource = list1;
+            });
+            
         }
 
         private void ShowInventory_Clicked(object sender, EventArgs e)

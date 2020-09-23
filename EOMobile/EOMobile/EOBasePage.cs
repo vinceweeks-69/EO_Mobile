@@ -75,7 +75,7 @@ namespace EOMobile
             }
         }
 
-        public void PopToPage(string targetPageName)
+        public bool PopToPage(string targetPageName)
         {
             bool targetPageFound = false;
 
@@ -107,6 +107,8 @@ namespace EOMobile
                     Navigation.PopAsync();
                 } 
             }
+
+            return targetPageFound;
         }
     }
 }

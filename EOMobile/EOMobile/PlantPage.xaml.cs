@@ -21,18 +21,6 @@ namespace EOMobile
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class PlantPage : EOBasePage
     {
-        public string User
-        {
-            get { return ((App)App.Current).User; }
-            set { ((App)App.Current).User = value; }
-        }
-
-        public string Pwd
-        {
-            get { return ((App)App.Current).Pwd; }
-            set { ((App)App.Current).Pwd = value; }
-        }
-
         List<PlantInventoryDTO> plants = new List<PlantInventoryDTO>();
 
         ObservableCollection<PlantInventoryDTO> list3 = new ObservableCollection<PlantInventoryDTO>();
@@ -41,112 +29,83 @@ namespace EOMobile
         {
             InitializeComponent();
 
-            List<PlantTypeDTO> plantTypes = GetPlantTypes();
+            LoadTypes();
+        }
 
+        public async void LoadTypes()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetPlantTypes", String.Empty, 0);
+
+            ((App)App.Current).GetRequest<GetPlantTypeResponse>(request).ContinueWith(a => ShowTypes(a.Result));
+        }
+
+        public void ShowTypes(GetPlantTypeResponse response)
+        {
             ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
 
-            foreach (PlantTypeDTO code in plantTypes)
+            foreach (PlantTypeDTO code in response.PlantTypes)
             {
                 list1.Add(new KeyValuePair<long, string>(code.PlantTypeId, code.PlantTypeName));
             }
 
-            PlantType.ItemsSource = list1;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                PlantType.ItemsSource = list1;
 
-            List<string> sizes = ((App)App.Current).GetSizeByInventoryType(1);
+                PlantType.SelectedIndexChanged += PlantType_SelectedIndexChanged;
+            });
 
+            LoadSizes();
+        }
+
+        public async void LoadSizes()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetSizeByInventoryType", "inventoryTypeId", 1);
+
+            ((App)App.Current).GetSizeByInventoryType(request).ContinueWith(a => ShowSizes(a.Result));
+        }
+
+        public void ShowSizes(GetSizeResponse response)
+        {
             ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
 
             long index = 1;
-            foreach (string size in sizes)
+            foreach (string size in response.Sizes)
             {
                 list2.Add(new KeyValuePair<long, string>(index++, size));
             }
 
-            PlantSize.ItemsSource = list2;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                PlantSize.ItemsSource = list2;
 
-            PlantType.SelectedIndexChanged += PlantType_SelectedIndexChanged;
+                PlantSize.SelectedIndexChanged += PlantSize_SelectedIndexChanged;
+            });
 
-            PlantName.SelectedIndexChanged += PlantName_SelectedIndexChanged;
-
-            PlantSize.SelectedIndexChanged += PlantSize_SelectedIndexChanged;
-
-            plants = ((App)App.Current).GetPlants().PlantInventoryList;
-
-            //foreach(PlantInventoryDTO p in plants)
-            //{
-            //    list3.Add(p);
-            //}
-
-            //plantListView.ItemsSource = list3;
+            LoadPlants();
         }
 
-
-        public List<PlantTypeDTO> GetPlantTypes()
+        public async void LoadPlants()
         {
-            List<PlantTypeDTO> plantTypes = new List<PlantTypeDTO>();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse = client.GetAsync("api/Login/GetPlantTypes").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    GetPlantTypeResponse response = JsonConvert.DeserializeObject<GetPlantTypeResponse>(strData);
-                    plantTypes = response.PlantTypes;
-                }
-                else
-                {
-                   // MessageBox.Show("There was an error retreiving plant types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetPlantTypes", ex);
-                ((App)App.Current).LogError(ex2.Message, String.Empty);
-            }
-            return plantTypes;
+            GenericGetRequest request = new GenericGetRequest("GetPlants", String.Empty, 0);
+            ((App)App.Current).GetRequest<GetPlantResponse>(request).ContinueWith(a => ShowPlants(a.Result));
         }
 
-        public GetPlantResponse GetPlantsByType(long plantTypeId)
+        public void ShowPlants(GetPlantResponse response)
         {
-            GetPlantResponse plants = new GetPlantResponse();
+            plants = response.PlantInventoryList;
 
-            try
+            foreach(PlantInventoryDTO p in plants)
             {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetPlantsByType?plantTypeId=" + plantTypeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    plants = JsonConvert.DeserializeObject<GetPlantResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plants");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetPlantsByType", ex);
-                ((App)App.Current).LogError(ex2.Message, String.Empty);
+                list3.Add(p);
             }
 
-            return plants;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                plantListView.ItemsSource = list3;
+
+                PlantName.SelectedIndexChanged += PlantName_SelectedIndexChanged;
+            });
         }
 
         private void PlantSize_SelectedIndexChanged(object sender, EventArgs e)
@@ -173,26 +132,37 @@ namespace EOMobile
         {
             PlantSize.SelectedIndex = -1;
 
-            long selectedValue = ((KeyValuePair<long, string>)PlantName.SelectedItem).Key;
-            string selectedPlantName = ((KeyValuePair<long, string>)PlantName.SelectedItem).Value;
-
-            ObservableCollection<PlantInventoryDTO> pDTO = new ObservableCollection<PlantInventoryDTO>();
-
-            foreach (PlantInventoryDTO p in plants.Where(a => a.Plant.PlantName == selectedPlantName))
+            if (PlantName.SelectedItem != null)
             {
-                pDTO.Add(p);
-            }
+                string selectedPlantName = ((KeyValuePair<long, string>)PlantName.SelectedItem).Value;
 
-            plantListView.ItemsSource = pDTO;
+                ObservableCollection<PlantInventoryDTO> pDTO = new ObservableCollection<PlantInventoryDTO>();
+
+                foreach (PlantInventoryDTO p in plants.Where(a => a.Plant.PlantName == selectedPlantName))
+                {
+                    pDTO.Add(p);
+                }
+
+                plantListView.ItemsSource = pDTO;
+            }
         }
 
         private void PlantType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            PlantName.SelectedIndex = -1;
             PlantSize.SelectedIndex = -1;
 
-            long selectedValue = ((KeyValuePair<long, string>)PlantType.SelectedItem).Key;
+            if (PlantType.SelectedItem != null)
+            {
+                long selectedValue = ((KeyValuePair<long, string>)PlantType.SelectedItem).Key;
 
-            GetPlantResponse response = GetPlantsByType(selectedValue);
+                ((App)App.Current).GetPlantsByType(selectedValue).ContinueWith(a => ShowSelectedPlantTypes(a.Result, selectedValue));
+            }
+        }
+
+        private void ShowSelectedPlantTypes(GetPlantResponse response, long selectedValue)
+        {
+            plants = response.PlantInventoryList;
 
             ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
 
@@ -205,9 +175,12 @@ namespace EOMobile
                 pDTO.Add(p);
             }
 
-            PlantName.ItemsSource = list2;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                PlantName.ItemsSource = list2;
 
-            plantListView.ItemsSource = pDTO;
+                plantListView.ItemsSource = pDTO;
+            });
         }
 
         private void ViewImage_Clicked(object sender, EventArgs e)
@@ -237,22 +210,12 @@ namespace EOMobile
 
                     EOImgData img = ((App)App.Current).GetImage(plantImageId);
 
-                    ServiceCodeDTO serviceCode = ((App)App.Current).GetServiceCodeById(plant.Inventory.ServiceCodeId);
-
-                    string price = string.Empty;
-                    if(serviceCode.ServiceCodeId > 0)
-                    {
-                        price = (serviceCode.Price.HasValue ? serviceCode.Price.Value.ToString("C2", CultureInfo.CurrentCulture) : String.Empty);
-                    }
-
-                    PopupImagePage popup = new PopupImagePage(img, price);
-
-                    Navigation.PushPopupAsync(popup);
-
-                    if(plantImageId == ((App)App.Current).MissingImageId)
+                    if (plantImageId == ((App)App.Current).MissingImageId)
                     {
                         MessagingCenter.Send<PlantInventoryDTO>(plant, "PlantMissingImage");
                     }
+
+                    ((App)App.Current).GetServiceCodeById(plant.Inventory.ServiceCodeId).ContinueWith(a => ShowImage(img,a.Result));
                 }
             }
             catch(Exception ex)
@@ -263,6 +226,22 @@ namespace EOMobile
             {
                 b.IsEnabled = true;
             }
+        }
+
+        private void ShowImage(EOImgData img, ServiceCodeDTO serviceCode)
+        {
+            string price = string.Empty;
+            if (serviceCode.ServiceCodeId > 0)
+            {
+                price = (serviceCode.Price.HasValue ? serviceCode.Price.Value.ToString("C2", CultureInfo.CurrentCulture) : String.Empty);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                PopupImagePage popup = new PopupImagePage(img, price);
+
+                Navigation.PushPopupAsync(popup);
+            });
         }
 
         private void Help_PlantsPage_Clicked(object sender, EventArgs e)

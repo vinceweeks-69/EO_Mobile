@@ -39,105 +39,54 @@ namespace EOMobile
 		{
 			InitializeComponent ();
 
-            List<MaterialTypeDTO> materialTypes = ((App)App.Current).GetMaterialTypes();
-
-            ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
-
-            foreach (MaterialTypeDTO code in materialTypes)
-            {
-                list1.Add(new KeyValuePair<long, string>(code.MaterialTypeId, code.MaterialTypeName));
-            }
-
-            MaterialType.ItemsSource = list1;
-
-            MaterialType.SelectedIndexChanged += MaterialType_SelectedIndexChanged;
+            ((App)App.Current).GetMaterialTypes().ContinueWith(a => MaterialTypesLoaded(a.Result));
 
             MaterialName.SelectedIndexChanged += MaterialName_SelectedIndexChanged;
 
             MaterialSize.SelectedIndexChanged += MaterialSize_SelectedIndexChanged;
 
-            materials = GetMaterials().MaterialInventoryList;
+            ((App)App.Current).GetMaterials().ContinueWith(a => MaterialsLoaded(a.Result));
+           
+        }
 
-            foreach(MaterialInventoryDTO m in materials)
+        private void MaterialTypesLoaded(GetMaterialTypeResponse materialTypes)
+        {
+            ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
+
+            foreach (MaterialTypeDTO code in materialTypes.MaterialTypes)
+            {
+                list1.Add(new KeyValuePair<long, string>(code.MaterialTypeId, code.MaterialTypeName));
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                MaterialType.ItemsSource = list1;
+
+                MaterialType.SelectedIndexChanged += MaterialType_SelectedIndexChanged;
+            });
+        }
+
+        private void MaterialsLoaded(GetMaterialResponse response)
+        {
+            materials = response.MaterialInventoryList;
+
+            foreach (MaterialInventoryDTO m in materials)
             {
                 list2.Add(m);
             }
 
-            materialListView.ItemsSource = list2;
-        }
-
-        public GetMaterialResponse GetMaterials()
-        {
-            GetMaterialResponse response = new GetMaterialResponse();
-
-            try
+            Device.BeginInvokeOnMainThread(() =>
             {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetMaterials").Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    string strData = httpResponse.Content.ReadAsStringAsync().Result;
-                    response = JsonConvert.DeserializeObject<GetMaterialResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plant types");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetMaterials", ex);
-                ((App)App.Current).LogError(ex2.Message, String.Empty);
-            }
-            return response;
-        }
-               
-        public GetMaterialResponse GetMaterialByType(long materialTypeId)
-        {
-            GetMaterialResponse material = new GetMaterialResponse();
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", User + " : " + Pwd);
-
-                HttpResponseMessage httpResponse =
-                    client.GetAsync("api/Login/GetMaterialsByType?materialTypeId=" + materialTypeId).Result;
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    material = JsonConvert.DeserializeObject<GetMaterialResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving plants");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetMaterialsByType", ex);
-                ((App)App.Current).LogError(ex2.Message, "materialTypeId = " + materialTypeId.ToString());
-            }
-
-            return material;
+                materialListView.ItemsSource = list2;
+            });
         }
 
         private void MaterialSize_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if(MaterialSize.SelectedItem != null)
+            {
 
-
+            }
         }
 
         private void MaterialName_SelectedIndexChanged(object sender, EventArgs e)
@@ -146,28 +95,20 @@ namespace EOMobile
             {
                 MaterialSize.SelectedIndex = -1;
 
-                long selectedValue = ((KeyValuePair<long, string>)MaterialName.SelectedItem).Key;
-                string selectedMaterialName = ((KeyValuePair<long, string>)MaterialName.SelectedItem).Value;
-
-                //List<GetPlantResponse> plants = GetPlantSizes(selectedValue);
-
-                //ObservableCollection<KeyValuePair<long, string>> list3 = new ObservableCollection<KeyValuePair<long, string>>();
-
-                //foreach (GetPlantResponse resp in plants)
-                //{
-                //    list2.Add(new KeyValuePair<long, string>(resp.Plant.PlantId, resp.Plant.PlantName));
-                //}
-
-                //PlantSize.ItemsSource = list3; 
-
-                ObservableCollection<MaterialInventoryDTO> mDTO = new ObservableCollection<MaterialInventoryDTO>();
-
-                foreach (MaterialInventoryDTO m in materials.Where(a => a.Material.MaterialName == selectedMaterialName))
+                if (MaterialName.SelectedItem != null)
                 {
-                    mDTO.Add(m);
-                }
+                    long selectedValue = ((KeyValuePair<long, string>)MaterialName.SelectedItem).Key;
+                    string selectedMaterialName = ((KeyValuePair<long, string>)MaterialName.SelectedItem).Value;
 
-                materialListView.ItemsSource = mDTO;
+                    ObservableCollection<MaterialInventoryDTO> mDTO = new ObservableCollection<MaterialInventoryDTO>();
+
+                    foreach (MaterialInventoryDTO m in materials.Where(a => a.Material.MaterialName == selectedMaterialName))
+                    {
+                        mDTO.Add(m);
+                    }
+
+                    materialListView.ItemsSource = mDTO;
+                }
             }
             catch(Exception ex)
             {
@@ -177,10 +118,16 @@ namespace EOMobile
 
         private void MaterialType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            MaterialName.SelectedIndex = -1;
+            MaterialSize.SelectedIndex = -1;
+
             long selectedValue = ((KeyValuePair<long, string>)MaterialType.SelectedItem).Key;
 
-            GetMaterialResponse response = GetMaterialByType(selectedValue);
+            ((App)App.Current).GetMaterialByType(selectedValue).ContinueWith(a => MaterialsByTypeLoaded(selectedValue, a.Result));
+        }
 
+        private void MaterialsByTypeLoaded(long selectedValue, GetMaterialResponse response)
+        {
             materials = response.MaterialInventoryList;
 
             ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
@@ -190,8 +137,6 @@ namespace EOMobile
                 list2.Add(new KeyValuePair<long, string>(resp.Material.MaterialId, resp.Material.MaterialName));
             }
 
-            MaterialName.ItemsSource = list2;
-
             ObservableCollection<MaterialInventoryDTO> mDTO = new ObservableCollection<MaterialInventoryDTO>();
 
             foreach (MaterialInventoryDTO m in materials.Where(a => a.Material.MaterialTypeId == selectedValue))
@@ -199,7 +144,12 @@ namespace EOMobile
                 mDTO.Add(m);
             }
 
-            materialListView.ItemsSource = mDTO;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                MaterialName.ItemsSource = list2;
+
+                materialListView.ItemsSource = mDTO;
+            });
         }
 
         private void ViewImage_Clicked(object sender, EventArgs e)
@@ -229,22 +179,12 @@ namespace EOMobile
 
                     EOImgData img = ((App)App.Current).GetImage(materialImageId);
 
-                    ServiceCodeDTO serviceCode = ((App)App.Current).GetServiceCodeById(material.Inventory.ServiceCodeId);
-
-                    string price = string.Empty;
-                    if (serviceCode.ServiceCodeId > 0)
-                    {
-                        price = (serviceCode.Price.HasValue ? serviceCode.Price.Value.ToString("C2", CultureInfo.CurrentCulture) : String.Empty);
-                    }
-
-                    PopupImagePage popup = new PopupImagePage(img, price);
-
-                    Navigation.PushPopupAsync(popup);
-
                     if (materialImageId == ((App)App.Current).MissingImageId)
                     {
                         MessagingCenter.Send<MaterialInventoryDTO>(material, "MaterialMissingImage");
                     }
+
+                    ((App)App.Current).GetServiceCodeById(material.Inventory.ServiceCodeId).ContinueWith(a => ShowImage(img, a.Result));
                 }
             }
             catch (Exception ex)
@@ -255,6 +195,22 @@ namespace EOMobile
             {
                 b.IsEnabled = true;
             }
+        }
+
+        private void ShowImage(EOImgData img, ServiceCodeDTO serviceCode)
+        {
+            string price = string.Empty;
+            if (serviceCode.ServiceCodeId > 0)
+            {
+                price = (serviceCode.Price.HasValue ? serviceCode.Price.Value.ToString("C2", CultureInfo.CurrentCulture) : String.Empty);
+            }
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                PopupImagePage popup = new PopupImagePage(img, price);
+
+                Navigation.PushPopupAsync(popup);
+            });
         }
 
         private void Help_MaterialsPage_Clicked(object sender, EventArgs e)

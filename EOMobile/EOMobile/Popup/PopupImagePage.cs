@@ -1,4 +1,5 @@
 ﻿using Android.Views;
+using Rg.Plugins.Popup.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,8 +36,11 @@ namespace EOMobile
             }
             else
             {
+                //being used as the "loading" spinner - turn of and disable all other elements
                 this.BackgroundColor = Color.Transparent;
                 PopupImage.IsVisible = false;
+                PopupBack.IsEnabled = false;
+                PopupBack.IsVisible = false;
                 spinner.IsEnabled = true;
                 spinner.IsRunning = true;
                 spinner.IsVisible = true;
@@ -97,6 +101,11 @@ namespace EOMobile
         protected override Task OnDisappearingAnimationEndAsync()
         {
             return base.OnDisappearingAnimationEndAsync();
+        }
+
+        public async void OnPopupBackClicked(object sender, EventArgs e)
+        {
+            await PopupNavigation.Instance.PopAsync();
         }
 
         // ### Overrided methods which can prevent closing a popup page ###

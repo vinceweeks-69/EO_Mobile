@@ -4,11 +4,13 @@ using Org.Apache.Http.Impl.Conn.Tsccm;
 using Rg.Plugins.Popup.Extensions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using ViewModels.ControllerModels;
 using Xamarin.Forms;
 
 namespace EOMobile
@@ -76,7 +78,22 @@ namespace EOMobile
                     httpResponse.Headers.TryGetValues("EO-Header", out values);
                     if (values != null && values.ToList().Count == 1)
                     {
-                        await Navigation.PushAsync(new DashboardPage());
+                        Stream streamData = await httpResponse.Content.ReadAsStreamAsync();
+                        StreamReader strReader = new StreamReader(streamData);
+                        string strData = strReader.ReadToEnd();
+                        LoginResponse loginResponse = JsonConvert.DeserializeObject<LoginResponse>(strData);
+
+                        ((App)App.Current).User = User;
+                        ((App)App.Current).Role = loginResponse.RoleId;
+
+                        if (loginResponse.RoleId == 1)
+                        {
+                            await Navigation.PushAsync(new DashboardPage());
+                        }
+                        else
+                        {
+                            await Navigation.PushAsync(new MainPage());
+                        }
 
                         this.Name.Text = String.Empty;
                         this.Password.Text = String.Empty;
@@ -110,10 +127,6 @@ namespace EOMobile
                 {
                     await DisplayAlert("Error", message, "Cancel");
                 }
-                //else if(httpResponse.StatusCode == System.Net.HttpStatusCode.OK && httpResponse.RequestMessage is null)
-                //{
-                //    DisplayAlert("Login", "could not connect to server", "Cancel");
-                //}
 
                 Login.IsEnabled = true;
             }

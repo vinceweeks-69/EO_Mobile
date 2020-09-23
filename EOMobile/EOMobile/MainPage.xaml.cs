@@ -5,6 +5,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using ViewModels.ControllerModels;
+using ViewModels.DataModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -16,8 +18,46 @@ namespace EOMobile
 		public MainPage ()
 		{
 			InitializeComponent ();
+
+            ((App)App.Current).GetUsers().ContinueWith(a => SetUIForRole(a.Result));
         }
 
+        private void SetUIForRole(GetUserResponse response)
+        {
+            UserDTO u = response.Users.Where(a => a.UserName == ((App)App.Current).User).FirstOrDefault();
+
+            if (u.UserName == ((App)App.Current).User)
+            {
+                ((App)App.Current).Role = u.RoleId;
+            }
+
+            if (((App)App.Current).Role > 1)
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    Inventory.IsEnabled = false;
+                    Inventory.IsVisible = false;
+
+                    Customers.IsEnabled = false;
+                    Customers.IsVisible = false;
+
+                    Vendors.IsEnabled = false;
+                    Vendors.IsVisible = false;
+
+                    Reports.IsEnabled = false;
+                    Reports.IsVisible = false;
+
+                    Scheduler.IsEnabled = false;
+                    Scheduler.IsVisible = false;
+
+                    Shipments.IsEnabled = false;
+                    Shipments.IsVisible = false;
+
+                    SiteService.IsEnabled = false;
+                    SiteService.IsVisible = false;
+                });
+            }
+        }
         public void OnInventoryClicked(object sender, EventArgs e)
         {
             Inventory.IsEnabled = false;

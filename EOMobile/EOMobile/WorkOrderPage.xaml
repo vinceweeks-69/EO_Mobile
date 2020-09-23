@@ -160,7 +160,7 @@
 
 
             <Frame CornerRadius="1"  HasShadow="true" Margin="10" BackgroundColor="Transparent" BorderColor="LightGray" Padding="10">
-                <ListView  x:Name="InventoryItemsListView" ItemsSource="{Binding workOrderInventoryList}" >
+                <ListView  x:Name="InventoryItemsListView" ItemsSource="{Binding workOrderInventoryList}" ItemSelected="InventoryItemsListView_ItemSelected" >
                     <ListView.Header>
                         <Grid >
                             <Grid.ColumnDefinitions>
