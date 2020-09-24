@@ -44,7 +44,7 @@ namespace EOMobile
             ((App)App.Current).GetWorkOrders(workOrderFilter).ContinueWith(a => LoadDeliveries(a.Result));
            
 
-            workOrderFilter.Delivery = true;
+            workOrderFilter.Delivery = false;
             workOrderFilter.SiteService = true;
             ((App)App.Current).GetWorkOrders(workOrderFilter).ContinueWith(a => LoadSiteService(a.Result));
         }

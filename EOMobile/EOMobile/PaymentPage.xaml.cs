@@ -293,7 +293,7 @@ namespace EOMobile
         {
             MessagingCenter.Send<WorkOrderResponse>(workOrder,"PaymentSuccess");
 
-            Navigation.PopModalAsync();
+            Navigation.PopAsync();
         }
 
         void PaymentFailure()
@@ -489,7 +489,7 @@ namespace EOMobile
 
         private void Back_Clicked(object sender, EventArgs e)
         {
-            Navigation.PopModalAsync();
+            Navigation.PopAsync();
         }
 
         private void Help_PaymentPage_Clicked(object sender, EventArgs e)

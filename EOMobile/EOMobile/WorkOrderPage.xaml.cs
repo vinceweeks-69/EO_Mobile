@@ -513,7 +513,7 @@ namespace EOMobile
 
         public void OnInventorySearchClicked(object sender, EventArgs e)
         {
-            Navigation.PushModalAsync(new ArrangementFilterPage(this));
+            Navigation.PushAsync(new ArrangementFilterPage(this));
         }
 
         public void OnCustomerSearchClicked(object sender, EventArgs e)
@@ -668,7 +668,7 @@ namespace EOMobile
         {
             if (currentWorkOrderId > 0)
             {
-                Navigation.PushModalAsync(new PaymentPage(currentWorkOrderId, workOrderInventoryList));
+                Navigation.PushAsync(new PaymentPage(currentWorkOrderId, workOrderInventoryList));
             }
         }
 

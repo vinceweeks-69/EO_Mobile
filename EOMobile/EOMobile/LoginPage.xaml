@@ -3,62 +3,76 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:EOMobile"
              x:Class="EOMobile.LoginPage">
-    
-    <StackLayout>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="2*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
-            </Grid.RowDefinitions>
+
+    <ContentPage.Content> 
+        <StackLayout>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="33*" />
+                    <ColumnDefinition Width="33*" />
+                    <ColumnDefinition Width="33*" />
+                </Grid.ColumnDefinitions>
+            
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="80"/>
+                </Grid.RowDefinitions>
+            
         <!-- Place new controls here -->
-        <Label Text="Elegant Orchids" 
-           FontSize="Medium"
-           Grid.Column="1"
-           Grid.Row="0"
-           HorizontalOptions="Center"
-           VerticalOptions="CenterAndExpand" />
+            <Label Text="Elegant Orchids" 
+               FontSize="Large"
+               Grid.Column="1"
+               Grid.Row="0"
+               HorizontalOptions="Center"
+               VerticalOptions="CenterAndExpand" />
 
-        <Label Text="Name"
-               Grid.Column="1"
-               Grid.Row="1"
-               HorizontalOptions="Center"
-               FontAttributes="Bold" />
-        <Entry x:Name="Name"
-                Grid.Column="1"
-                Grid.Row="2"
-                HorizontalOptions="Center"
-                HeightRequest="50"
-                WidthRequest="200"/>
-        <Label Text="Password"
-               Grid.Column="1"
-               Grid.Row="3"
-               HorizontalOptions="Center"
-               FontAttributes="Bold" />
-        <Entry x:Name="Password"
-                Grid.Column="1"
-                Grid.Row="4"
-                HorizontalOptions="Center"
-                HeightRequest="50" 
-                WidthRequest="200"/>
+            <Label Text="Name"
+                   Grid.Column="1"
+                   Grid.Row="1"
+                   HorizontalOptions="Center"
+                   FontSize="Medium"/>
+            
+            <Entry x:Name="Name"
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    HorizontalOptions="Center"
+                    FontSize="Medium"
+                    HeightRequest="50"
+                    WidthRequest="200"/>
+            
+            <Label Text="Password"
+                   Grid.Column="1"
+                   Grid.Row="3"
+                   HorizontalOptions="Center"
+                   FontSize="Medium"/>
+            
+            <Entry x:Name="Password"
+                    Grid.Column="1"
+                    Grid.Row="4"
+                    HorizontalOptions="Center"
+                    FontSize="Medium"
+                    IsPassword="True"
+                    HeightRequest="50" 
+                    WidthRequest="200"/>
         
-            <Button x:Name="Login"
-                Text="Log In"
-                Grid.Column="1"
-                Grid.Row="5"
-                HorizontalOptions="Center"
-                HeightRequest="50"
-                WidthRequest="200"
-                Clicked="OnLoginButtonClicked" />
-        </Grid>
-    </StackLayout>
-
+                <Button x:Name="Login"
+                    Text="Log In"
+                    TextColor="White"
+                    Grid.Column="1"
+                    Grid.Row="6"
+                    FontSize="Medium"
+                    HorizontalOptions="Center"
+                    HeightRequest="80"
+                    WidthRequest="200"
+                    BorderRadius="20"   
+                    BackgroundColor="CornflowerBlue"
+                    Clicked="OnLoginButtonClicked" />
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content> 
 </ContentPage>

@@ -69,9 +69,9 @@ namespace EOMobile
             ((App)App.Current).GetInventoryTypes().ContinueWith(a => ShowTypes(a.Result));
         }
 
-        private void ShowTypes(List<InventoryTypeDTO> response)
+        private void ShowTypes(GetInventoryTypeResponse response)
         {
-            inventoryTypeList = response;
+            inventoryTypeList = response.InventoryType;
 
             ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
             foreach (InventoryTypeDTO type in inventoryTypeList)
@@ -96,24 +96,68 @@ namespace EOMobile
         {
             GenericGetRequest request = new GenericGetRequest("GetSizeByInventoryType", "inventoryTypeId", inventoryTypeId);
 
+            List<KeyValuePair<long, string>> sizeList = new List<KeyValuePair<long, string>>();
+
             long index = 1;
             switch (inventoryTypeId)
             {
                 case 1:  //orchids
-                    ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, plantSizes, showSizes));
+                    if (plantSizes.Count == 0)
+                    {
+                        ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, plantSizes, showSizes));
+                    }
+                    else
+                    {
+                        sizeList = plantSizes;  
+                    }
                     break;
 
                 case 2:  //containers
-                    ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, containerSizes, showSizes));
+                    if (containerSizes.Count == 0)
+                    {
+                        ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, containerSizes, showSizes));
+                    }
+                    else
+                    {
+                        sizeList = containerSizes;
+                    }
                     break;
 
                 case 4:  //foliage
-                    ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, foliageSizes, showSizes));
+                    if (foliageSizes.Count == 0)
+                    { 
+                        ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, foliageSizes, showSizes));
+                    }
+                    else
+                    {
+                        sizeList = foliageSizes;
+                    }
                     break;
 
                 case 5:  //materials
-                    ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, materialSizes, showSizes));
+                    if (materialSizes.Count == 0)
+                    {
+                        ((App)App.Current).GetRequest<GetSizeResponse>(request).ContinueWith(a => StoreSizes(a.Result, materialSizes, showSizes));
+                    }
+                    else
+                    {
+                        sizeList = materialSizes;
+                    }
                     break;
+            }
+
+            if (sizeList.Count > 0)
+            {
+                ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
+
+                list2.Add(new KeyValuePair<long, string>(0, "All sizes"));
+
+                foreach (KeyValuePair<long, string> kvp in sizeList)
+                {
+                    list2.Add(kvp);
+                }
+
+                Size.ItemsSource = list2;
             }
         }
 
@@ -195,6 +239,8 @@ namespace EOMobile
 
                     ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
 
+                    ObservableCollection<KeyValuePair<long, string>> sizeList = new ObservableCollection<KeyValuePair<long, string>>();
+
                     switch (kvp.Value)
                     {
                         case "Orchids":
@@ -202,12 +248,40 @@ namespace EOMobile
                             {
                                 ((App)App.Current).GetPlantTypes().ContinueWith(a => PlantTypesLoaded(kvp.Key, list1,a.Result));
                             }
+                            else
+                            {
+                                ShowPlantData(plants);
+
+                                foreach (PlantTypeDTO plantType in plantTypes)
+                                {
+                                    list1.Add(new KeyValuePair<long, string>(plantType.PlantTypeId, plantType.PlantTypeName));
+                                }
+
+                                foreach(KeyValuePair<long, string> size in plantSizes)
+                                {
+                                    sizeList.Add(size);
+                                }
+                            }
                             break;
 
                         case "Foliage":
                             if (foliageTypes.Count == 0)
                             {
-                                ((App)App.Current).GetFoliageTypes().ContinueWith(a => FoliageTypesLoaded(list1,a.Result));
+                                ((App)App.Current).GetFoliageTypes().ContinueWith(a => FoliageTypesLoaded(kvp.Key,list1,a.Result));
+                            }
+                            else
+                            {
+                                ShowFoliageData(foliage);
+
+                                foreach (FoliageTypeDTO foliageType in foliageTypes)
+                                {
+                                    list1.Add(new KeyValuePair<long, string>(foliageType.FoliageTypeId, foliageType.FoliageTypeName));
+                                }
+
+                                foreach (KeyValuePair<long, string> size in foliageSizes)
+                                {
+                                    sizeList.Add(size);
+                                }
                             }
                             break;
 
@@ -220,19 +294,48 @@ namespace EOMobile
                         case "Materials":
                             if (materialTypes.Count == 0)
                             {
-                               ((App)App.Current).GetMaterialTypes().ContinueWith(a => MaterialTypesLoaded(list1,a.Result));
+                               ((App)App.Current).GetMaterialTypes().ContinueWith(a => MaterialTypesLoaded(kvp.Key,list1,a.Result));
+                            }
+                            else
+                            {
+                                foreach (MaterialTypeDTO materialType in materialTypes)
+                                {
+                                    list1.Add(new KeyValuePair<long, string>(materialType.MaterialTypeId, materialType.MaterialTypeName));
+                                }
+
+                                foreach (KeyValuePair<long, string> size in materialSizes)
+                                {
+                                    sizeList.Add(size);
+                                }
                             }
                             break;
 
                         case "Containers":
                             if (containerTypes.Count == 0)
                             {
-                                ((App)App.Current).GetContainerTypes().ContinueWith(a => ContainerTypesLoaded(list1,a.Result));
+                                ((App)App.Current).GetContainerTypes().ContinueWith(a => ContainerTypesLoaded(kvp.Key, list1,a.Result));
+                            }
+                            else
+                            {
+                                foreach (ContainerTypeDTO containerType in containerTypes)
+                                {
+                                    list1.Add(new KeyValuePair<long, string>(containerType.ContainerTypeId, containerType.ContainerTypeName));
+                                }
+
+                                foreach (KeyValuePair<long, string> size in containerSizes)
+                                {
+                                    sizeList.Add(size);
+                                }
                             }
                             break;
                     }
 
-                    Type.ItemsSource = list1;
+                    if (list1.Count > 0)
+                    {
+                        Type.ItemsSource = list1;
+
+                        Size.ItemsSource = sizeList;
+                    }
                 }
             }
             catch(Exception ex)
@@ -241,65 +344,305 @@ namespace EOMobile
             }
         }
 
-        private void PlantTypesLoaded(long forLoadingSizes, ObservableCollection<KeyValuePair<long, string>> list1, List<PlantTypeDTO> types)
+        private void PlantTypesLoaded(long inventoryTypeId, ObservableCollection<KeyValuePair<long, string>> list1, GetPlantTypeResponse types)
         {
-            plantTypes = types;
-
-            foreach (PlantTypeDTO plantType in plantTypes)
-            {
-                list1.Add(new KeyValuePair<long, string>(plantType.PlantTypeId, plantType.PlantTypeName));
-            }
+            plantTypes = types.PlantTypes;
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                Type.ItemsSource = list1;
-            });
+                foreach (PlantTypeDTO plantType in plantTypes)
+                {
+                    list1.Add(new KeyValuePair<long, string>(plantType.PlantTypeId, plantType.PlantTypeName));
+                }
 
-            LoadSizes(forLoadingSizes, true);
+                Type.ItemsSource = list1;
+
+                LoadListData(inventoryTypeId);
+            });
         }
 
-        private void MaterialTypesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, GetMaterialTypeResponse types)
+        private void LoadListData(long inventoryTypeId)
+        {
+            switch (inventoryTypeId)
+            {
+                case 1: //orchids
+                    if (plants.Count == 0)
+                    {
+                        ((App)App.Current).GetPlants().ContinueWith(a => ShowPlantData(a.Result.PlantInventoryList, true));
+                    }
+                    else
+                    {
+                        ShowPlantData(plants);
+                    }
+                    break;
+
+                case 2: // containers
+                    if (containers.Count == 0)
+                    {
+                        ((App)App.Current).GetContainers().ContinueWith(a => ShowContainerData(a.Result.ContainerInventoryList, true));
+                    }
+                    else
+                    {
+                        ShowFoliageData(foliage);
+                    }
+                    break;
+
+                case 3: //arrangements
+
+                    break;
+
+                case 4: // foliage
+                    if(foliage.Count == 0)
+                    {
+                        ((App)App.Current).GetFoliage().ContinueWith(a => ShowFoliageData(a.Result.FoliageInventoryList, true));
+                    }
+                    else
+                    {
+                        ShowFoliageData(foliage);
+                    }
+                    break;
+
+                case 5: //materials
+                    if(materials.Count == 0)
+                    {
+                        ((App)App.Current).GetMaterials().ContinueWith(a => ShowMaterialData(a.Result.MaterialInventoryList, true));
+                    }
+                    else
+                    {
+                        ShowMaterialData(materials);
+                    }
+                    break;
+            }
+        }
+
+        private void ShowPlantData(List<PlantInventoryDTO> plantData, bool isAsync = false)
+        {
+            plants = plantData;
+
+            ObservableCollection<ArrangementInventoryFilteredItem> list1 = new ObservableCollection<ArrangementInventoryFilteredItem>();
+
+            foreach (PlantInventoryDTO p in plantData)
+            {
+                list1.Add(new ArrangementInventoryFilteredItem()
+                {
+                    Id = p.Inventory.InventoryId,
+                    Type = p.Inventory.InventoryName,
+                    InventoryTypeId = p.Inventory.InventoryTypeId,
+                    Name = p.Plant.PlantName,
+                    Size = p.Plant.PlantSize,
+                    ServiceCodeId = p.Inventory.ServiceCodeId,
+                    ServiceCode = p.Inventory.ServiceCodeName,
+                    ImageId = p.ImageId
+                });
+            }
+
+            if (isAsync)
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ArrangementInventoryList.ItemsSource = list1;
+
+                    LoadSizes(1,true);
+                });
+            }
+            else
+            {
+                ArrangementInventoryList.ItemsSource = list1;
+
+                ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
+
+                foreach(KeyValuePair<long,string> kvp in plantSizes)
+                {
+                    list2.Add(kvp);
+                }
+
+                Size.ItemsSource = list2;
+            }
+        }
+
+        private void ShowContainerData(List<ContainerInventoryDTO> containerData, bool isAsync = false)
+        {
+            containers = containerData;
+
+            ObservableCollection<ArrangementInventoryFilteredItem> list1 = new ObservableCollection<ArrangementInventoryFilteredItem>();
+
+            foreach (ContainerInventoryDTO p in containerData)
+            {
+                list1.Add(new ArrangementInventoryFilteredItem()
+                {
+                    Id = p.Inventory.InventoryId,
+                    Type = p.Inventory.InventoryName,
+                    InventoryTypeId = p.Inventory.InventoryTypeId,
+                    Name = p.Container.ContainerName,
+                    Size = p.Container.ContainerSize,
+                    ServiceCodeId = p.Inventory.ServiceCodeId,
+                    ServiceCode = p.Inventory.ServiceCodeName,
+                    ImageId = p.ImageId
+                });
+            }
+
+            if (isAsync)
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ArrangementInventoryList.ItemsSource = list1;
+
+                    LoadSizes(2, true);
+                });
+            }
+            else
+            {
+                ArrangementInventoryList.ItemsSource = list1;
+
+                ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
+
+                foreach (KeyValuePair<long, string> kvp in containerSizes)
+                {
+                    list2.Add(kvp);
+                }
+
+                Size.ItemsSource = list2;
+            }
+        }
+
+        private void ShowFoliageData(List<FoliageInventoryDTO> foliageData, bool isAsync = false)
+        {
+            foliage = foliageData;
+
+            ObservableCollection<ArrangementInventoryFilteredItem> list1 = new ObservableCollection<ArrangementInventoryFilteredItem>();
+
+            foreach (FoliageInventoryDTO p in foliageData)
+            {
+                list1.Add(new ArrangementInventoryFilteredItem()
+                {
+                    Id = p.Inventory.InventoryId,
+                    Type = p.Inventory.InventoryName,
+                    InventoryTypeId = p.Inventory.InventoryTypeId,
+                    Name = p.Foliage.FoliageName,
+                    Size = p.Foliage.FoliageSize,
+                    ServiceCodeId = p.Inventory.ServiceCodeId,
+                    ServiceCode = p.Inventory.ServiceCodeName,
+                    ImageId = p.ImageId
+                });
+            }
+
+            if (isAsync)
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ArrangementInventoryList.ItemsSource = list1;
+
+                    LoadSizes(4, true);
+                });
+            }
+            else
+            {
+                ArrangementInventoryList.ItemsSource = list1;
+
+                ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
+
+                foreach (KeyValuePair<long, string> kvp in foliageSizes)
+                {
+                    list2.Add(kvp);
+                }
+
+                Size.ItemsSource = list2;
+            }
+        }
+
+        private void ShowMaterialData(List<MaterialInventoryDTO> materialData, bool isAsync = false)
+        {
+            materials = materialData;
+
+            ObservableCollection<ArrangementInventoryFilteredItem> list1 = new ObservableCollection<ArrangementInventoryFilteredItem>();
+
+            foreach (MaterialInventoryDTO p in materialData)
+            {
+                list1.Add(new ArrangementInventoryFilteredItem()
+                {
+                    Id = p.Inventory.InventoryId,
+                    Type = p.Inventory.InventoryName,
+                    InventoryTypeId = p.Inventory.InventoryTypeId,
+                    Name = p.Material.MaterialName,
+                    Size = p.Material.MaterialSize,
+                    ServiceCodeId = p.Inventory.ServiceCodeId,
+                    ServiceCode = p.Inventory.ServiceCodeName,
+                    ImageId = p.ImageId
+                });
+            }
+
+            if (isAsync)
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ArrangementInventoryList.ItemsSource = list1;
+
+                    LoadSizes(5, true);
+                });
+            }
+            else
+            {
+                ArrangementInventoryList.ItemsSource = list1;
+
+                ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
+
+                foreach (KeyValuePair<long, string> kvp in materialSizes)
+                {
+                    list2.Add(kvp);
+                }
+
+                Size.ItemsSource = list2;
+            }
+        }
+
+        private void MaterialTypesLoaded(long inventoryTypeId, ObservableCollection<KeyValuePair<long, string>> list1, GetMaterialTypeResponse types)
         {
             materialTypes = types.MaterialTypes;
-
-            foreach (MaterialTypeDTO materialType in materialTypes)
-            {
-                list1.Add(new KeyValuePair<long, string>(materialType.MaterialTypeId, materialType.MaterialTypeName));
-            }
-
+            
             Device.BeginInvokeOnMainThread(() =>
             {
+                foreach (MaterialTypeDTO materialType in materialTypes)
+                {
+                    list1.Add(new KeyValuePair<long, string>(materialType.MaterialTypeId, materialType.MaterialTypeName));
+                }
+
                 Type.ItemsSource = list1;
+
+                LoadListData(inventoryTypeId);
             });
         }
 
-        private void FoliageTypesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, List<FoliageTypeDTO> types)
+        private void FoliageTypesLoaded(long inventoryTypeId, ObservableCollection<KeyValuePair<long, string>> list1, GetFoliageTypeResponse types)
         {
-            foliageTypes = types;
-
-            foreach (FoliageTypeDTO foliage in foliageTypes)
-            {
-                list1.Add(new KeyValuePair<long, string>(foliage.FoliageTypeId, foliage.FoliageTypeName));
-            }
-
+            foliageTypes = types.FoliageTypes;
+            
             Device.BeginInvokeOnMainThread(() =>
             {
+                foreach (FoliageTypeDTO foliage in foliageTypes)
+                {
+                    list1.Add(new KeyValuePair<long, string>(foliage.FoliageTypeId, foliage.FoliageTypeName));
+                }
+
                 Type.ItemsSource = list1;
+
+                LoadListData(inventoryTypeId);
             });
         }
 
-        private void ContainerTypesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, List<ContainerTypeDTO> types)
+        private void ContainerTypesLoaded(long inventoryTypeId,ObservableCollection<KeyValuePair<long, string>> list1, GetContainerTypeResponse types)
         {
-            containerTypes = types;
-
-            foreach (ContainerTypeDTO container in containerTypes)
-            {
-                list1.Add(new KeyValuePair<long, string>(container.ContainerTypeId, container.ContainerTypeName));
-            }
-
+            containerTypes = types.ContainerTypeList;
+            
             Device.BeginInvokeOnMainThread(() =>
             {
+                foreach (ContainerTypeDTO container in containerTypes)
+                {
+                    list1.Add(new KeyValuePair<long, string>(container.ContainerTypeId, container.ContainerTypeName));
+                }
+
                 Type.ItemsSource = list1;
+
+                LoadListData(inventoryTypeId);
             });
         }
 
@@ -322,27 +665,74 @@ namespace EOMobile
                     {
                         case "Orchids":
                             {
-                                ((App)App.Current).GetPlantNamesByType(kvp.Key).ContinueWith(a => PlantNamesLoaded(list1,a.Result));
+                                if (plantNames.Count == 0)
+                                {
+                                    ((App)App.Current).GetPlantNamesByType(kvp.Key).ContinueWith(a => PlantNamesLoaded(list1, a.Result));
+                                }
+                                else
+                                {
+                                    foreach (PlantNameDTO plantName in plantNames)
+                                    {
+                                        list1.Add(new KeyValuePair<long, string>(plantName.PlantNameId, plantName.PlantName));
+                                    }
+                                }
                                 break;
                             }
 
                         case "Foliage":
                             {
-                                ((App)App.Current).GetFoliageNamesByType(kvp.Key).ContinueWith(a => FoliageNamesLoaded(list1,a.Result));
+                                if (foliageNames.Count == 0)
+                                {
+                                    ((App)App.Current).GetFoliageNamesByType(kvp.Key).ContinueWith(a => FoliageNamesLoaded(list1, a.Result));
+                                }
+                                else
+                                {
+                                    foreach (FoliageNameDTO foliageName in foliageNames)
+                                    {
+                                        list1.Add(new KeyValuePair<long, string>(foliageName.FoliageNameId, foliageName.FoliageName));
+                                    }
+                                }
                                 break;
                             }
 
                         case "Materials":
                             {
-                                ((App)App.Current).GetMaterialNamesByType(kvp.Key).ContinueWith(a => MaterialNamesLoaded(list1,a.Result));
+                                if (materialNames.Count == 0)
+                                {
+                                    ((App)App.Current).GetMaterialNamesByType(kvp.Key).ContinueWith(a => MaterialNamesLoaded(list1, a.Result));
+                                }
+                                else
+                                {
+                                    foreach (MaterialNameDTO materialName in materialNames)
+                                    {
+                                        list1.Add(new KeyValuePair<long, string>(materialName.MaterialNameId, materialName.MaterialName));
+                                    }
+                                }
                                 break;
                             }
 
                         case "Containers":
                             {
-                                ((App)App.Current).GetContainerNamesByType(kvp.Key).ContinueWith(a => ContainerNamesLoaded(list1, a.Result));
+                                if (containerNames.Count == 0)
+                                {
+                                    ((App)App.Current).GetContainerNamesByType(kvp.Key).ContinueWith(a => ContainerNamesLoaded(list1, a.Result));
+                                }
+                                else
+                                {
+                                    foreach (ContainerNameDTO containerName in containerNames)
+                                    {
+                                        list1.Add(new KeyValuePair<long, string>(containerName.ContainerNameId, containerName.ContainerName));
+                                    }
+                                }
                                 break;
                             }
+                    }
+
+                    if(list1.Count > 0)
+                    {
+                        Name.ItemsSource = list1;
+
+                        SearchButton_Click(null, new EventArgs());
                     }
                 }
             }
@@ -352,9 +742,9 @@ namespace EOMobile
             }
         }
 
-        private void PlantNamesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, List<PlantNameDTO> names)
+        private void PlantNamesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, GetPlantNameResponse names)
         {
-            plantNames = names;
+            plantNames = names.PlantNames;
 
             foreach (PlantNameDTO plantName in plantNames)
             {
@@ -364,14 +754,14 @@ namespace EOMobile
             Device.BeginInvokeOnMainThread(() =>
             {
                 Name.ItemsSource = list1;
-            });
 
-            SearchButton_Click(null, new EventArgs());
+                SearchButton_Click(null, new EventArgs());
+            });
         }
 
-        private void MaterialNamesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, List<MaterialNameDTO> names)
+        private void MaterialNamesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, GetMaterialNameResponse names)
         {
-            materialNames = names;
+            materialNames = names.MaterialNames;
 
             foreach (MaterialNameDTO materialName in materialNames)
             {
@@ -381,14 +771,14 @@ namespace EOMobile
             Device.BeginInvokeOnMainThread(() =>
             {
                 Name.ItemsSource = list1;
-            });
 
-            SearchButton_Click(null, new EventArgs());
+                SearchButton_Click(null, new EventArgs());
+            });
         }
 
-        private void FoliageNamesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, List<FoliageNameDTO> names)
+        private void FoliageNamesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, GetFoliageNameResponse names)
         {
-            foliageNames = names;
+            foliageNames = names.FoliageNames;
 
             foreach (FoliageNameDTO foliageName in foliageNames)
             {
@@ -398,9 +788,9 @@ namespace EOMobile
             Device.BeginInvokeOnMainThread(() =>
             {
                 Name.ItemsSource = list1;
-            });
 
-            SearchButton_Click(null, new EventArgs());
+                SearchButton_Click(null, new EventArgs());
+            });
         }
 
         private void ContainerNamesLoaded(ObservableCollection<KeyValuePair<long, string>> list1, List<ContainerNameDTO> names)
@@ -415,9 +805,11 @@ namespace EOMobile
             Device.BeginInvokeOnMainThread(() =>
             {
                 Name.ItemsSource = list1;
+
+                SearchButton_Click(null, new EventArgs());
             });
 
-            SearchButton_Click(null, new EventArgs());
+            
         }
 
         private void NameCombo_SelectionChanged(object sender, EventArgs e)
@@ -503,7 +895,36 @@ namespace EOMobile
                 switch (inventoryType)
                 {
                     case "Orchids":
-                        ((App)App.Current).GetPlantsByType(typeId).ContinueWith(a => PlantsByTypeLoaded(list1,name,size,a.Result));
+                        {
+                            List<PlantInventoryDTO> filtered = new List<PlantInventoryDTO>();
+
+                            filtered.AddRange(plants);
+
+                            if (!String.IsNullOrEmpty(name))
+                            {
+                                filtered = plants.Where(a => a.Plant.PlantName.Contains(name)).ToList();
+                            }
+
+                            if (!String.IsNullOrEmpty(size))
+                            {
+                                filtered = plants.Where(a => a.Plant.PlantSize.Equals(size)).ToList();
+                            }
+
+                            foreach (PlantInventoryDTO p in filtered)
+                            {
+                                list1.Add(new ArrangementInventoryFilteredItem()
+                                {
+                                    Id = p.Inventory.InventoryId,
+                                    Type = p.Inventory.InventoryName,
+                                    InventoryTypeId = p.Inventory.InventoryTypeId,
+                                    Name = p.Plant.PlantName,
+                                    Size = p.Plant.PlantSize,
+                                    ServiceCodeId = p.Inventory.ServiceCodeId,
+                                    ServiceCode = p.Inventory.ServiceCodeName,
+                                    ImageId = p.ImageId
+                                });
+                            }
+                        }
                         break;
 
                     case "Foliage":
@@ -519,7 +940,7 @@ namespace EOMobile
                         break;
                 }
 
-                
+                ArrangementInventoryList.ItemsSource = list1;
             }
         }
 
@@ -527,17 +948,21 @@ namespace EOMobile
         {
             plants = response.PlantInventoryList;
 
+            List<PlantInventoryDTO> filtered = new List<PlantInventoryDTO>();
+
+            filtered.AddRange(plants);
+
             if (!String.IsNullOrEmpty(name))
             {
-                plants = plants.Where(a => a.Plant.PlantName.Contains(name)).ToList();
+                filtered = plants.Where(a => a.Plant.PlantName.Contains(name)).ToList();
             }
 
             if (!String.IsNullOrEmpty(size))
             {
-                plants = plants.Where(a => a.Plant.PlantSize.Equals(size)).ToList();
+                filtered = plants.Where(a => a.Plant.PlantSize.Equals(size)).ToList();
             }
 
-            foreach (PlantInventoryDTO p in plants)
+            foreach (PlantInventoryDTO p in filtered)
             {
                 list1.Add(new ArrangementInventoryFilteredItem()
                 {
@@ -560,12 +985,18 @@ namespace EOMobile
 
         private void MaterialsByTypeLoaded(ObservableCollection<ArrangementInventoryFilteredItem> list1, string name, string size, GetMaterialResponse response)
         {
+            materials = response.MaterialInventoryList;
+
+            List<MaterialInventoryDTO> filtered = new List<MaterialInventoryDTO>();
+
+            filtered.AddRange(materials);
+
             if (!String.IsNullOrEmpty(name))
             {
-                materials = materials.Where(a => a.Material.MaterialName.Contains(name)).ToList();
+                filtered = materials.Where(a => a.Material.MaterialName.Contains(name)).ToList();
             }
 
-            foreach (MaterialInventoryDTO m in materials)
+            foreach (MaterialInventoryDTO m in filtered)
             {
                 list1.Add(new ArrangementInventoryFilteredItem()
                 {
@@ -588,12 +1019,18 @@ namespace EOMobile
 
         private void FoliageByTypeLoaded(ObservableCollection<ArrangementInventoryFilteredItem> list1, string name, string size, GetFoliageResponse response)
         {
+            foliage = response.FoliageInventoryList;
+
+            List<FoliageInventoryDTO> filtered = new List<FoliageInventoryDTO>();
+
+            filtered.AddRange(foliage);
+
             if (!String.IsNullOrEmpty(name))
             {
-                foliage = foliage.Where(a => a.Foliage.FoliageName.Contains(name)).ToList();
+                filtered = foliage.Where(a => a.Foliage.FoliageName.Contains(name)).ToList();
             }
 
-            foreach (FoliageInventoryDTO f in foliage)
+            foreach (FoliageInventoryDTO f in filtered)
             {
                 list1.Add(new ArrangementInventoryFilteredItem()
                 {
@@ -614,14 +1051,20 @@ namespace EOMobile
             });
         }
 
-        private void ContainersByTypeLoaded(ObservableCollection<ArrangementInventoryFilteredItem> list1, string name, string size, GetContainerResponse respponse)
+        private void ContainersByTypeLoaded(ObservableCollection<ArrangementInventoryFilteredItem> list1, string name, string size, GetContainerResponse response)
         {
+            containers = response.ContainerInventoryList;
+
+            List<ContainerInventoryDTO> filtered = new List<ContainerInventoryDTO>();
+
+            filtered.AddRange(containers);
+
             if (!String.IsNullOrEmpty(name))
             {
-                containers = containers.Where(a => a.Container.ContainerName.Contains(name)).ToList();
+                filtered = containers.Where(a => a.Container.ContainerName.Contains(name)).ToList();
             }
 
-            foreach (ContainerInventoryDTO c in containers)
+            foreach (ContainerInventoryDTO c in filtered)
             {
                 list1.Add(new ArrangementInventoryFilteredItem()
                 {
@@ -644,7 +1087,7 @@ namespace EOMobile
 
         private void ArrangementFilterCancel_Clicked(object sender, EventArgs e)
         {
-            Navigation.PopModalAsync();
+            Navigation.PopAsync();
         }
 
         private void ViewImage_Clicked(object sender, EventArgs e)

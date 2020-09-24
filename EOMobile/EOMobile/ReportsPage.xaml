@@ -40,9 +40,9 @@
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="CenterAndExpand" />
 
-                <Button Text="Work Orders" FontSize="Medium" Grid.Column="0" Grid.Row="1" Clicked="OnWorkOrderReportClicked" HeightRequest="80" WidthRequest="200"/>
-                <Button Text="Shipments" FontSize="Medium" Grid.Column="1" Grid.Row="1" Clicked="OnShipmentReportClicked" HeightRequest="80" WidthRequest="200"/>
-                <Button Text="Site Service" FontSize="Medium" Grid.Column="0" Grid.Row="2" Clicked="OnSiteServiceClicked" HeightRequest="80" WidthRequest="200"/>
+                <Button Text="Work Orders" FontSize="Medium" TextColor="White" Grid.Column="0" Grid.Row="1" Clicked="OnWorkOrderReportClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="CornflowerBlue"/>
+                <Button Text="Shipments" FontSize="Medium"  TextColor="White" Grid.Column="1" Grid.Row="1" Clicked="OnShipmentReportClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="CornflowerBlue"/>
+                <Button Text="Site Service" FontSize="Medium" TextColor="White" Grid.Column="0" Grid.Row="2" Clicked="OnSiteServiceClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="CornflowerBlue"/>
             </Grid>
         </StackLayout>
         </ScrollView>

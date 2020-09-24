@@ -24,9 +24,9 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="60" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
-                    <RowDefinition Height="40" />
+                    <RowDefinition Height="80" />
+                    <RowDefinition Height="80" />
+                    <RowDefinition Height="80" />
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
@@ -40,11 +40,11 @@
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="Center" />
                 
-                <Button x:Name="Plants" Text="Orchids" Grid.Column="0" Grid.Row="1" Clicked="OnPlantsClicked" HeightRequest="50" WidthRequest="200"/>
-                <Button x:Name="Foliage" Text="Foliage" Grid.Column="1" Grid.Row="1" Clicked="OnFoliageClicked" HeightRequest="50" WidthRequest="200"/>
-                <Button x:Name="Materials" Text="Materials" Grid.Column="0" Grid.Row="2" Clicked="OnMaterialsClicked" HeightRequest="50" WidthRequest="200"/>
-                <Button x:Name="Containers" Text="Containers" Grid.Column="1" Grid.Row="2" Clicked="OnContainersClicked" HeightRequest="50" WidthRequest="200"/>
-                <Button x:Name="Arrangements" Text="Arrangements" Grid.Column="0" Grid.Row="3" Clicked="OnArrangementsClicked" HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Plants" Text="Orchids" TextColor="White" FontSize="Medium" Grid.Column="0" Grid.Row="1" Clicked="OnPlantsClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="LightBlue"/>
+                <Button x:Name="Foliage" Text="Foliage" TextColor="White" FontSize="Medium" Grid.Column="1" Grid.Row="1" Clicked="OnFoliageClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="LightBlue"/>
+                <Button x:Name="Materials" Text="Materials" TextColor="White" FontSize="Medium" Grid.Column="0" Grid.Row="2" Clicked="OnMaterialsClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="LightBlue"/>
+                <Button x:Name="Containers" Text="Containers" TextColor="White" FontSize="Medium" Grid.Column="1" Grid.Row="2" Clicked="OnContainersClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="LightBlue"/>
+                <Button x:Name="Arrangements" Text="Arrangements" TextColor="White" FontSize="Medium" Grid.Column="0" Grid.Row="3" Clicked="OnArrangementsClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" BackgroundColor="LightBlue"/>
                 
                 <!--<Button Text="Import" Grid.Column="0" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>-->
             </Grid>

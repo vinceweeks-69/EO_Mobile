@@ -206,7 +206,7 @@ namespace EOMobile
         }
         public void OnInventorySearchClicked(object sender, EventArgs e)
         {
-            Navigation.PushModalAsync(new ArrangementFilterPage(this));
+            Navigation.PushAsync(new ArrangementFilterPage(this));
         }
 
         public void OnShipmentSaveClicked(object sender, EventArgs e)
@@ -312,7 +312,7 @@ namespace EOMobile
 
             TabParent.ClearShipmentImages();
 
-            Navigation.PushModalAsync(new ArrangementFilterPage(this));
+            Navigation.PushAsync(new ArrangementFilterPage(this));
         }
 
         public async void StartCamera()

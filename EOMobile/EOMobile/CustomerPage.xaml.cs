@@ -220,7 +220,7 @@ namespace EOMobile
 
                             MessagingCenter.Send<PersonAndAddressDTO>(request.Customer, "SearchCustomer");
 
-                            Navigation.PopModalAsync();
+                            Navigation.PopAsync();
                         }
                     }
                 }

@@ -54,7 +54,7 @@
                 VerticalOptions="Center" 
                 HorizontalOptions="Start"
                 XAlign="Start" />
-                <Editor x:Name="Name" Text="" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="50" WidthRequest="200"/>
+                <Entry x:Name="Name" Text="" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="50" WidthRequest="200"/>
 
                 <Label Text="Inventory Search"
                 Grid.Column="2"

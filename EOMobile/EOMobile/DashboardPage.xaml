@@ -25,16 +25,19 @@
     <ContentPage.Content>
         <ScrollView>
             <StackLayout>
-                 <Grid>
+                 <Grid Padding="0,8,0,8">
                     <Grid.ColumnDefinitions>    
                         <ColumnDefinition Width="50*" />
                         <ColumnDefinition Width="50*"/>
-                    </Grid.ColumnDefinitions>       
-                     <Label  Grid.Column="0" x:Name="DashboardDate" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Medium"/>
-                     <Button Grid.Column="1" x:Name="Home" Text="Home" HorizontalOptions="End" FontAttributes="Bold" Clicked="Home_Clicked"/>
+                    </Grid.ColumnDefinitions>   
+                     <Grid.RowDefinitions>
+                         <RowDefinition Height="42" />
+                     </Grid.RowDefinitions>
+                     <Label  Grid.Column="0" x:Name="DashboardDate" VerticalOptions="Center" HorizontalOptions="Start"  FontAttributes="Bold" FontSize="Medium" Margin="0,10,0,0"/>
+                     <Button Grid.Column="1" x:Name="Home" Text="Home" TextColor="White" BackgroundColor="CornflowerBlue"  HeightRequest="38" WidthRequest="140" HorizontalOptions="End" VerticalOptions="Center"  FontAttributes="Bold" BorderRadius="10" Clicked="Home_Clicked" />
                  </Grid>
                 
-                 <Label Text="Pickups" HorizontalOptions="Start" FontAttributes="Bold"></Label>
+                 <Label Text="Pickups" HorizontalOptions="Start" FontAttributes="Bold" Padding="0,10,0,0"></Label>
                  <Frame Padding="10,10,10,10" HeightRequest="300"> 
                      <ListView  x:Name="PickupsListView" ItemsSource="{Binding pickupList}">
                         <ListView.Header>
@@ -75,7 +78,7 @@
                     </ListView>
                  </Frame>
                
-                 <Label Text="Deliveries" HorizontalOptions="Start" FontAttributes="Bold"></Label>
+                 <Label Text="Deliveries" HorizontalOptions="Start" FontAttributes="Bold" Padding="0,8,0,0"></Label>
                  <Frame Padding="10,10,10,10" HeightRequest="300">  
                     <ListView  x:Name="DeliveriesListView" ItemsSource="{Binding deliveryList}">
                         <ListView.Header>
@@ -116,7 +119,7 @@
                     </ListView> 
                  </Frame>
                 
-                 <Label Text="Site Service" HorizontalOptions="Start" FontAttributes="Bold"></Label>
+                 <Label Text="Site Service" HorizontalOptions="Start" FontAttributes="Bold" ></Label>
                  <Frame Padding="10,10,10,10" HeightRequest="300">   
                     <ListView  x:Name="SiteServiceListView" ItemsSource="{Binding siteServiceList}">
                         <ListView.Header>

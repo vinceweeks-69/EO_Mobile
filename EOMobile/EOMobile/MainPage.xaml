@@ -42,20 +42,20 @@
                 HorizontalOptions="CenterAndExpand" />
             
             
-            <Button x:Name="WorkOrders" Text="Work Orders" FontSize="Medium" Clicked="OnWorkOrdersClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="1"/>
-            <Button x:Name="Arrangements" Text="Arrangements" FontSize="Medium" Clicked="OnArrangementsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="1"/>
+            <Button x:Name="WorkOrders" Text="Work Orders" TextColor="White" FontSize="Medium" Clicked="OnWorkOrdersClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="0" Grid.Row="1" BackgroundColor="CornflowerBlue"/>
+            <Button x:Name="Arrangements" Text="Arrangements" TextColor="White" FontSize="Medium" Clicked="OnArrangementsClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="1" Grid.Row="1" BackgroundColor="CornflowerBlue"/>
             
-            <Button x:Name="Inventory" Text="Products" FontSize="Medium" Clicked="OnInventoryClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="2"/>
-            <Button x:Name="Customers" Text="Customers" FontSize="Medium" Clicked="OnCustomersClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="2"/>
+            <Button x:Name="Inventory" Text="Products" TextColor="White" FontSize="Medium" Clicked="OnInventoryClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="0" Grid.Row="2" BackgroundColor="CornflowerBlue"/>
+            <Button x:Name="Customers" Text="Customers" TextColor="White" FontSize="Medium" Clicked="OnCustomersClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="1" Grid.Row="2" BackgroundColor="CornflowerBlue"/>
             
-            <Button x:Name="Vendors" Text="Vendors" FontSize="Medium" Clicked="OnVendorsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="3"/>
-            <Button x:Name="Shipments" Text="Shipments" FontSize="Medium" Clicked="OnShipmentsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="3"/>
+            <Button x:Name="Vendors" Text="Vendors" TextColor="White" FontSize="Medium" Clicked="OnVendorsClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="0" Grid.Row="3" BackgroundColor="CornflowerBlue"/>
+            <Button x:Name="Shipments" Text="Shipments" TextColor="White" FontSize="Medium" Clicked="OnShipmentsClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="1" Grid.Row="3" BackgroundColor="CornflowerBlue"/>
             
-            <Button x:Name="Reports" Text="Reports" FontSize="Medium" Clicked="OnReportsClicked" HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="4"/>
-            <Button x:Name="SiteService" Text="On Site Service" FontSize="Medium" Clicked="OnSiteServiceClicked" HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="4"/>
+            <Button x:Name="Reports" Text="Reports" TextColor="White" FontSize="Medium" Clicked="OnReportsClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="0" Grid.Row="4" BackgroundColor="CornflowerBlue"/>
+            <Button x:Name="SiteService" Text="On Site Service" TextColor="White" FontSize="Medium" Clicked="OnSiteServiceClicked" HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="1" Grid.Row="4" BackgroundColor="CornflowerBlue"/>
             
-            <Button x:Name="Scheduler" Text="Scheduler" FontSize="Medium" Clicked="Scheduler_Clicked"  HeightRequest="80" WidthRequest="200" Grid.Column="0" Grid.Row="5"/>
-            <Button x:Name="Bugs" Text="Bugs" FontSize="Medium" Clicked="Bugs_Clicked"  HeightRequest="80" WidthRequest="200" Grid.Column="1" Grid.Row="5"/>
+            <Button x:Name="Scheduler" Text="Scheduler" TextColor="White" FontSize="Medium" Clicked="Scheduler_Clicked"  HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="0" Grid.Row="5" BackgroundColor="CornflowerBlue"/>
+            <Button x:Name="Bugs" Text="Bugs" TextColor="White" FontSize="Medium" Clicked="Bugs_Clicked"  HeightRequest="80" WidthRequest="200" BorderRadius="20" Grid.Column="1" Grid.Row="5" BackgroundColor="CornflowerBlue"/>
         </Grid>
     </ContentPage.Content>
 </d:EOBasePage>

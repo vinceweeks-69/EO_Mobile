@@ -206,7 +206,7 @@ namespace EOMobile
 
         private void Back_Clicked(object sender, EventArgs e)
         {
-            Task<Page> p = Navigation.PopModalAsync();
+            Task<Page> p = Navigation.PopAsync();
         }
 
         void PopUntilDestination(Type DestinationPage)
@@ -233,7 +233,7 @@ namespace EOMobile
                 Navigation.RemovePage(Navigation.NavigationStack[LeastFoundIndex]);
             }
 
-            Navigation.PopModalAsync();
+            Navigation.PopAsync();
         }
     }
 }

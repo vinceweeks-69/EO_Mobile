@@ -522,10 +522,10 @@ namespace EOMobile
             return imageData;
         }
 
-        public async Task<List<InventoryTypeDTO>> GetInventoryTypes()
+        public async Task<GetInventoryTypeResponse> GetInventoryTypes()
         {
             GenericGetRequest request = new GenericGetRequest("GetInventoryTypes", String.Empty, 0);
-            List<InventoryTypeDTO> response = await GetRequest<List<InventoryTypeDTO>>(request);
+            GetInventoryTypeResponse response = await GetRequest<GetInventoryTypeResponse>(request);
             return response;
         }
 
@@ -957,10 +957,10 @@ namespace EOMobile
             return response;
         }
 
-        public async Task<List<FoliageTypeDTO>> GetFoliageTypes()
+        public async Task<GetFoliageTypeResponse> GetFoliageTypes()
         {
             GenericGetRequest request = new GenericGetRequest("GetFoliageTypes", String.Empty, 0);
-            List<FoliageTypeDTO> response = await GetRequest<List<FoliageTypeDTO>>(request);
+            GetFoliageTypeResponse response = await GetRequest<GetFoliageTypeResponse>(request);
             return response;
         }
 
@@ -985,10 +985,17 @@ namespace EOMobile
             return response;
         }
 
-        public async Task<List<MaterialNameDTO>> GetMaterialNamesByType(long typeId)
+        public async Task<GetMaterialNameResponse> GetMaterialNamesByType(long typeId)
         {
             GenericGetRequest request = new GenericGetRequest("GetMaterialNamesByType", "materialTypeId", typeId);
-            List<MaterialNameDTO> response = await GetRequest<List<MaterialNameDTO>>(request);
+            GetMaterialNameResponse response = await GetRequest<GetMaterialNameResponse>(request);
+            return response;
+        }
+
+        public async Task<GetFoliageResponse> GetFoliage()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetFoliage", String.Empty, 0);
+            GetFoliageResponse response = await GetRequest<GetFoliageResponse>(request);
             return response;
         }
 
@@ -999,10 +1006,10 @@ namespace EOMobile
             return response;
         }
 
-        public async Task<List<FoliageNameDTO>> GetFoliageNamesByType(long typeId)
+        public async Task<GetFoliageNameResponse> GetFoliageNamesByType(long typeId)
         {
             GenericGetRequest request = new GenericGetRequest("GetFoliageNamesByType", "foliageTypeId", typeId);
-            List<FoliageNameDTO> response = await GetRequest<List<FoliageNameDTO>>(request);
+            GetFoliageNameResponse response = await GetRequest<GetFoliageNameResponse>(request);
             return response;
         }
 
@@ -1013,17 +1020,17 @@ namespace EOMobile
             return response;
         }
  
-        public async Task<List<PlantTypeDTO>> GetPlantTypes()
+        public async Task<GetPlantTypeResponse> GetPlantTypes()
         {
             GenericGetRequest request = new GenericGetRequest("GetPlantTypes", String.Empty, 0);
-            List<PlantTypeDTO> response = await GetRequest<List<PlantTypeDTO>>(request);
+            GetPlantTypeResponse response = await GetRequest<GetPlantTypeResponse>(request);
             return response;
         }
 
-        public async Task<List<PlantNameDTO>> GetPlantNamesByType(long typeId)
+        public async Task<GetPlantNameResponse> GetPlantNamesByType(long typeId)
         {
             GenericGetRequest request = new GenericGetRequest("GetPlantNamesByType", "plantTypeId", typeId);
-            List<PlantNameDTO> response = await GetRequest<List<PlantNameDTO>>(request);
+            GetPlantNameResponse response = await GetRequest<GetPlantNameResponse>(request);
             return response;
         }
 
@@ -1034,7 +1041,14 @@ namespace EOMobile
             return response;
         }
 
- 
+        public async Task<GetContainerResponse> GetContainers()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetContainers", String.Empty, 0);
+            GetContainerResponse response = await GetRequest<GetContainerResponse>(request);
+            return response;
+        }
+
+
         public async Task<List<ContainerNameDTO>> GetContainerNamesByType(long typeId)
         {
             GenericGetRequest request = new GenericGetRequest("GetContainerNamesByType", "containerTypeId", typeId);
@@ -1044,10 +1058,10 @@ namespace EOMobile
 
  
 
-        public async Task<List<ContainerTypeDTO>> GetContainerTypes()
+        public async Task<GetContainerTypeResponse> GetContainerTypes()
         {
             GenericGetRequest request = new GenericGetRequest("GetContainerTypes", String.Empty, 0);
-            List<ContainerTypeDTO> response = await GetRequest<List<ContainerTypeDTO>>(request);
+            GetContainerTypeResponse response = await GetRequest<GetContainerTypeResponse>(request);
             return response;
         }
 
