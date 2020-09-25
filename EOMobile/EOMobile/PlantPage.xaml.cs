@@ -246,7 +246,10 @@ namespace EOMobile
 
         private void Help_PlantsPage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("PlantsPage")).GetAwaiter();
+            if (!PageExists(typeof(HelpPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("PlantsPage")).GetAwaiter();
+            }
         }
     }
 }

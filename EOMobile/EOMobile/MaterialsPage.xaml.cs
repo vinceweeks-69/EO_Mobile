@@ -215,7 +215,10 @@ namespace EOMobile
 
         private void Help_MaterialsPage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("MaterialsPage")).GetAwaiter();
+            if (!PageExists(typeof(HelpPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("MaterialsPage")).GetAwaiter();
+            }
         }
     }
 }

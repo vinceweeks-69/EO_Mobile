@@ -18,6 +18,10 @@ namespace EOMobile
         ObservableCollection<WorkOrderResponse> deliveryList;
         ObservableCollection<WorkOrderResponse> siteServiceList;
 
+        bool pickupsLoaded = false;
+        bool deliveriesLoaded = false;
+        bool siteServiceLoaded = false;
+
         public DashboardPage()
         {
             InitializeComponent();
@@ -37,6 +41,8 @@ namespace EOMobile
             workOrderFilter.Delivery = false;
             workOrderFilter.SiteService = false;
 
+            Home.IsEnabled = false; //prohibit rage finger
+
             ((App)App.Current).GetWorkOrders(workOrderFilter).ContinueWith(a => LoadPickups(a.Result)); 
             
 
@@ -49,8 +55,18 @@ namespace EOMobile
             ((App)App.Current).GetWorkOrders(workOrderFilter).ContinueWith(a => LoadSiteService(a.Result));
         }
 
+        private void EnableHomeButton()
+        {
+            if(pickupsLoaded && deliveriesLoaded && siteServiceLoaded)
+            {
+                Home.IsEnabled = true;
+            }
+        }
+
         private void LoadPickups(List<WorkOrderResponse> response)
         {
+            pickupsLoaded = true;
+
             pickupList = new ObservableCollection<WorkOrderResponse>();
 
             foreach(WorkOrderResponse r in response)
@@ -62,10 +78,14 @@ namespace EOMobile
             {
                 PickupsListView.ItemsSource = pickupList;
             });
+
+            EnableHomeButton();
         }
 
         private void LoadDeliveries(List<WorkOrderResponse> response)
         {
+            deliveriesLoaded = true;
+
             deliveryList = new ObservableCollection<WorkOrderResponse>();
 
             foreach(WorkOrderResponse r in response)
@@ -77,10 +97,14 @@ namespace EOMobile
             {
                 DeliveriesListView.ItemsSource = deliveryList;
             });
+
+            EnableHomeButton();
         }
 
         private void LoadSiteService(List<WorkOrderResponse> response)
         {
+            siteServiceLoaded = true;
+
             siteServiceList = new ObservableCollection<WorkOrderResponse>();
 
             foreach(WorkOrderResponse r in response)
@@ -92,6 +116,8 @@ namespace EOMobile
             {
                 SiteServiceListView.ItemsSource = siteServiceList;
             });
+
+            EnableHomeButton();
         }
 
         protected override void OnAppearing()
@@ -104,7 +130,12 @@ namespace EOMobile
 
         private void Home_Clicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new MainPage());
+            //even after disabling the Home button, execution was getting in here multiple times - no bueno
+
+            if (!PageExists(typeof(MainPage)))
+            {
+                Navigation.PushAsync(new MainPage());
+            }
         }
 
         private void WorkOrderDetail_Clicked(object sender, EventArgs e)
@@ -116,8 +147,11 @@ namespace EOMobile
                 //Command parameter is WorkOrderId
                 if (button.CommandParameter != null)
                 {
-                    long workOrderId = (long)button.CommandParameter;
-                    Navigation.PushAsync(new TabbedWorkOrderPage(workOrderId));
+                    if (!PageExists(typeof(TabbedWorkOrderPage)))
+                    {
+                        long workOrderId = (long)button.CommandParameter;
+                        Navigation.PushAsync(new TabbedWorkOrderPage(workOrderId));
+                    }
                 }
             }
         }

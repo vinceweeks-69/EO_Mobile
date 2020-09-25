@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Xamarin.Forms;
@@ -19,7 +20,10 @@ namespace EOMobile
                     string commandParam = b.CommandParameter as string;
                     if (commandParam != null && !String.IsNullOrEmpty(commandParam))
                     {
-                        TaskAwaiter t = Navigation.PushAsync(new HelpPage(commandParam)).GetAwaiter();
+                        if (!Navigation.NavigationStack.Any(p => p is HelpPage))
+                        {
+                            TaskAwaiter t = Navigation.PushAsync(new HelpPage(commandParam)).GetAwaiter();
+                        }
                     }
                 }
             }

@@ -209,14 +209,20 @@ namespace EOMobile
 
         public void EditWorkOrder_Clicked(object sender, EventArgs e)
         {
-            long workOrderId = (long)(sender as Button).CommandParameter;
+            if (!PageExists(typeof(TabbedWorkOrderPage)))
+            {
+                long workOrderId = (long)(sender as Button).CommandParameter;
 
-            Navigation.PushAsync(new TabbedWorkOrderPage(workOrderId));
+                Navigation.PushAsync(new TabbedWorkOrderPage(workOrderId));
+            }
         }
 
         private void WorkOrderCustomer_Clicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new PersonFilterPage(this));
+            if (!PageExists(typeof(PersonFilterPage)))
+            {
+                Navigation.PushAsync(new PersonFilterPage(this));
+            }
         }
 
         protected override void OnAppearing()

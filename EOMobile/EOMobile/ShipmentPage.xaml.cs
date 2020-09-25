@@ -130,13 +130,13 @@ namespace EOMobile
             {
                 list1.Add(wo);
             }
-            
-            Vendor.SelectedIndex = ((App)App.Current).GetPickerIndex(Vendor, shipment.Shipment.VendorId);
-
-            Receiver.SelectedIndex = ((App)App.Current).GetPickerIndex(Receiver, shipment.Shipment.ReceiverId);
 
             Device.BeginInvokeOnMainThread(() =>
             {
+                Vendor.SelectedIndex = ((App)App.Current).GetPickerIndex(Vendor, shipment.Shipment.VendorId);
+
+                Receiver.SelectedIndex = ((App)App.Current).GetPickerIndex(Receiver, shipment.Shipment.ReceiverId);
+
                 ShipmentItemsListView.ItemsSource = list1;
             });
         }
@@ -206,7 +206,10 @@ namespace EOMobile
         }
         public void OnInventorySearchClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new ArrangementFilterPage(this));
+            if (!PageExists(typeof(ArrangementFilterPage)))
+            {
+                Navigation.PushAsync(new ArrangementFilterPage(this));
+            }
         }
 
         public void OnShipmentSaveClicked(object sender, EventArgs e)
@@ -308,11 +311,14 @@ namespace EOMobile
 
         private void AddShipmentInventory_Clicked(object sender, EventArgs e)
         {
-            ((App)App.Current).ClearImageData();
+            if (!PageExists(typeof(ArrangementFilterPage)))
+            {
+                ((App)App.Current).ClearImageData();
 
-            TabParent.ClearShipmentImages();
+                TabParent.ClearShipmentImages();
 
-            Navigation.PushAsync(new ArrangementFilterPage(this));
+                Navigation.PushAsync(new ArrangementFilterPage(this));
+            }
         }
 
         public async void StartCamera()
@@ -378,7 +384,10 @@ namespace EOMobile
 
         private void Help_ShipmentPage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("ShipmentPage")).GetAwaiter();
+            if (!PageExists(typeof(HelpPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("ShipmentPage")).GetAwaiter();
+            }
         }
     }
 }

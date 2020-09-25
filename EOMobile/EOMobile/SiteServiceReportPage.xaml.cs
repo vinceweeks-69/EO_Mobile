@@ -113,8 +113,11 @@ namespace EOMobile
 
         private void SiteServiceCustomer_Clicked(object sender, EventArgs e)
         {
-            SearchedForPersonType = 0;
-            Navigation.PushAsync(new PersonFilterPage(this));
+            if (!PageExists(typeof(PersonFilterPage)))
+            {
+                SearchedForPersonType = 0;
+                Navigation.PushAsync(new PersonFilterPage(this));
+            }
         }
 
         public void EditSiteService_Clicked(object sender, EventArgs e)
@@ -123,9 +126,12 @@ namespace EOMobile
 
             if (button != null)
             {
-                long workOrderId = (long)(button.CommandParameter);
+                if (!PageExists(typeof(TabbedSiteServicePage)))
+                {
+                    long workOrderId = (long)(button.CommandParameter);
 
-                Navigation.PushAsync(new TabbedSiteServicePage(workOrderId));
+                    Navigation.PushAsync(new TabbedSiteServicePage(workOrderId));
+                }
             }
         }
 

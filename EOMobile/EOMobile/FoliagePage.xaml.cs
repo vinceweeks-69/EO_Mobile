@@ -284,7 +284,10 @@ namespace EOMobile
 
         private void Help_FoliagePage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("FoliagePage")).GetAwaiter();
+            if (!PageExists(typeof(HelpPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("FoliagePage")).GetAwaiter();
+            }
         }
     }
 }

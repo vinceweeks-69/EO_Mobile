@@ -190,13 +190,13 @@ namespace EOMobile
         {
             if(response.Success)
             {
-                selectedCustomerContainerId = 0;
-                selectedCustomerContainerImageId = 0;
-                ((App)App.Current).ClearImageData();
-                ((App)App.Current).ClearImageDataList();
-
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    selectedCustomerContainerId = 0;
+                    selectedCustomerContainerImageId = 0;
+                    ((App)App.Current).ClearImageData();
+                    ((App)App.Current).ClearImageDataList();
+
                     LoadCustomerContainerData();
                 });
             }

@@ -179,8 +179,6 @@ namespace EOMobile
 
             InitStateList();
         }
-
-
         public List<string> GetLocalIPv4(NetworkInterfaceType _type)
         {
             List<string> ipAddrList = new List<string>();

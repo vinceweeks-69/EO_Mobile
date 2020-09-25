@@ -86,6 +86,8 @@ namespace EOMobile
             {
                 LoadWorkOrderArrangement();
             }
+
+            ArrangementListView.ItemSelected += ArrangementListView_ItemSelected;
         }
 
         private void LoadWorkOrderArrangement()
@@ -164,7 +166,10 @@ namespace EOMobile
                 {
                     EnableCustomerContainerSecondaryControls(true);
 
-                    Navigation.PushAsync(new CustomerContainerPage(TabParent.Customer, TabParent.ForWorkOrder));
+                    if (!PageExists(typeof(CustomerContainerPage)))
+                    {
+                        Navigation.PushAsync(new CustomerContainerPage(TabParent.Customer, TabParent.ForWorkOrder));
+                    }
                 }
             }
         }
@@ -231,15 +236,27 @@ namespace EOMobile
 
         public void OnInventorySearchClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new ArrangementFilterPage(this, false));
+            if (!PageExists(typeof(ArrangementFilterPage)))
+            {
+                Navigation.PushAsync(new ArrangementFilterPage(this, false));
+            }
         }
 
         public void OnSearchArrangementsClicked(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty(Name.Text))
             {
-                arrangementList.Clear();
-                arrangementListOC.Clear();
+                if (arrangementList != null)
+                {
+                    arrangementList.Clear();
+                }
+
+                if (arrangementListOC != null)
+                {
+                    arrangementListOC.Clear();
+                }
+
+                ArrangementSearch.IsEnabled = false;
 
                 ((App)App.Current).GetArrangements(Name.Text).ContinueWith(a => ArrangementSearchComplete(a.Result));
             }
@@ -261,6 +278,8 @@ namespace EOMobile
             Device.BeginInvokeOnMainThread(() =>
             {
                 ArrangementListView.ItemsSource = arrangementListOC;
+
+                ArrangementSearch.IsEnabled = true;
             });
         }
 
@@ -272,6 +291,12 @@ namespace EOMobile
         public void ClearArrangements()
         {
             Name.Text = String.Empty;
+            Designer.SelectedIndex = -1;
+            Style.SelectedIndex = -1;
+            Location.Text = String.Empty;
+            Container.SelectedIndex = -1;
+            CustomerContainerLabelEntry.Text = String.Empty;
+
             arrangementList.Clear();
             arrangementListOC.Clear();
             arrangementInventoryList.Clear();
@@ -280,7 +305,7 @@ namespace EOMobile
             inventoryImageIdsLoaded.Clear();
             TabParent.ClearArrangementImages();
             customerContainerId = null;
-            CustomerContainerLabelEntry.Text = String.Empty;
+
             EnableCustomerContainerSecondaryControls(false);
         }
 
@@ -442,6 +467,13 @@ namespace EOMobile
                                     ((App)App.Current).AddArrangementImage(imgRequest);
                                 }
                             }
+
+                            DisplayAlert("Success", "New arrangement saved!", "OK");
+                            ClearArrangements();
+                        }
+                        else
+                        {
+                            DisplayAlert("Error", "Problem saving arrangement", "OK");
                         }
                     }
                     else
@@ -483,10 +515,15 @@ namespace EOMobile
                                     ((App)App.Current).AddArrangementImage(imgRequest);
                                 }
                             }
+
+                            DisplayAlert("Success", "Arrangement updated!", "OK");
+                            ClearArrangements();
+                        }
+                        else
+                        {
+                            DisplayAlert("Error", "Problem updating arrangement", "OK");
                         }
                     }
-
-                    ClearArrangements();
                 }
             }
             catch(Exception ex)
@@ -560,33 +597,61 @@ namespace EOMobile
             GetSimpleArrangementResponse item = lv.SelectedItem as GetSimpleArrangementResponse;
 
             //call GetArrangementsById() and populate form
-            ((App)App.Current).GetArrangement(item.Arrangement.ArrangementId).ContinueWith(a => SelectedArrangementLoaded(lv,item, a.Result));
+            ((App)App.Current).GetArrangement(item.Arrangement.ArrangementId).ContinueWith(a => SelectedArrangementLoaded(lv, item, a.Result));
+
+        }
+
+        private void SetPickerSelection(Picker p, string value)
+        {
+
+            foreach(KeyValuePair<long,string> kvp in p.ItemsSource as ObservableCollection<KeyValuePair<long,string>>)
+            {
+                if(kvp.Value == value)
+                {
+                    p.SelectedItem = kvp;
+                }
+            }
         }
 
         private void SelectedArrangementLoaded(ListView lv,GetSimpleArrangementResponse item, GetArrangementResponse response)
         {
-            ClearArrangements();
-
-            Name.Text = response.Arrangement.ArrangementName;
-
-            arrangementList.Add(item);
-
-            arrangementInventoryList = response.ArrangementList;
-
-            ObservableCollection<ArrangementInventoryDTO> list1 = new ObservableCollection<ArrangementInventoryDTO>();
-
-            foreach (ArrangementInventoryDTO a in arrangementInventoryList)
-            {
-                arrangementInventoryListOC.Add(a);
-            }
-
             Device.BeginInvokeOnMainThread(() =>
             {
+                Name.Text = response.Arrangement.ArrangementName;
+
+                Location.Text = response.Arrangement.LocationName;
+
+                SetPickerSelection(Designer, item.Arrangement.DesignerName);
+
+                //fix these next 2
+                Style.SelectedIndex = item.Arrangement._180or360 - 1;
+
+                Container.SelectedIndex = item.Arrangement.Container - 1;
+
+                //if this is a customer container, there may be a string "label" value 
+                //this won't be used in a "save arrangement" scenario, but would be a factor possibly
+                //when this page is used to create an arrangement "on the fly" for a work order
+                //where the arrangement in question uses a customer's container AND
+                //that container has a "label" value.
+
+                //CustomerContainerLabelEntry.Text = item.Arrangement.CustomerContainerLabel;
+
+                arrangementList.Add(item);
+
+                arrangementInventoryList = response.ArrangementList;
+
+                arrangementInventoryListOC.Clear();
+
+                foreach (ArrangementInventoryDTO a in arrangementInventoryList)
+                {
+                    arrangementInventoryListOC.Add(a);
+                }
+
                 ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
                 lv.SelectedItem = null;
-            });
 
-            TabParent.LoadArrangmentImages(response.Images);
+                TabParent.LoadArrangmentImages(response.Images);
+            });
         }
 
         private void ShowImage_Clicked(object sender, EventArgs e)
@@ -620,7 +685,10 @@ namespace EOMobile
 
         public void Help_ArrangementPage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("ArrangementPage")).GetAwaiter();
+            if (!PageExists(typeof(HelpPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("ArrangementPage")).GetAwaiter();
+            }
         }
     }
 }

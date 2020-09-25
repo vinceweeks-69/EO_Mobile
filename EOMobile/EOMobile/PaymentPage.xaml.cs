@@ -494,7 +494,10 @@ namespace EOMobile
 
         private void Help_PaymentPage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("PaymentPage")).GetAwaiter();
+            if (!PageExists(typeof(PaymentPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("PaymentPage")).GetAwaiter();
+            }
         }
     }
 }

@@ -19,17 +19,25 @@ namespace EOMobile
 
         public void OnWorkOrderReportClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new TabbedWorkOrderReportPage());
+            if (!PageExists(typeof(TabbedWorkOrderReportPage)))
+            {
+                Navigation.PushAsync(new TabbedWorkOrderReportPage());
+            }
         }
-
         public void OnShipmentReportClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new TabbedShipmentReportPage());
+            if (!PageExists(typeof(TabbedShipmentReportPage)))
+            {
+                Navigation.PushAsync(new TabbedShipmentReportPage());
+            }
         }
 
         private void OnSiteServiceClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new TabbedSiteServiceReportPage());
+            if (!PageExists(typeof(TabbedSiteServiceReportPage)))
+            {
+                Navigation.PushAsync(new TabbedSiteServiceReportPage());
+            }
         }
     }
 }

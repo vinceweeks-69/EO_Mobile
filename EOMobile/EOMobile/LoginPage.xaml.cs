@@ -88,11 +88,17 @@ namespace EOMobile
 
                         if (loginResponse.RoleId == 1)
                         {
-                            await Navigation.PushAsync(new DashboardPage());
+                            if (!Navigation.NavigationStack.Any(p => p is DashboardPage))
+                            {
+                                await Navigation.PushAsync(new DashboardPage());
+                            }
                         }
                         else
                         {
-                            await Navigation.PushAsync(new MainPage());
+                            if (!Navigation.NavigationStack.Any(p => p is MainPage))
+                            {
+                                await Navigation.PushAsync(new MainPage());
+                            }
                         }
 
                         this.Name.Text = String.Empty;

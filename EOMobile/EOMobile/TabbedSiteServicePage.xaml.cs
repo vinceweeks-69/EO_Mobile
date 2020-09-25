@@ -59,7 +59,10 @@ namespace EOMobile
 
         private void Help_SiteServicePage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("SiteServicePage")).GetAwaiter();
+            if (!Navigation.NavigationStack.Any(p => p is HelpPage))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("SiteServicePage")).GetAwaiter();
+            }
         }
     }
 }

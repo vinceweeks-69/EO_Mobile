@@ -209,77 +209,77 @@ namespace EOMobile
 
         private void WorkOrderPaymentLoaded(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment)
         {
-            currentWorkOrderPaymentId = payment.WorkOrderPaymentId;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                currentWorkOrderPaymentId = payment.WorkOrderPaymentId;
 
-            if (currentWorkOrderPaymentId == 0)
-            {
-                Save.IsEnabled = true;
-                Payment.IsEnabled = true;
-            }
-            else
-            {
-                if (workOrder.WorkOrder.Paid)
+                if (currentWorkOrderPaymentId == 0)
                 {
-                    InventoryItemsListView.IsEnabled = false;
-                    Save.IsEnabled = false;
-                    Payment.IsEnabled = false;
+                    Save.IsEnabled = true;
+                    Payment.IsEnabled = true;
                 }
                 else
                 {
-                    Save.IsEnabled = true;
-                    if (workOrder.WorkOrderList.Count == 0)
+                    if (workOrder.WorkOrder.Paid)
                     {
+                        InventoryItemsListView.IsEnabled = false;
+                        Save.IsEnabled = false;
                         Payment.IsEnabled = false;
                     }
                     else
                     {
-                        Payment.IsEnabled = true;
+                        Save.IsEnabled = true;
+                        if (workOrder.WorkOrderList.Count == 0)
+                        {
+                            Payment.IsEnabled = false;
+                        }
+                        else
+                        {
+                            Payment.IsEnabled = true;
+                        }
                     }
                 }
-            }
 
-            customerId = workOrder.WorkOrder.CustomerId;
+                customerId = workOrder.WorkOrder.CustomerId;
 
-            Buyer.Text = workOrder.WorkOrder.Buyer;
+                Buyer.Text = workOrder.WorkOrder.Buyer;
 
-            sellerId = workOrder.WorkOrder.SellerId;
-            Seller.SelectedIndex = ((App)App.Current).GetPickerIndex(Seller, workOrder.WorkOrder.SellerId);
+                sellerId = workOrder.WorkOrder.SellerId;
+                Seller.SelectedIndex = ((App)App.Current).GetPickerIndex(Seller, workOrder.WorkOrder.SellerId);
 
-            DeliveryType.SelectedIndex = workOrder.WorkOrder.DeliveryType;
+                DeliveryType.SelectedIndex = workOrder.WorkOrder.DeliveryType;
 
-            deliveryUserId = workOrder.WorkOrder.DeliveryUserId;
-            DeliveryPerson.SelectedIndex = ((App)App.Current).GetPickerIndex(DeliveryPerson, workOrder.WorkOrder.DeliveryUserId);
+                deliveryUserId = workOrder.WorkOrder.DeliveryUserId;
+                DeliveryPerson.SelectedIndex = ((App)App.Current).GetPickerIndex(DeliveryPerson, workOrder.WorkOrder.DeliveryUserId);
 
-            DeliveryDate.Date = workOrder.WorkOrder.DeliveryDate;
+                DeliveryDate.Date = workOrder.WorkOrder.DeliveryDate;
 
-            deliveryRecipientId = workOrder.WorkOrder.DeliveryRecipientId;
+                deliveryRecipientId = workOrder.WorkOrder.DeliveryRecipientId;
 
-            DeliverTo.Text = workOrder.WorkOrder.DeliverTo;
+                DeliverTo.Text = workOrder.WorkOrder.DeliverTo;
 
-            WorkOrderDate.Date = workOrder.WorkOrder.CreateDate;
+                WorkOrderDate.Date = workOrder.WorkOrder.CreateDate;
 
-            ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
+                ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
 
-            foreach (var x in workOrder.WorkOrderList)
-            {
-                WorkOrderInventoryItemDTO dto =
-                    new WorkOrderInventoryItemDTO()
-                    {
-                        WorkOrderId = x.WorkOrderId,
-                        InventoryId = x.InventoryId,
-                        InventoryName = x.InventoryName,
-                        Quantity = x.Quantity,
-                        Size = x.Size,
-                        GroupId = x.GroupId
-                    };
+                foreach (var x in workOrder.WorkOrderList)
+                {
+                    WorkOrderInventoryItemDTO dto =
+                        new WorkOrderInventoryItemDTO()
+                        {
+                            WorkOrderId = x.WorkOrderId,
+                            InventoryId = x.InventoryId,
+                            InventoryName = x.InventoryName,
+                            Quantity = x.Quantity,
+                            Size = x.Size,
+                            GroupId = x.GroupId
+                        };
 
-                workOrderInventoryList.Add(dto);
+                    workOrderInventoryList.Add(dto);
 
-                list1.Add(new WorkOrderViewModel(dto));
-            }
+                    list1.Add(new WorkOrderViewModel(dto));
+                }
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
                 InventoryItemsListView.ItemsSource = list1;
             });
         }
@@ -513,13 +513,19 @@ namespace EOMobile
 
         public void OnInventorySearchClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new ArrangementFilterPage(this));
+            if (!PageExists(typeof(ArrangementFilterPage)))
+            {
+                Navigation.PushAsync(new ArrangementFilterPage(this));
+            }
         }
 
         public void OnCustomerSearchClicked(object sender, EventArgs e)
         {
-            SearchedForPersonType = 0;
-            Navigation.PushAsync(new PersonFilterPage(this));
+            if (!PageExists(typeof(PersonFilterPage)))
+            {
+                SearchedForPersonType = 0;
+                Navigation.PushAsync(new PersonFilterPage(this));
+            }
         }
 
         private string ValidateSaveWorkOrder()
@@ -652,6 +658,10 @@ namespace EOMobile
                 Save.IsEnabled = false;
                 //PaymentType.IsEnabled = true;
                 Payment.IsEnabled = true;
+
+                DisplayAlert("Success", "WorkOrder Saved!", "OK");
+
+                OnClear(null, new EventArgs());
             }
             else
             {
@@ -668,7 +678,10 @@ namespace EOMobile
         {
             if (currentWorkOrderId > 0)
             {
-                Navigation.PushAsync(new PaymentPage(currentWorkOrderId, workOrderInventoryList));
+                if (!PageExists(typeof(PaymentPage)))
+                {
+                    Navigation.PushAsync(new PaymentPage(currentWorkOrderId, workOrderInventoryList));
+                }
             }
         }
 
@@ -711,13 +724,19 @@ namespace EOMobile
 
         private void AddInventory_Clicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new ArrangementFilterPage(this));
+            if (!PageExists(typeof(ArrangementFilterPage)))
+            {
+                Navigation.PushAsync(new ArrangementFilterPage(this));
+            }
         }
 
         private void Buyer_Focused(object sender, FocusEventArgs e)
         {
-            SearchedForPersonType = 0;
-            Navigation.PushAsync(new PersonFilterPage(this));
+            if (!PageExists(typeof(PersonFilterPage)))
+            {
+                SearchedForPersonType = 0;
+                Navigation.PushAsync(new PersonFilterPage(this));
+            }
         }
 
         private void OrderType_SelectedIndexChanged(object sender, EventArgs e)
@@ -738,11 +757,17 @@ namespace EOMobile
 
                 if (p.SelectedIndex == 1)
                 {
-                    Navigation.PushAsync(new PersonFilterPage(this));
+                    if (!PageExists(typeof(PersonFilterPage)))
+                    {
+                        Navigation.PushAsync(new PersonFilterPage(this));
+                    }
                 }
                 else if(p.SelectedIndex == 2)
                 {
-                    Navigation.PushAsync(new CustomerPage(this));
+                    if (!PageExists(typeof(CustomerPage)))
+                    {
+                        Navigation.PushAsync(new CustomerPage(this));
+                    }
                 }
             }
         }
@@ -762,10 +787,13 @@ namespace EOMobile
                 {
                     if(dto.GroupId.HasValue)
                     {
-                        AddArrangementRequest aar = arrangementList.Where(a => a.GroupId == dto.GroupId).FirstOrDefault();
+                        if (!PageExists(typeof(TabbedArrangementPage)))
+                        {
+                            AddArrangementRequest aar = arrangementList.Where(a => a.GroupId == dto.GroupId).FirstOrDefault();
 
-                        //get all members with same group id and load Arrangement page
-                        Navigation.PushAsync(new TabbedArrangementPage(aar));
+                            //get all members with same group id and load Arrangement page
+                            Navigation.PushAsync(new TabbedArrangementPage(aar));
+                        }
                     }
                 }
             }

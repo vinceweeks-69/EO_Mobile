@@ -60,77 +60,110 @@ namespace EOMobile
         }
         public void OnInventoryClicked(object sender, EventArgs e)
         {
-            Inventory.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new InventoryPage()).GetAwaiter();
-            t.OnCompleted(() => { Inventory.IsEnabled = true; });
+            if (!PageExists(typeof(InventoryPage)))
+            {
+                Inventory.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new InventoryPage()).GetAwaiter();
+                t.OnCompleted(() => { Inventory.IsEnabled = true; });
+            }
         }
 
         public void OnArrangementsClicked(object sender, EventArgs e)
         {
-            Arrangements.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new TabbedArrangementPage()).GetAwaiter();
-            t.OnCompleted(() => { Arrangements.IsEnabled = true; });
+            if (!PageExists(typeof(TabbedArrangementPage)))
+            {
+                Arrangements.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new TabbedArrangementPage()).GetAwaiter();
+                t.OnCompleted(() => { Arrangements.IsEnabled = true; });
+            }
         }
 
         public void OnWorkOrdersClicked(object sender, EventArgs e)
         {
-            WorkOrders.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new TabbedWorkOrderPage()).GetAwaiter();
-            t.OnCompleted(() => { WorkOrders.IsEnabled = true; });
+            if (!PageExists(typeof(TabbedWorkOrderPage)))
+            {
+                WorkOrders.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new TabbedWorkOrderPage()).GetAwaiter();
+                t.OnCompleted(() => { WorkOrders.IsEnabled = true; });
+            }
         }
 
         public void OnCustomersClicked(object sender, EventArgs e)
         {
-            Customers.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new CustomerPage()).GetAwaiter();
-            t.OnCompleted(() => { Customers.IsEnabled = true; });
+            if (!PageExists(typeof(CustomerPage)))
+            {
+                Customers.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new CustomerPage()).GetAwaiter();
+                t.OnCompleted(() => { Customers.IsEnabled = true; });
+            }
         }
 
         public void OnVendorsClicked(object sender, EventArgs e)
         {
-            Vendors.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new VendorPage()).GetAwaiter();
-            t.OnCompleted(() => { Vendors.IsEnabled = true; });
+            if (!PageExists(typeof(VendorPage)))
+            {
+                Vendors.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new VendorPage()).GetAwaiter();
+                t.OnCompleted(() => { Vendors.IsEnabled = true; });
+            }
         }
 
         public void OnShipmentsClicked(object sender, EventArgs e)
         {
-            Shipments.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new TabbedShipmentPage()).GetAwaiter();
-            t.OnCompleted(() => { Shipments.IsEnabled = true; });
+            if (!PageExists(typeof(TabbedShipmentPage)))
+            {
+                Shipments.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new TabbedShipmentPage()).GetAwaiter();
+                t.OnCompleted(() => { Shipments.IsEnabled = true; });
+            }
         }
 
         public void OnReportsClicked(object sender, EventArgs e)
         {
-            Reports.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new ReportsPage()).GetAwaiter();
-            t.OnCompleted(() => { Reports.IsEnabled = true; });
+            if (!PageExists(typeof(ReportsPage)))
+            {
+                Reports.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new ReportsPage()).GetAwaiter();
+                t.OnCompleted(() => { Reports.IsEnabled = true; });
+            }
         }
 
         private void OnSiteServiceClicked(object sender, EventArgs e)
         {
-            SiteService.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new TabbedSiteServicePage()).GetAwaiter();
-            t.OnCompleted(() => { SiteService.IsEnabled = true; });
+            if (!PageExists(typeof(TabbedSiteServicePage)))
+            {
+                SiteService.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new TabbedSiteServicePage()).GetAwaiter();
+                t.OnCompleted(() => { SiteService.IsEnabled = true; });
+            }
         }
 
         private void Scheduler_Clicked(object sender, EventArgs e)
         {
-            Scheduler.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new SchedulerPage()).GetAwaiter();
-            t.OnCompleted(() => { Scheduler.IsEnabled = true; });
+            if (!PageExists(typeof(SchedulerPage)))
+            {
+                Scheduler.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new SchedulerPage()).GetAwaiter();
+                t.OnCompleted(() => { Scheduler.IsEnabled = true; });
+            }
         }
 
         private void Bugs_Clicked(object sender, EventArgs e)
         {
-            Bugs.IsEnabled = false;
-            TaskAwaiter t = Navigation.PushAsync(new BugsPage()).GetAwaiter();
-            t.OnCompleted(() => { Bugs.IsEnabled = true; });
+            if (!PageExists(typeof(BugsPage)))
+            {
+                Bugs.IsEnabled = false;
+                TaskAwaiter t = Navigation.PushAsync(new BugsPage()).GetAwaiter();
+                t.OnCompleted(() => { Bugs.IsEnabled = true; });
+            }
         }
 
         private void Help_MainPage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("MainPage")).GetAwaiter();
+            if (!PageExists(typeof(HelpPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("MainPage")).GetAwaiter();
+            }
         }
     }
 }

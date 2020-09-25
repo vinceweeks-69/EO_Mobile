@@ -101,14 +101,6 @@ namespace EOMobile
         {
             workOrder = response;
 
-            currentSiteServiceId = workOrder.WorkOrder.WorkOrderId;
-
-            Customer.Text = workOrder.WorkOrder.Buyer;
-
-            customerId = workOrder.WorkOrder.CustomerId;
-
-            DeliveryDate.Date = workOrder.WorkOrder.DeliveryDate;
-
             foreach (var x in workOrder.WorkOrderList)
             {
                 siteServiceInventoryList.Add(new WorkOrderInventoryItemDTO()
@@ -125,21 +117,29 @@ namespace EOMobile
 
             Device.BeginInvokeOnMainThread(() =>
             {
+                currentSiteServiceId = workOrder.WorkOrder.WorkOrderId;
+
+                Customer.Text = workOrder.WorkOrder.Buyer;
+
+                customerId = workOrder.WorkOrder.CustomerId;
+
+                DeliveryDate.Date = workOrder.WorkOrder.DeliveryDate;
+
                 SiteServiceInventoryItemsListView.ItemsSource = list1;
-            });
 
-            foreach (WorkOrderImageMapDTO imgData in workOrder.ImageMap)
-            {
-                imageData.Add(new EOImgData()
+                foreach (WorkOrderImageMapDTO imgData in workOrder.ImageMap)
                 {
-                    ImageId = imgData.ImageId,
-                    imgData = imgData.ImageData
-                });
-            }
+                    imageData.Add(new EOImgData()
+                    {
+                        ImageId = imgData.ImageId,
+                        imgData = imgData.ImageData
+                    });
+                }
 
-            CreatedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(CreatedBy, workOrder.WorkOrder.SellerId);
+                CreatedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(CreatedBy, workOrder.WorkOrder.SellerId);
 
-            ServicedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(ServicedBy, workOrder.WorkOrder.DeliveryUserId);
+                ServicedBy.SelectedIndex = ((App)App.Current).GetPickerIndex(ServicedBy, workOrder.WorkOrder.DeliveryUserId);
+            });
         }
 
         public int SearchedForPersonType
@@ -351,13 +351,19 @@ namespace EOMobile
 
         private void AddInventory_Clicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new ArrangementFilterPage(this));
+            if (!PageExists(typeof(ArrangementFilterPage)))
+            {
+                Navigation.PushAsync(new ArrangementFilterPage(this));
+            }
         }
 
         private void Customer_Focused(object sender, FocusEventArgs e)
         {
-            SearchedForPersonType = 0;
-            Navigation.PushAsync(new PersonFilterPage(this));
+            if (!PageExists(typeof(PersonFilterPage)))
+            {
+                SearchedForPersonType = 0;
+                Navigation.PushAsync(new PersonFilterPage(this));
+            }
         }
 
         private void Completed_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -369,7 +375,10 @@ namespace EOMobile
         {
             if (currentSiteServiceId > 0)
             {
-                Navigation.PushAsync(new PaymentPage(currentSiteServiceId, siteServiceInventoryList));
+                if (!PageExists(typeof(PaymentPage)))
+                {
+                    Navigation.PushAsync(new PaymentPage(currentSiteServiceId, siteServiceInventoryList));
+                }
             }
         }
     }

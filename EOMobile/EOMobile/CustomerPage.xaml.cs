@@ -49,19 +49,19 @@ namespace EOMobile
 
         public void ShowCustomerData(GetPersonResponse r)
         {
-            ClearForm();
-
-            customerList = r.PersonAndAddress;
-
-            customersOC.Clear();
-
-            foreach (PersonAndAddressDTO p in customerList)
-            {
-                customersOC.Add(p);
-            }
-
             Device.BeginInvokeOnMainThread(() =>
             {
+                ClearForm();
+
+                customerList = r.PersonAndAddress;
+
+                customersOC.Clear();
+
+                foreach (PersonAndAddressDTO p in customerList)
+                {
+                    customersOC.Add(p);
+                }
+
                 CustomerListView.ItemsSource = customersOC;
             });
         }
@@ -133,17 +133,17 @@ namespace EOMobile
 
         private void CustomersLoaded(GetPersonResponse response)
         {
-            customerList = response.PersonAndAddress;
-
-            customersOC.Clear();
-
-            foreach (PersonAndAddressDTO p in customerList)
-            {
-                customersOC.Add(p);
-            }
-
             Device.BeginInvokeOnMainThread(() =>
             {
+                customerList = response.PersonAndAddress;
+
+                customersOC.Clear();
+
+                foreach (PersonAndAddressDTO p in customerList)
+                {
+                    customersOC.Add(p);
+                }
+
                 CustomerListView.ItemsSource = customersOC;
             });
         }
@@ -266,7 +266,10 @@ namespace EOMobile
 
         private void Help_CustomerPage_Clicked(object sender, EventArgs e)
         {
-            TaskAwaiter t = Navigation.PushAsync(new HelpPage("CustomerPage")).GetAwaiter();
+            if (!PageExists(typeof(HelpPage)))
+            {
+                TaskAwaiter t = Navigation.PushAsync(new HelpPage("CustomerPage")).GetAwaiter();
+            }
         }
 
         private void History_Clicked(object sender, EventArgs e)
@@ -282,9 +285,10 @@ namespace EOMobile
 
                 if (p.Person.person_id != 0)
                 {
-                    //TaskAwaiter t = Navigation.PushAsync(new CustomerContainerPage(p)).GetAwaiter();
-
-                    Navigation.PushAsync(new CustomerContainerPage(p));
+                    if (!PageExists(typeof(CustomerContainerPage)))
+                    {
+                        Navigation.PushAsync(new CustomerContainerPage(p));
+                    }
                 }
             }
         }
