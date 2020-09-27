@@ -184,6 +184,8 @@ namespace EOMobile
         {
             base.OnAppearing();
 
+            Products.IsEnabled = true;
+
             //called when we return from an "Inventory Search"
             ArrangementInventoryDTO searchedForInventory = ((App)App.Current).searchedForArrangementInventory;
 
@@ -232,14 +234,6 @@ namespace EOMobile
             //SubTotal.Text = response.SubTotal.ToString("C", CultureInfo.CurrentCulture);
             //Tax.Text = response.Tax.ToString("C", CultureInfo.CurrentCulture);
             //Total.Text = response.Total.ToString("C", CultureInfo.CurrentCulture);
-        }
-
-        public void OnInventorySearchClicked(object sender, EventArgs e)
-        {
-            if (!PageExists(typeof(ArrangementFilterPage)))
-            {
-                Navigation.PushAsync(new ArrangementFilterPage(this, false));
-            }
         }
 
         public void OnSearchArrangementsClicked(object sender, EventArgs e)
@@ -689,6 +683,17 @@ namespace EOMobile
             {
                 TaskAwaiter t = Navigation.PushAsync(new HelpPage("ArrangementPage")).GetAwaiter();
             }
+        }
+
+        private void Products_Clicked(object sender, EventArgs e)
+        {
+            //in the case where an arrangement is being added to a work order "on the fly"
+            //there WILL be anothere ArrangementFilterPage on the nav stack - so turn the button
+            //off instead
+
+            Products.IsEnabled = false;
+            Navigation.PushAsync(new ArrangementFilterPage(this, false));
+
         }
     }
 }

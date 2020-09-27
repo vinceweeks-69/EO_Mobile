@@ -121,6 +121,7 @@ namespace EOMobile
 
             ObservableCollection<WorkOrderDTO> list1 = new ObservableCollection<WorkOrderDTO>();
 
+            //for arrangements, add blank rows fore and aft and a header row
             foreach (WorkOrderResponse wo in workOrderList)
             {
                 workOrder.Add(wo.WorkOrder);

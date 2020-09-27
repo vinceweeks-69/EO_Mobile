@@ -262,6 +262,8 @@ namespace EOMobile
 
                 ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
 
+                Dictionary<long, List<WorkOrderInventoryItemDTO>> arrangements = new Dictionary<long, List<WorkOrderInventoryItemDTO>>();
+
                 foreach (var x in workOrder.WorkOrderList)
                 {
                     WorkOrderInventoryItemDTO dto =
@@ -275,9 +277,73 @@ namespace EOMobile
                             GroupId = x.GroupId
                         };
 
-                    workOrderInventoryList.Add(dto);
+                    if (dto.GroupId.HasValue && dto.GroupId != 0)
+                    {
+                        if (!arrangements.ContainsKey(dto.GroupId.Value))
+                        {
+                            List<WorkOrderInventoryItemDTO> dtos = new List<WorkOrderInventoryItemDTO>();
+                            dtos.Add(dto);
+                            arrangements.Add(dto.GroupId.Value, dtos);
+                        }
+                        else
+                        {
+                            arrangements[dto.GroupId.Value].Add(dto);
+                        }
+                    }
+                    else
+                    {
+                        workOrderInventoryList.Add(dto);
+                        list1.Add(new WorkOrderViewModel(dto));
+                    }
+                }
 
-                    list1.Add(new WorkOrderViewModel(dto));
+                foreach(KeyValuePair<long,List<WorkOrderInventoryItemDTO>> kvp in arrangements)
+                {
+                    //add a blank row
+                    list1.Add(new WorkOrderViewModel()
+                    {
+                        WorkOrderId = kvp.Value[0].WorkOrderId,
+                        InventoryId = 0,
+                        InventoryName = String.Empty,
+                        Quantity = 0,
+                        Size = String.Empty,
+                        GroupId = kvp.Value[0].GroupId
+                    });
+
+                    //add a Header row
+                    list1.Add(new WorkOrderViewModel()
+                    {
+                        WorkOrderId = kvp.Value[0].WorkOrderId,
+                        InventoryId = 0,
+                        InventoryName = "Arrangement",
+                        Quantity = 0,
+                        Size = String.Empty,
+                        GroupId = kvp.Value[0].GroupId
+                    });
+
+                    foreach (WorkOrderInventoryItemDTO d in kvp.Value)
+                    {
+                        list1.Add(new WorkOrderViewModel()
+                        {
+                            WorkOrderId = d.WorkOrderId,
+                            InventoryId = d.InventoryId,
+                            InventoryName = d.InventoryName,
+                            Quantity = d.Quantity,
+                            Size = d.Size,
+                            GroupId = d.GroupId
+                        });
+                    }
+
+                    //add a blank row
+                    list1.Add(new WorkOrderViewModel()
+                    {
+                        WorkOrderId = kvp.Value[0].WorkOrderId,
+                        InventoryId = 0,
+                        InventoryName = String.Empty,
+                        Quantity = 0,
+                        Size = String.Empty,
+                        GroupId = kvp.Value[0].GroupId
+                    });
                 }
 
                 InventoryItemsListView.ItemsSource = list1;
