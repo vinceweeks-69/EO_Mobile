@@ -36,6 +36,10 @@ namespace EOMobile
 
         long? customerContainerId = null;
 
+        long NotInInventoryTempId = 0;
+
+        List<NotInInventoryDTO> notInInventoryList = new List<NotInInventoryDTO>();
+        
         /// <summary>
         /// If the TabbedParent has a CurrentArrangement value, load the form with these values
         /// </summary>
@@ -82,7 +86,9 @@ namespace EOMobile
 
             TabParent = tabParent;
 
-            if(TabParent.CurrentArrangement != null)
+            GiftCheckBox.IsChecked = false;
+
+            if (TabParent.CurrentArrangement != null)
             {
                 LoadWorkOrderArrangement();
             }
@@ -291,6 +297,8 @@ namespace EOMobile
             Container.SelectedIndex = -1;
             CustomerContainerLabelEntry.Text = String.Empty;
 
+            GiftCheckBox.IsChecked = false;
+
             arrangementList.Clear();
             arrangementListOC.Clear();
             arrangementInventoryList.Clear();
@@ -394,6 +402,10 @@ namespace EOMobile
                     request.Arrangement.LocationName = Location.Text;
                     request.Arrangement.UpdateDate = DateTime.Now;
                     request.ArrangementInventory = arrangementInventoryList;
+                    request.Arrangement.IsGift = GiftCheckBox.IsChecked ? 1 : 0;
+                    request.Arrangement.GiftMessage = GiftMessage.Text;
+
+                    request.NotInInventory = notInInventoryList;
 
                     request.Inventory = new InventoryDTO()
                     {
@@ -432,6 +444,8 @@ namespace EOMobile
                         request.Arrangement.CustomerContainerId = null;
                         request.Arrangement.DesignerName = ((KeyValuePair<long, string>)Designer.SelectedItem).Value;
                         request.Arrangement.LocationName = Location.Text;
+                        request.Arrangement.IsGift = GiftCheckBox.IsChecked ? 1 : 0;
+                        request.Arrangement.GiftMessage = GiftMessage.Text;
 
                         request.Arrangement.UpdateDate = DateTime.Now;
                         request.ArrangementInventory = arrangementInventoryList;
@@ -484,6 +498,8 @@ namespace EOMobile
                         request.Arrangement.DesignerName = ((KeyValuePair<long, string>)Designer.SelectedItem).Value;
                         request.Arrangement.LocationName = Location.Text;
                         request.Arrangement.UpdateDate = DateTime.Now;
+                        request.Arrangement.IsGift = GiftCheckBox.IsChecked ? 1 : 0;
+                        request.Arrangement.GiftMessage = GiftMessage.Text;
 
                         request.Inventory = simpleArrangement.Inventory;
 
@@ -694,6 +710,97 @@ namespace EOMobile
             Products.IsEnabled = false;
             Navigation.PushAsync(new ArrangementFilterPage(this, false));
 
+        }
+
+        private void GiftCheckBox_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+
+            if(cb != null)
+            {
+                GiftMessageLabel.IsEnabled = cb.IsChecked;
+                GiftMessageLabel.IsVisible = cb.IsChecked;
+
+                GiftMessage.IsEnabled = cb.IsChecked;
+                GiftMessage.IsVisible = cb.IsChecked;
+            }
+        }
+
+        private void AddItemNotInInventory_Clicked(object sender, EventArgs e)
+        {
+            String msg = String.Empty;
+            if (NotInInventoryName.Text == String.Empty)
+            {
+                msg += "Please add a name for the item not in inventory. \n";
+            }
+
+            if (NotInInventorySize.Text == String.Empty)
+            {
+                msg += "Please add a size for the item not in inventory. \n";
+            }
+
+            if (NotInInventoryQuantity.Text == String.Empty)
+            {
+                msg += "Please add a quantity for the item not in inventory. \n";
+            }
+
+            if (NotInInventoryPrice.Text == String.Empty)
+            {
+                msg += "Please add a price for the item not in inventory. \n";
+            }
+
+            if (msg != String.Empty)
+            {
+                DisplayAlert("Error", msg, "Ok");
+            }
+            else
+            {
+                //add this item to the list
+                NotInInventoryDTO dto = new NotInInventoryDTO();
+
+                dto.WorkOrderId = 0;
+                dto.ArrangementId = 0;
+                dto.NotInInventoryName = NotInInventoryName.Text;
+                dto.NotInInventoryQuantity = Convert.ToInt32(NotInInventoryQuantity.Text);
+                dto.NotInInventorySize = NotInInventorySize.Text;
+                dto.NotInInventoryPrice = Convert.ToDecimal(NotInInventoryPrice.Text);
+
+                if (!NotInInventoryItemIsinList(dto))
+                {
+                    NotInInventoryName.Text = String.Empty;
+                    NotInInventoryQuantity.Text = String.Empty;
+                    NotInInventorySize.Text = String.Empty;
+                    NotInInventoryPrice.Text = String.Empty;
+
+                    notInInventoryList.Add(dto);
+
+                    arrangementInventoryList.Add(new ArrangementInventoryDTO()
+                    {
+                        ArrangementId = 0,
+                        ArrangementInventoryName = dto.NotInInventoryName,
+                        InventoryId = 0,
+                        InventoryTypeId = 0,
+                        Quantity = dto.NotInInventoryQuantity,
+                        Size = dto.NotInInventorySize,
+                    });
+
+
+                    arrangementInventoryListOC.Clear();
+
+                    foreach (ArrangementInventoryDTO a in arrangementInventoryList)
+                    {
+                        arrangementInventoryListOC.Add(a);
+                    }
+
+                    ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                }
+            }
+        }
+
+        private bool NotInInventoryItemIsinList(NotInInventoryDTO dto)
+        {
+            return notInInventoryList.Where(a => a.NotInInventoryName == dto.NotInInventoryName &&
+                a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryPrice == dto.NotInInventoryPrice).Any();
         }
     }
 }

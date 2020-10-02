@@ -5,6 +5,7 @@ using System.Text;
 
 using Android.App;
 using Android.Content;
+using Android.Net.Wifi;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
@@ -25,6 +26,8 @@ namespace EOMobile.Droid
         }
         public void StartActivityInAndroid()
         {
+            
+
             Intent intent = new Intent();
             intent.AddFlags(ActivityFlags.NewTask);
             intent.AddFlags(ActivityFlags.MultipleTask);
@@ -49,4 +52,6 @@ namespace EOMobile.Droid
             Android.App.Application.Context.StartActivity(intent);
         }
     }
+
+    
 }

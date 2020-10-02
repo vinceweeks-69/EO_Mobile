@@ -43,6 +43,9 @@
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
                  </Grid.RowDefinitions>
 
 
@@ -156,6 +159,72 @@
 
                 <Button x:Name="Payment" Text="Pay" Clicked="Payment_Clicked"  Grid.Column="3" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
       
+                  
+                    <Label
+                        Text="Add item not in inventory"
+                        Grid.Column="0"
+                        Grid.Row="9"
+                        Grid.ColumnSpan="2"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="Start" 
+                        HorizontalOptions="Start" />
+                    
+                     <Button
+                        x:Name="AddItemNotInInventory"
+                        Text="Add"
+                        Grid.Column="3"
+                        Grid.Row="9"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="Start" 
+                        HorizontalOptions="Start"
+                        Clicked="AddItemNotInInventory_Clicked"/>
+                    
+                        <Label
+                        Text="Name"
+                        Grid.Column="0"
+                        Grid.Row="10"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="Start" 
+                        HorizontalOptions="Start" />
+                    
+                        <Entry x:Name="NotInInventoryName" Grid.Column="0" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
+                    
+                        <Label
+                        Text="Size"
+                        Grid.Column="1"
+                        Grid.Row="10"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="Start" 
+                        HorizontalOptions="Start" />
+                    
+                        <Entry x:Name="NotInInventorySize" Grid.Column="1" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
+                    
+                        <Label
+                        Text="Quantity"
+                        Grid.Column="2"
+                        Grid.Row="10"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="Start" 
+                        HorizontalOptions="Start" />
+                    
+                        <Entry x:Name="NotInInventoryQuantity" Grid.Column="2" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
+                    
+                        <Label
+                        Text="Price"
+                        Grid.Column="3"
+                        Grid.Row="10"
+                        FontSize="Default"
+                        FontAttributes="Bold"
+                        VerticalOptions="Start" 
+                        HorizontalOptions="Start" />
+                    
+                        <Entry x:Name="NotInInventoryPrice" Grid.Column="3" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
+
             </Grid>
 
 
@@ -196,7 +265,7 @@
                                         <RowDefinition Height="Auto" Shell.BackgroundColor="{Binding BackgroundColor}" />
                                     </Grid.RowDefinitions>
                                     <Label Grid.Column="0" Text="{Binding InventoryName}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
-                                    <Label Grid.Column="1" Text="{Binding Size}"  VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" FontAttributes="Bold" HeightRequest="40"/>
+                                    <Label Grid.Column="1" Text="{Binding Size}"  VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"  HeightRequest="40"/>
                                     <Entry x:Name="Quantity" Keyboard="Numeric" Text="{Binding Quantity, Mode=TwoWay}" IsVisible="{Binding ShouldShow}" IsEnabled ="{Binding ShouldShow}" Grid.Column="2" WidthRequest="40" PropertyChanged="Quantity_PropertyChanged" HorizontalOptions="Start"/>
                                     <Button Text="Delete"  Grid.Column="3" Clicked="OnDeleteWorkOrderItem" CommandParameter="{Binding InventoryId}" IsVisible="{Binding ShouldShow}" IsEnabled ="{Binding ShouldShow}" HorizontalOptions="Start"/>
                                 </Grid>

@@ -104,6 +104,8 @@
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StripeService.cs" />
+    <Compile Include="WifiActivity.cs" />
+    <Compile Include="WifiBroadcastReceiver.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\FontAwesome5Brands.otf" />

@@ -1,4 +1,6 @@
-﻿using Android.Content.Res;
+﻿using Android.Content;
+using Android.Content.Res;
+using Android.Net.Wifi;
 using EO.ViewModels.ControllerModels;
 using EOMobile.Interfaces;
 using Newtonsoft.Json;
@@ -82,17 +84,19 @@ namespace EOMobile
 
             //LAN_Address = "http://99.125.200.187:9000"; //Me Royalwood IP
 
-            LAN_Address = "http://10.0.0.4:9000/";   //Me Royalwood router
+            //LAN_Address = "http://10.0.0.4:9000/";   //Me Royalwood router
 
             //LAN_Address = "http://10.1.10.148:9000/";   //Me EO
 
             //LAN_Address = "http://10.1.10.1:9000/";   //router EO
 
-            //LAN_Address = "http://10.1.10.36:9000/";   //Roseanne EO when hardwired to eohome network
+            LAN_Address = "http://10.1.10.36:9000/";   //Roseanne EO when hardwired to eohome network
 
-            //LAN_Address = "http://elegantsystem3.ddns.net:9000";   //The farm NoIP ( I had to add port number)
+            //LAN_Address = "http://192.168.1.134:9000"; //EO my laptop on jdambar
 
-            //LAN_Address = "http://76.109.59.49:9000";   //The farm by ip
+            //LAN_Address = "http://elegantsystem2.ddns.net:9000";   //The farm NoIP ( I had to add port number)
+
+            //LAN_Address = "http://elegantsystem.ddns.net:9000";   //The farm by ip
 
             //LAN_Address = "http://eo.hopto.org:9000/";   //Me
 
@@ -100,15 +104,7 @@ namespace EOMobile
 
             //Stripe.StripeConfiguration.ApiKey = "sk_test_6vJyMV6NxHArGV6kI2EL6R7V00kzjXJ72u";
 
-            //List<string> wtf = GetLocalIPv4(NetworkInterfaceType.Ethernet);
-
-            //List<string> wtf2 = GetLocalIPv4(NetworkInterfaceType.Wireless80211);
-
-            //var addresses = Dns.GetHostEntry((Dns.GetHostName()))
-            //        .AddressList
-            //        .Where(x => x.AddressFamily == AddressFamily.InterNetwork)
-            //        .Select(x => x.ToString())
-            //        .ToArray();
+            string hostName = DependencyService.Get<IWifiActivity>().GetHostName();
 
             MainPage = new NavigationPage(new LoginPage());
            
@@ -179,6 +175,23 @@ namespace EOMobile
 
             InitStateList();
         }
+
+        public void ChangeLANAddress(string hostName)
+        {
+            hostName = hostName.ToLower();
+
+            if(hostName.Contains("jdambar") ||
+                hostName.Contains("orchidhome"))
+            {
+                LAN_Address = "http://10.1.10.36:9000";             //Roseanne
+                //LAN_Address = "http://192.168.1.134:9000";    //Me in back office
+            }
+            else
+            {
+                LAN_Address = "http://elegantsystem2.ddns.net:9000";  //76.109.59.49
+            }
+        }
+        
         public List<string> GetLocalIPv4(NetworkInterfaceType _type)
         {
             List<string> ipAddrList = new List<string>();
@@ -293,7 +306,7 @@ namespace EOMobile
         }
 
         //where the call you want make is paramName = objectPkId, objectName (string)  OR leave paramName and paramID empty for "Get All"
-        public async Task<T> GetRequest<T>(GenericGetRequest getRequest)
+        public async Task<T> GetRequest<T>(GenericGetRequest getRequest) where T : new()
         {
             try
             {
@@ -333,11 +346,12 @@ namespace EOMobile
             {
                 Exception ex2 = new Exception(getRequest.Uri, ex);
                 LogError(ex2.Message, JsonConvert.SerializeObject(getRequest));
-                return default(T);
+                //this returns null for reference types
+                return new T();
             }
         }
 
-        public async Task<TOut> PostRequest<TIn, TOut>(string uri, TIn content)
+        public async Task<TOut> PostRequest<TIn, TOut>(string uri, TIn content) where TOut : new()
         {
             string serializedContent = String.Empty;
 
@@ -365,7 +379,7 @@ namespace EOMobile
             {
                 Exception ex2 = new Exception(uri, ex);
                 LogError(ex2.Message, serializedContent);
-                return default(TOut);
+                return new TOut();
             }
         }
 
@@ -376,6 +390,12 @@ namespace EOMobile
             GetUserResponse response = await GetRequest<GetUserResponse>(request);
             return response;
         }   
+
+        public async Task<ApiResponse> DoesCustomerExist(AddCustomerRequest request)
+        {
+            ApiResponse taskResponse = await PostRequest<AddCustomerRequest, ApiResponse>("DoesCustomerExist", request);
+            return taskResponse;
+        }
 
         //Called Get - actually a Post
         public async Task<GetPersonResponse> GetCustomer(long customerId)

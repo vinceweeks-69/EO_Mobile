@@ -174,6 +174,13 @@ namespace EOMobile
                 }
             }
 
+            List<NotInInventoryDTO> notInInventory = workOrderList.Where(a => a.WorkOrder.WorkOrderId == workOrderId).Select(b => b.NotInInventory).FirstOrDefault();
+
+            foreach (NotInInventoryDTO a in notInInventory)
+            {
+                list1.Add(a.ConvertToWorkOrderinventoryMap());
+            }
+
             if(arrangements.Count > 0)
             {
                 foreach(KeyValuePair<long,List<WorkOrderInventoryMapDTO>> kvp in arrangements)

@@ -3,6 +3,7 @@ using EOMobile.ViewModels;
 using Newtonsoft.Json;
 using Stripe;
 using System;
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -17,6 +18,7 @@ using ViewModels.ControllerModels;
 using ViewModels.DataModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+
 
 namespace EOMobile
 {
@@ -43,6 +45,8 @@ namespace EOMobile
         List<KeyValuePair<long, string>> employeeDDL = new List<KeyValuePair<long, string>>();
 
         TabbedWorkOrderPage TabParent = null;
+
+        int NotInInventoryTempId = 1;
 
         decimal workOrderTotal = 0;
         long currentWorkOrderId = 0;
@@ -263,6 +267,25 @@ namespace EOMobile
                 ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
 
                 Dictionary<long, List<WorkOrderInventoryItemDTO>> arrangements = new Dictionary<long, List<WorkOrderInventoryItemDTO>>();
+
+                foreach (var x in workOrder.NotInInventory)
+                {
+                    WorkOrderInventoryItemDTO dto =
+                        new WorkOrderInventoryItemDTO()
+                        {
+                            WorkOrderId = x.WorkOrderId,
+                            InventoryId = 0,
+                            InventoryName = x.NotInInventoryName,
+                            Size = x.NotInInventorySize,
+                            NotInInventoryName = x.NotInInventoryName,
+                            Quantity = x.NotInInventoryQuantity,
+                            NotInInventorySize = x.NotInInventorySize,
+                            NotInInventoryPrice = x.NotInInventoryPrice,
+                            GroupId = 0
+                        };
+
+                    list1.Add(new WorkOrderViewModel(dto));
+                }
 
                 foreach (var x in workOrder.WorkOrderList)
                 {
@@ -667,7 +690,6 @@ namespace EOMobile
                 CreateDate = DateTime.Now,
                 DeliveryDate = this.DeliveryDate.Date,
                 Comments = this.Comments.Text,
-                //IsSiteService = this.ServiceType.SelectedIndex == 0 ? false : true,
                 IsSiteService = this.DeliveryType.SelectedIndex == 2 ? true : false, 
                 IsDelivery = this.DeliveryType.SelectedIndex == 0 ? false : true,
                 DeliveryType = this.DeliveryType.SelectedIndex,
@@ -683,19 +705,37 @@ namespace EOMobile
 
             List<WorkOrderInventoryMapDTO> workOrderInventoryMap = new List<WorkOrderInventoryMapDTO>();
 
+            List<NotInInventoryDTO> notInInventory = new List<NotInInventoryDTO>();
+
             foreach (WorkOrderInventoryItemDTO woii in workOrderInventoryList)
             {
-                workOrderInventoryMap.Add(new WorkOrderInventoryMapDTO()
+                if (!String.IsNullOrEmpty(woii.NotInInventoryName))
                 {
-                    InventoryId = woii.InventoryId,
-                    InventoryName = woii.InventoryName,
-                    Quantity = woii.Quantity,
-                    GroupId = woii.GroupId
-                });
+                    notInInventory.Add(new NotInInventoryDTO()
+                    {
+                        WorkOrderId = currentWorkOrderId,
+                        NotInInventoryName = woii.NotInInventoryName,
+                        NotInInventorySize = woii.NotInInventorySize,
+                        NotInInventoryQuantity = woii.Quantity,
+                        NotInInventoryPrice = woii.NotInInventoryPrice
+                    });
+                }
+                else
+                {
+                    workOrderInventoryMap.Add(new WorkOrderInventoryMapDTO()
+                    {
+                        InventoryId = woii.InventoryId,
+                        InventoryName = woii.InventoryName,
+                        Quantity = woii.Quantity,
+                        GroupId = woii.GroupId,
+                        Size = woii.Size,
+                    });
+                }
             }
 
             addWorkOrderRequest.WorkOrder = dto;
             addWorkOrderRequest.WorkOrderInventoryMap = workOrderInventoryMap;
+            addWorkOrderRequest.NotInInventory = notInInventory;
 
             currentWorkOrderId = ((App)App.Current).AddWorkOrder(addWorkOrderRequest);
 
@@ -863,6 +903,73 @@ namespace EOMobile
                     }
                 }
             }
+        }
+
+        private void AddItemNotInInventory_Clicked(object sender, EventArgs e)
+        {
+            String msg = String.Empty;
+            if (NotInInventoryName.Text == String.Empty)
+            {
+                msg += "Please add a name for the item not in inventory. \n";
+            }
+
+            if(NotInInventorySize.Text == String.Empty)
+            {
+                msg += "Please add a size for the item not in inventory. \n";
+            }
+
+            if (NotInInventoryQuantity.Text == String.Empty)
+            {
+                msg += "Please add a quantity for the item not in inventory. \n";
+            }
+
+            if (NotInInventoryPrice.Text == String.Empty)
+            {
+                msg += "Please add a price for the item not in inventory. \n";
+            }
+
+            if(msg!= String.Empty)
+            {
+                DisplayAlert("Error", msg, "Ok");
+            }
+            else
+            {
+                //add this item to the list
+                WorkOrderInventoryItemDTO dto = new WorkOrderInventoryItemDTO();
+                dto.InventoryId = NotInInventoryTempId++;
+                dto.InventoryName = NotInInventoryName.Text;
+                dto.Quantity = Convert.ToInt32(NotInInventoryQuantity.Text);
+                dto.Size = NotInInventorySize.Text;
+                
+                dto.NotInInventoryName = NotInInventoryName.Text;
+                dto.NotInInventorySize = NotInInventorySize.Text;
+                dto.NotInInventoryPrice = Convert.ToDecimal(NotInInventoryPrice.Text);
+
+                if(!NotInInventoryItemIsinList(dto))
+                {
+                    workOrderInventoryList.Add(dto);
+
+                    ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>();
+
+                    foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
+                    {
+                        list1.Add(wo);
+                    }
+
+                    InventoryItemsListView.ItemsSource = list1;
+
+                    NotInInventoryName.Text = String.Empty;
+                    NotInInventorySize.Text = String.Empty;
+                    NotInInventoryPrice.Text = String.Empty;
+                    NotInInventoryQuantity.Text = String.Empty;
+                }
+            }
+        }
+
+        private bool NotInInventoryItemIsinList(WorkOrderInventoryItemDTO dto)
+        {
+            return workOrderInventoryList.Where(a => a.NotInInventoryName == dto.NotInInventoryName &&
+                a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryPrice == dto.NotInInventoryPrice).Any();
         }
     }
 }

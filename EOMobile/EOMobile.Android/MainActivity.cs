@@ -23,6 +23,7 @@ using static Android.Provider.MediaStore;
 using Android.Database;
 using ViewModels.DataModels;
 using LibVLCSharp.Forms.Shared;
+using Android.Net.Wifi;
 
 namespace EOMobile.Droid
 {
@@ -34,7 +35,9 @@ namespace EOMobile.Droid
 
         public MainActivity()
         {
-
+            IntentFilter filter = new IntentFilter();
+            filter.AddAction(WifiManager.NetworkStateChangedAction);
+            Android.App.Application.Context.RegisterReceiver(new NetworkBroadcastReceiver(), filter);
         }
 
         public override void OnBackPressed()

@@ -169,7 +169,7 @@ namespace EOMobile
                 }
                 request.Customer.Address.zipcode = Zip.Text;
 
-                SaveCustomer(request);
+                ((App)App.Current).DoesCustomerExist(request).ContinueWith(a => SaveCustomer(request,a.Result));
             }
             else
             {
@@ -177,56 +177,73 @@ namespace EOMobile
             }
         }
 
-        private void SaveCustomer(AddCustomerRequest request)
+        private void SaveCustomer(AddCustomerRequest request, ApiResponse response)
         {
             try
             {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", ((App)(App.Current)).User + " : " + ((App)(App.Current)).Pwd);
-
-                string jsonData = JsonConvert.SerializeObject(request);
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-                HttpResponseMessage httpResponse = client.PostAsync("api/Login/AddCustomer", content).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
+                if (response.Success && response.Id != 0)  
                 {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    ApiResponse apiResponse = JsonConvert.DeserializeObject<ApiResponse>(strData);
-
-                    if (apiResponse.Messages.Count > 0)
+                    //duplicate customer
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        StringBuilder sb = new StringBuilder();
-                        foreach (KeyValuePair<string, List<string>> messages in apiResponse.Messages)
+                        DisplayAlert("Error", "This user is already in the database.", "Ok");
+                    });
+                }
+                else
+                {
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
+                    client.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    client.DefaultRequestHeaders.Add("EO-Header", ((App)(App.Current)).User + " : " + ((App)(App.Current)).Pwd);
+
+                    string jsonData = JsonConvert.SerializeObject(request);
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage httpResponse = client.PostAsync("api/Login/AddCustomer", content).Result;
+
+                    if (httpResponse.IsSuccessStatusCode)
+                    {
+                        Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
+                        StreamReader strReader = new StreamReader(streamData);
+                        string strData = strReader.ReadToEnd();
+                        //strReader.Close();
+                        ApiResponse apiResponse = JsonConvert.DeserializeObject<ApiResponse>(strData);
+
+                        if (apiResponse.Messages.Count > 0)
                         {
-                            foreach (string msg in messages.Value)
+                            StringBuilder sb = new StringBuilder();
+                            foreach (KeyValuePair<string, List<string>> messages in apiResponse.Messages)
                             {
-                                sb.AppendLine(msg);
+                                foreach (string msg in messages.Value)
+                                {
+                                    sb.AppendLine(msg);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (Initiator != null && Initiator as WorkOrderPage != null)
+                            {
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    request.Customer.Person.person_id = apiResponse.Id;
+
+                                    MessagingCenter.Send<PersonAndAddressDTO>(request.Customer, "SearchCustomer");
+
+                                    Navigation.PopAsync();
+                                });
                             }
                         }
                     }
                     else
                     {
-                        if (Initiator != null && Initiator as WorkOrderPage != null)
+                        Device.BeginInvokeOnMainThread(() =>
                         {
-                            request.Customer.Person.person_id = apiResponse.Id;
-
-                            MessagingCenter.Send<PersonAndAddressDTO>(request.Customer, "SearchCustomer");
-
-                            Navigation.PopAsync();
-                        }
+                            DisplayAlert("Error", "Error adding Work Order", "Ok");
+                        });
                     }
-                }
-                else
-                {
-                    //MessageBox.Show("Error adding Work Order");
                 }
             }
             catch (Exception ex)
@@ -234,7 +251,6 @@ namespace EOMobile
                 Exception ex2 = new Exception("AddCustomer", ex);
                 ((App)App.Current).LogError(ex2.Message, JsonConvert.SerializeObject(request));
             }
-
         }
 
         public void OnDeleteCustomerClicked(object sender, EventArgs e)

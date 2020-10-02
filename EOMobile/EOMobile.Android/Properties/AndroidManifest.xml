@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.ElegantOrchids.EOMobile" android:installLocation="preferExternal">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
 	<uses-permission android:name="android.permission.CAMERA" />
@@ -7,10 +7,9 @@
 	<uses-permission android:name="android.permission.DELETE_CACHE_FILES" />
 	<uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
 	<uses-permission android:name="android.permission.INTERNET" />
-<application android:label="EOMobile">
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<application android:label="EOMobile">
 	android:usesCleartextTraffic="true"	
-		<provider android:name="android.support.v4.content.FileProvider" android:authorities="com.ElegantOrchids.EOMobile.fileprovider" android:exported="false" android:grantUriPermissions="true">
-			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"></meta-data>
-		</provider>
-	</application>
+		<provider android:name="android.support.v4.content.FileProvider" android:authorities="com.ElegantOrchids.EOMobile.fileprovider" android:exported="false" android:grantUriPermissions="true"><meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"></meta-data></provider></application>
 </manifest>
