@@ -138,6 +138,19 @@ namespace EOMobile
 
             arrangementInventoryList = TabParent.CurrentArrangement.ArrangementInventory;
 
+            foreach(NotInInventoryDTO nii in TabParent.CurrentArrangement.NotInInventory)
+            {
+                arrangementInventoryList.Add(new ArrangementInventoryDTO
+                {
+                    ArrangementId = TabParent.CurrentArrangement.Arrangement.ArrangementId,
+                    ArrangementInventoryName = nii.NotInInventoryName,
+                    Quantity = nii.NotInInventoryQuantity,
+                    Size = nii.NotInInventorySize,
+                });
+
+                notInInventoryList.Add(nii);
+            }
+
             foreach (ArrangementInventoryDTO a in arrangementInventoryList)
             {
                 arrangementInventoryListOC.Add(a);
@@ -313,44 +326,40 @@ namespace EOMobile
 
         public bool ValidateArrangement(ref string validationMessage)
         {
-            if(arrangementInventoryList.Count < 2)
+            if (!TabParent.ForWorkOrder)
             {
-                validationMessage += "Please add at least one container or container value and one inventory item. \n";
-            }
-            else
-            {
-                 if (!TabParent.ForWorkOrder)
+                if(String.IsNullOrEmpty(Name.Text))
                 {
-                    if(String.IsNullOrEmpty(Name.Text))
-                    {
-                        validationMessage += "Please pick a name for this arrangement. \n";
-                    }
-                    else
-                    {
-                        ArrangementDTO arrangement = new ArrangementDTO();
-                        arrangement.ArrangementId = arrangementInventoryList[0].ArrangementId;
-                        arrangement.ArrangementName = Name.Text;
-                        //check for duplication
-                        if (!((App)App.Current).ArrangementNameIsNotUnique(arrangement))
-                        {
-                            validationMessage += "This arrangement name is being used. Please choose another. \n";
-                        }
-                    }
-                }
-
-                if (Container.SelectedItem == null)
-                {
-                    validationMessage += "Please pick a Container value. \n";
+                    validationMessage += "Please pick a name for this arrangement. \n";
                 }
                 else
                 {
-                    int containerVal = (int)((KeyValuePair<long, string>)Container.SelectedItem).Key;
+                    ArrangementDTO arrangement = new ArrangementDTO();
+                    arrangement.ArrangementId = arrangementInventoryList[0].ArrangementId;
+                    arrangement.ArrangementName = Name.Text;
+                    //check for duplication
+                    if (!((App)App.Current).ArrangementNameIsNotUnique(arrangement))
+                    {
+                        validationMessage += "This arrangement name is being used. Please choose another. \n";
+                    }
+                }
+            }
 
-                    if (containerVal == 1) // "new container"
+            if (Container.SelectedItem == null)
+            {
+                validationMessage += "Please pick a Container value. \n";
+            }
+            else
+            {
+                int containerVal = (int)((KeyValuePair<long, string>)Container.SelectedItem).Key;
+
+                if (containerVal == 1) // "new container"
+                {
+                    //if the container chosen is not in inventory, this validation cannot be valid
+                    if (notInInventoryList.Count == 0)
                     {
                         //check inventory for an inventory item of type container
-                        //if(!arrangementInventoryList.Where(a => a.Type.Equals("Containers")).Any())
-                        if(!arrangementInventoryList.Where(a => a.InventoryTypeId == 2).Any())
+                        if (!arrangementInventoryList.Where(a => a.InventoryTypeId == 2).Any())
                         {
                             validationMessage += "Please pick a Container. \n";
                         }
@@ -362,9 +371,12 @@ namespace EOMobile
                             }
                         }
                     }
-                    else
+                }
+                else
+                {
+                    //make sure CustomerContainerId is not null
+                    if (!customerContainerId.HasValue || customerContainerId.Value == 0)
                     {
-                        //make sure CustomerContainerId is not null
                         validationMessage += "Please choose the customer container to be used \n";
                     }
                 }
@@ -392,24 +404,35 @@ namespace EOMobile
                     AddArrangementRequest request = new AddArrangementRequest();
                     request.Arrangement = new ArrangementDTO();
 
-                    if (TabParent.CurrentArrangement != null)
-                        request = TabParent.CurrentArrangement;
-                                        
+                    request.Arrangement.ArrangementId = TabParent.CurrentArrangement != null ? TabParent.CurrentArrangement.Arrangement.ArrangementId : 0;
+
                     request.Arrangement.ArrangementName = Name.Text;
-                    request.Arrangement.DesignerName = Designer.SelectedItem != null ? ((KeyValuePair<long,string>)Designer.SelectedItem).Value : String.Empty;
+                    request.Arrangement.DesignerName = Designer.SelectedItem != null ? ((KeyValuePair<long, string>)Designer.SelectedItem).Value : String.Empty;
                     request.Arrangement._180or360 = Style.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;
                     request.Arrangement.Container = Container.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;   //1 = new container (db default)
                     request.Arrangement.LocationName = Location.Text;
                     request.Arrangement.UpdateDate = DateTime.Now;
-                    request.ArrangementInventory = arrangementInventoryList;
+                    request.ArrangementInventory = arrangementInventoryList.Where(a => a.InventoryId != 0).ToList();  // "Not In Inventory" items may have been added to the display list
                     request.Arrangement.IsGift = GiftCheckBox.IsChecked ? 1 : 0;
                     request.Arrangement.GiftMessage = GiftMessage.Text;
+
+                    Random r = new Random();
+                    long tempArrangementId = r.Next(1, 100);
+
+                    foreach(NotInInventoryDTO dto in notInInventoryList)
+                    {
+                        //group them for the work order
+                        if(!dto.ArrangementId.HasValue || dto.ArrangementId == 0)
+                        {
+                            dto.ArrangementId = tempArrangementId;
+                        }
+                    }
 
                     request.NotInInventory = notInInventoryList;
 
                     request.Inventory = new InventoryDTO()
                     {
-                        InventoryName = Name.Text,
+                        InventoryName = String.IsNullOrEmpty(Name.Text) ? "Arrangement_" + Convert.ToString(tempArrangementId) : Name.Text,
                         InventoryTypeId = 5,
                     };
 
@@ -455,6 +478,9 @@ namespace EOMobile
                             InventoryName = Name.Text,
                             InventoryTypeId = 5,
                         };
+
+                        request.NotInInventory = notInInventoryList;
+                        request.ArrangementInventory = arrangementInventoryList.Where(a => a.InventoryId != 0).ToList();
 
                         arrangementId = ((App)App.Current).AddArrangement(request);
 

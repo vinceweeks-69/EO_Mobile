@@ -28,7 +28,7 @@ namespace EOMobile
         ObservableCollection<PersonAndAddressDTO> customersOC = new ObservableCollection<PersonAndAddressDTO>();
         ContentPage Initiator;
         long currentCustomerId;
-
+        bool forWorkOrder;
         public CustomerPage()
         {
             InitializeComponent();
@@ -38,6 +38,8 @@ namespace EOMobile
             History.IsEnabled = false;
 
             Containers.IsEnabled = false; //turn it on once the user selects a customer
+
+            this.forWorkOrder = forWorkOrder;
 
             LoadCustomerData();
         }
@@ -66,8 +68,9 @@ namespace EOMobile
             });
         }
 
-        public CustomerPage(ContentPage initiator) : this()
+        public CustomerPage(ContentPage initiator, bool forWorkOrder = false) : this()
         {
+            this.forWorkOrder = forWorkOrder;
             Initiator = initiator;
         }
 
@@ -153,7 +156,7 @@ namespace EOMobile
             AddCustomerRequest request = new AddCustomerRequest();
 
             if (!String.IsNullOrEmpty(FirstName.Text) && !String.IsNullOrEmpty(LastName.Text) &&
-                !String.IsNullOrEmpty(Phone.Text) && !String.IsNullOrEmpty(Email.Text))
+                !String.IsNullOrEmpty(Phone.Text)) // && !String.IsNullOrEmpty(Email.Text))
             {
                 request.Customer.Person.first_name = FirstName.Text;
                 request.Customer.Person.last_name = LastName.Text;
@@ -173,7 +176,7 @@ namespace EOMobile
             }
             else
             {
-                DisplayAlert("Error", "To save a customer, enter at least First and Last Name, Phone and Email", "Ok");
+                DisplayAlert("Error", "To save a customer, enter at least First and Last Name and a Phone number", "Ok");
             }
         }
 
@@ -234,6 +237,10 @@ namespace EOMobile
 
                                     Navigation.PopAsync();
                                 });
+                            }
+                            else
+                            {
+                                DisplayAlert("Success", "Customer saved!", "Ok");
                             }
                         }
                     }

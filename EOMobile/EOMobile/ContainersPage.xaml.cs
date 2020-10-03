@@ -107,7 +107,6 @@ namespace EOMobile
             try
             {
                 HttpClient client = new HttpClient();
-                //client.BaseAddress = new Uri("http://localhost:9000/");
                 client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("plain/text"));
 

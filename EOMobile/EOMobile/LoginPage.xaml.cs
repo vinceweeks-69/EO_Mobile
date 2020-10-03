@@ -49,7 +49,7 @@ namespace EOMobile
             {
                 HttpClient client = new HttpClient();
 
-                client.Timeout = new TimeSpan(0, 0, 0, 3, 0);
+                //client.Timeout = new TimeSpan(0, 0, 0, 3, 0); //if this is uncommented - the timeout value is NOT respected
 
                 client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
 

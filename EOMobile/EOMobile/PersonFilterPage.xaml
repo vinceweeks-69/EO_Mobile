@@ -141,7 +141,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Column="0" Text="{Binding Person.first_name}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                    <Label Grid.Column="0" Text="{Binding Person.CustomerName}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
                                     <Label Grid.Column="1" Text="{Binding Address.street_address}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
                                     <Label Grid.Column="2" Text="{Binding Person.phone_primary}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />
                                     <Label Grid.Column="3" Text="{Binding Person.email}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start" />

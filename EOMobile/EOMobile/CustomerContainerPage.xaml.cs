@@ -166,12 +166,23 @@ namespace EOMobile
 
                 List<EOImgData> images = ((App)App.Current).GetImageData();
 
-                if(images != null && images.Count > 0)
+                if (images != null && images.Count > 0)
                 {
                     AddImageRequest imageRequest = new AddImageRequest();
                     imageRequest.imgBytes = images[0].imgData;
                     ((App)App.Current).AddImage(imageRequest).ContinueWith(a => UpdateCustomerContainerWithImage(request, response, a.Result));
                 }
+                else
+                {
+                    CustomerContainerSaveComplete(response);
+                }
+            }
+            else
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    DisplayAlert("Error", "Problem saving customer container", "Ok");
+                });
             }
         }
 
@@ -192,6 +203,8 @@ namespace EOMobile
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    DisplayAlert("Success", "Customer container saved!", "Ok");
+
                     selectedCustomerContainerId = 0;
                     selectedCustomerContainerImageId = 0;
                     ((App)App.Current).ClearImageData();
