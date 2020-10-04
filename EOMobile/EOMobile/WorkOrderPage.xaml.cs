@@ -314,10 +314,19 @@ namespace EOMobile
                     list1.Add(new WorkOrderViewModel(dto));
                 }
 
-                arrangements = workOrder.Arrangements;
+                //arrangements = workOrder.Arrangements;
 
                 foreach(GetArrangementResponse ar in workOrder.Arrangements)
                 {
+                    AddArrangementRequest aaReq = new AddArrangementRequest();
+
+                    aaReq.Arrangement = ar.Arrangement;
+                    aaReq.ArrangementInventory = ar.ArrangementList;
+                    aaReq.GroupId = ar.Arrangement.ArrangementId;
+                    aaReq.NotInInventory = ar.NotInInventory;
+
+                    arrangementList.Add(aaReq);
+                    
                     //add a blank row
                     list1.Add(new WorkOrderViewModel()
                     {
@@ -534,6 +543,20 @@ namespace EOMobile
                     groupId = aar.Arrangement.ArrangementId;
                 }
 
+                if(aar.Arrangement.ArrangementId == 0)
+                {
+                    arrangementList.Add(aar);
+                }
+                else
+                {
+                    if(arrangementList.Where(a => a.Arrangement.ArrangementId == aar.Arrangement.ArrangementId).Any())
+                    {
+                        AddArrangementRequest temp2 = arrangementList.Where(a => a.Arrangement.ArrangementId == aar.Arrangement.ArrangementId).First();
+                        arrangementList.Remove(temp2);
+                        arrangementList.Add(aar);
+                    }
+                }
+
                 ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
 
                 //if the arrangement data was passed back to the Arrangement page for any reason, clean the local store
@@ -557,75 +580,79 @@ namespace EOMobile
                     workOrderInventoryList.Add(wovm);
                 });
 
-                //add blank row at start
-                WorkOrderInventoryItemDTO blankFirst = new WorkOrderInventoryItemDTO();
-                blankFirst.GroupId = groupId;
-                workOrderInventoryList.Add(blankFirst);
-
-                //add a "Header" row
-                WorkOrderInventoryItemDTO header = new WorkOrderInventoryItemDTO();
-                header.GroupId = groupId;
-                header.InventoryName = "Arrangement";
-                workOrderInventoryList.Add(header);
-
-                //translate between the two inventory types
-                foreach (ArrangementInventoryDTO dto in aar.ArrangementInventory)
+                foreach (AddArrangementRequest req in arrangementList)
                 {
-                    WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO(dto);
-                    wdto.GroupId = groupId;
+                    //add blank row at start
+                    WorkOrderInventoryItemDTO blankFirst = new WorkOrderInventoryItemDTO();
+                    blankFirst.GroupId = groupId;
+                    workOrderInventoryList.Add(blankFirst);
 
-                    if(dto.InventoryId == 0)  //item not in inventory
+                    //add a "Header" row
+                    WorkOrderInventoryItemDTO header = new WorkOrderInventoryItemDTO();
+                    header.GroupId = groupId;
+                    header.InventoryName = "Arrangement";
+                    workOrderInventoryList.Add(header);
+
+                    //translate between the two inventory types
+                    foreach (ArrangementInventoryDTO dto in req.ArrangementInventory)
                     {
-                        wdto.InventoryName = dto.ArrangementInventoryName;
-                        wdto.NotInInventoryName = dto.ArrangementInventoryName;
-                        wdto.NotInInventorySize = dto.Size;
-                        wdto.Quantity = dto.Quantity;
-                        //wdto.NotInInventoryPrice = dto.Price;  //add price to ArrangementInventoryItemDTO ?
+                        WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO(dto);
                         wdto.GroupId = groupId;
+
+                        if (dto.InventoryId == 0)  //item not in inventory
+                        {
+                            wdto.InventoryName = dto.ArrangementInventoryName;
+                            wdto.NotInInventoryName = dto.ArrangementInventoryName;
+                            wdto.NotInInventorySize = dto.Size;
+                            wdto.Quantity = dto.Quantity;
+                            //wdto.NotInInventoryPrice = dto.Price;  //add price to ArrangementInventoryItemDTO ?
+                            wdto.GroupId = groupId;
+                        }
+
+                        workOrderInventoryList.Add(wdto);
                     }
 
-                    workOrderInventoryList.Add(wdto);
+                    
+                    //aar.NotInInventory.Where(a => a.ArrangementId != 0).ToList().ForEach(item =>
+                    req.NotInInventory.Where(a => a.ArrangementId != 0).ToList().ForEach(item =>
+                    {
+                        WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO();
+
+                        wdto.InventoryName = item.NotInInventoryName;
+                        wdto.NotInInventoryName = item.NotInInventoryName;
+                        wdto.NotInInventorySize = item.NotInInventorySize;
+                        wdto.Quantity = item.NotInInventoryQuantity;
+                        //wdto.NotInInventoryPrice = dto.Price;  //add price to ArrangementInventoryItemDTO ?
+                        wdto.GroupId = item.ArrangementId;
+
+                        workOrderInventoryList.Add(wdto);
+                    });
+
+                    //add blank row at end
+                    WorkOrderInventoryItemDTO blankLast = new WorkOrderInventoryItemDTO();
+                    blankLast.GroupId = groupId;
+                    workOrderInventoryList.Add(blankLast);
+
                 }
-
-                aar.NotInInventory.Where(a => a.ArrangementId != 0).ToList().ForEach(item =>
-                {
-                    WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO();
-
-                    wdto.InventoryName = item.NotInInventoryName;
-                    wdto.NotInInventoryName = item.NotInInventoryName;
-                    wdto.NotInInventorySize = item.NotInInventorySize;
-                    wdto.Quantity = item.NotInInventoryQuantity;
-                    //wdto.NotInInventoryPrice = dto.Price;  //add price to ArrangementInventoryItemDTO ?
-                    wdto.GroupId = item.ArrangementId;
-
-                    workOrderInventoryList.Add(wdto);
-                });
-
-                //add blank row at end
-                WorkOrderInventoryItemDTO blankLast = new WorkOrderInventoryItemDTO();
-                blankLast.GroupId = groupId;
-                workOrderInventoryList.Add(blankLast);
-
-                
 
                 foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
                 {
                     list1.Add(new WorkOrderViewModel(wo));
                 }
 
-                if(!arrangementList.Where(a => a.GroupId == groupId).Any())
-                {
-                    arrangementList.Add(aar);
-                }
-                else
-                {
-                    AddArrangementRequest old = arrangementList.Where(a => a.GroupId == groupId).FirstOrDefault();
-                    int index = arrangementList.IndexOf(old);
-                    if(index >= 0 && index < arrangementList.Count)
-                    {
-                        arrangementList[index] = aar;
-                    }
-                }
+                //if(!arrangementList.Where(a => a.GroupId == groupId).Any())
+                //{
+                //    arrangementList.Add(aar);
+                //}
+                //else
+                //{
+                //    AddArrangementRequest old = arrangementList.Where(a => a.GroupId == groupId).FirstOrDefault();
+                //    int index = arrangementList.IndexOf(old);
+                //    if(index >= 0 && index < arrangementList.Count)
+                //    {
+                //        arrangementList[index] = aar;
+                //    }
+                //}
 
                 InventoryItemsListView.ItemsSource = list1;
 
