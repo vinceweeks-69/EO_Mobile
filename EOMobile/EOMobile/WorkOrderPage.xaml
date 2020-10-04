@@ -267,7 +267,7 @@
                                     <Label Grid.Column="0" Text="{Binding InventoryName}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
                                     <Label Grid.Column="1" Text="{Binding Size}"  VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"  HeightRequest="40"/>
                                     <Entry x:Name="Quantity" Keyboard="Numeric" Text="{Binding Quantity, Mode=TwoWay}" IsVisible="{Binding ShouldShow}" IsEnabled ="{Binding ShouldShow}" Grid.Column="2" WidthRequest="40" PropertyChanged="Quantity_PropertyChanged" HorizontalOptions="Start"/>
-                                    <Button Text="Delete"  Grid.Column="3" Clicked="OnDeleteWorkOrderItem" CommandParameter="{Binding InventoryId}" IsVisible="{Binding ShouldShow}" IsEnabled ="{Binding ShouldShow}" HorizontalOptions="Start"/>
+                                    <Button Text="Delete"  Grid.Column="3" Clicked="OnDeleteWorkOrderItem" CommandParameter="{Binding}" IsVisible="{Binding ShouldShow}" IsEnabled ="{Binding ShouldShow}" HorizontalOptions="Start"/>
                                 </Grid>
                             </ViewCell>
                         </DataTemplate>

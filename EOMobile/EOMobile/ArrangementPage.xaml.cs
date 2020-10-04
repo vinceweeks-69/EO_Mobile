@@ -582,11 +582,23 @@ namespace EOMobile
                 //Command parameter is InventoryId
                 if (button.CommandParameter != null)
                 {
-                    long deleteItemId = (long)(button).CommandParameter;
-                    ArrangementInventoryDTO dto = arrangementInventoryList.Where(a => a.InventoryId == deleteItemId).FirstOrDefault();
-                    arrangementInventoryList.Remove(dto);
-                    arrangementInventoryListOC.Remove(dto);
-                    ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                    ArrangementInventoryDTO dto = button.CommandParameter as ArrangementInventoryDTO;
+
+                    if (dto != null)
+                    {
+                        if (dto.InventoryId == 0)
+                        {
+                            if(notInInventoryList.Where(a => a.NotInInventoryName == dto.ArrangementInventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).Any())
+                            {
+                                NotInInventoryDTO nii = notInInventoryList.Where(a => a.NotInInventoryName == dto.ArrangementInventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).First();
+                                notInInventoryList.Remove(nii);
+                            }
+                        }
+
+                        arrangementInventoryList.Remove(dto);
+                        arrangementInventoryListOC.Remove(dto);
+                        ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                    }
                 }
             }
         }
@@ -701,7 +713,7 @@ namespace EOMobile
                     long inventoryId = (long)(button).CommandParameter;
                     ArrangementInventoryDTO inventory = arrangementInventoryList.Where(a => a.InventoryId == inventoryId).FirstOrDefault();
 
-                    if (inventory.ImageId != 0)
+                    if (inventory != null && inventory.ImageId != 0)
                     {
                         if (!inventoryImageIdsLoaded.Contains(inventory.ImageId))
                         {

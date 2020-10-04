@@ -50,9 +50,7 @@ namespace EOMobile
 
         TabbedWorkOrderPage TabParent = null;
 
-        int NotInInventoryTempId = 1;
 
-        decimal workOrderTotal = 0;
         long currentWorkOrderId = 0;
         long currentWorkOrderPaymentId = 0;
 
@@ -210,11 +208,9 @@ namespace EOMobile
 
         private void WorkOrderLoaded(WorkOrderResponse workOrderResponse)
         {
-            
             currentWorkOrderId = workOrderResponse.WorkOrder.WorkOrderId;
 
             ((App)App.Current).GetWorkOrderPayment(currentWorkOrderId).ContinueWith(a => WorkOrderPaymentLoaded(workOrderResponse, a.Result));
-
         }
 
         private void WorkOrderPaymentLoaded(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment)
@@ -272,8 +268,6 @@ namespace EOMobile
 
                 ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
 
-                //Dictionary<long, List<WorkOrderInventoryItemDTO>> arrangements = new Dictionary<long, List<WorkOrderInventoryItemDTO>>();
-
                 notInInventory = workOrder.NotInInventory;
 
                 workOrder.NotInInventory.Where(b => b.ArrangementId == null || b.ArrangementId == 0).ToList().ForEach(x =>
@@ -294,7 +288,6 @@ namespace EOMobile
                         };
 
                     list1.Add(new WorkOrderViewModel(dto));
-
                 });
 
                 foreach (var x in workOrder.WorkOrderList)
@@ -313,8 +306,6 @@ namespace EOMobile
                     workOrderInventoryList.Add(dto);
                     list1.Add(new WorkOrderViewModel(dto));
                 }
-
-                //arrangements = workOrder.Arrangements;
 
                 foreach(GetArrangementResponse ar in workOrder.Arrangements)
                 {
@@ -612,8 +603,6 @@ namespace EOMobile
                         workOrderInventoryList.Add(wdto);
                     }
 
-                    
-                    //aar.NotInInventory.Where(a => a.ArrangementId != 0).ToList().ForEach(item =>
                     req.NotInInventory.Where(a => a.ArrangementId != 0).ToList().ForEach(item =>
                     {
                         WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO();
@@ -632,7 +621,6 @@ namespace EOMobile
                     WorkOrderInventoryItemDTO blankLast = new WorkOrderInventoryItemDTO();
                     blankLast.GroupId = groupId;
                     workOrderInventoryList.Add(blankLast);
-
                 }
 
                 foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
@@ -640,39 +628,8 @@ namespace EOMobile
                     list1.Add(new WorkOrderViewModel(wo));
                 }
 
-                //if(!arrangementList.Where(a => a.GroupId == groupId).Any())
-                //{
-                //    arrangementList.Add(aar);
-                //}
-                //else
-                //{
-                //    AddArrangementRequest old = arrangementList.Where(a => a.GroupId == groupId).FirstOrDefault();
-                //    int index = arrangementList.IndexOf(old);
-                //    if(index >= 0 && index < arrangementList.Count)
-                //    {
-                //        arrangementList[index] = aar;
-                //    }
-                //}
-
                 InventoryItemsListView.ItemsSource = list1;
-
-                AddArrangementRequest temp = arrangementList.Where(a => a.GroupId == aar.GroupId).FirstOrDefault();
-                
-                if(temp != null)
-                {
-                    arrangementList.Remove(temp);
-                }
-                
-                arrangementList.Add(aar);
-
-                //no duplicates, please 
-                if(arrangements.Where(a => a.Arrangement.ArrangementId == aar.Arrangement.ArrangementId).Any())
-                {
-                    GetArrangementResponse remove = arrangements.Where(a => a.Arrangement.ArrangementId == aar.Arrangement.ArrangementId).First();
-
-                    arrangements.Remove(remove);
-                }
-
+  
                 ((App)App.Current).searchedForArrangement = null;
             }
         }
@@ -683,12 +640,29 @@ namespace EOMobile
 
             if (button != null)
             {
-                long itemId = Int64.Parse(button.CommandParameter.ToString());
+                WorkOrderInventoryItemDTO sel = button.CommandParameter as WorkOrderInventoryItemDTO;
 
-                WorkOrderInventoryItemDTO sel = workOrderInventoryList.Where(a => a.InventoryId == itemId).FirstOrDefault();
-
-                if (sel.InventoryId != 0)
+                if (sel != null)
                 {
+                    if(sel.InventoryId == 0)  //"Not in inventory"
+                    {
+                        if(sel.GroupId == 0)   //not in arrangement
+                        {
+                            if (notInInventory.Where(a => a.NotInInventoryName == sel.NotInInventoryName && a.NotInInventorySize == sel.NotInInventorySize &&
+                                 a.NotInInventoryQuantity == sel.Quantity).Any())
+                            {
+                                NotInInventoryDTO dto = notInInventory.Where(a => a.NotInInventoryName == sel.NotInInventoryName && a.NotInInventorySize == sel.NotInInventorySize &&
+                                a.NotInInventoryQuantity == sel.Quantity).First();
+
+                                notInInventory.Remove(dto);
+                            }
+                        }
+                        else
+                        {
+                            RemoveItemFromArrangementList(sel);
+                        }
+                    }
+
                     workOrderInventoryList.Remove(sel);
 
                     ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>();
@@ -699,6 +673,29 @@ namespace EOMobile
                     }
 
                     InventoryItemsListView.ItemsSource = list1;
+                }
+            }
+        }
+
+        void RemoveItemFromArrangementList(WorkOrderInventoryItemDTO dto)
+        {
+            foreach(AddArrangementRequest aaReq in arrangementList)
+            {
+                if (dto.InventoryId == 0)  //not in inventory
+                {
+                    if(aaReq.NotInInventory.Where(a => a.NotInInventoryName == dto.NotInInventoryName && a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryQuantity == dto.Quantity).Any())
+                    {
+                        NotInInventoryDTO remove = aaReq.NotInInventory.Where(a => a.NotInInventoryName == dto.NotInInventoryName && a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryQuantity == dto.Quantity).First();
+                        aaReq.NotInInventory.Remove(remove);
+                    }
+                }
+                else
+                {
+                    if (aaReq.ArrangementInventory.Where(a => a.ArrangementInventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).Any())
+                    {
+                        ArrangementInventoryDTO remove = aaReq.ArrangementInventory.Where(a => a.ArrangementInventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).First();
+                        aaReq.ArrangementInventory.Remove(remove);
+                    }
                 }
             }
         }
@@ -1010,16 +1007,6 @@ namespace EOMobile
                         if (!PageExists(typeof(TabbedArrangementPage)))
                         {
                             AddArrangementRequest aar = arrangementList.Where(a => a.GroupId == dto.GroupId).FirstOrDefault();
-
-                            if(aar is null && arrangements.Where(a => a.Arrangement.ArrangementId == dto.GroupId).Any())
-                            {
-                                GetArrangementResponse ar = arrangements.Where(a => a.Arrangement.ArrangementId == dto.GroupId).First();
-                                aar = new AddArrangementRequest();
-                                aar.Arrangement = ar.Arrangement;
-                                aar.ArrangementInventory = ar.ArrangementList.Where(a => a.InventoryId != 0).ToList();
-                                aar.GroupId = ar.Arrangement.ArrangementId;
-                                aar.NotInInventory = ar.NotInInventory;
-                            }
 
                             //get all members with same group id and load Arrangement page
                             Navigation.PushAsync(new TabbedArrangementPage(aar));
