@@ -17,7 +17,7 @@ namespace EOMobile
     public partial class ArrangementFilterPage : EOBasePage
     {
         //if in WorkOrder mode, use this value to pick customer container
-        PersonAndAddressDTO customer = null;
+        PersonAndAddressDTO customer = new PersonAndAddressDTO();
 
         List<InventoryTypeDTO> inventoryTypeList = new List<InventoryTypeDTO>();
 

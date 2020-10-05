@@ -39,7 +39,11 @@ namespace EOMobile
         long NotInInventoryTempId = 0;
 
         List<NotInInventoryDTO> notInInventoryList = new List<NotInInventoryDTO>();
-        
+
+        List<CustomerContainerDTO> customerContainers = new List<CustomerContainerDTO>();
+
+        ObservableCollection<KeyValuePair<long, string>> containers = new ObservableCollection<KeyValuePair<long, string>>();
+
         /// <summary>
         /// If the TabbedParent has a CurrentArrangement value, load the form with these values
         /// </summary>
@@ -68,19 +72,10 @@ namespace EOMobile
             list2.Add(new KeyValuePair<long, string>(2, "360"));
 
             Style.ItemsSource = list2;
-
-
-            ObservableCollection<KeyValuePair<long, string>> list3 = new ObservableCollection<KeyValuePair<long, string>>();
-
-            list3.Add(new KeyValuePair<long, string>(1, "New container"));
-
-            if (tabParent.Customer != null)
-            {
-                list3.Add(new KeyValuePair<long, string>(2, "Customer container at EO"));
-                list3.Add(new KeyValuePair<long, string>(3, "Customer container at customer site")); //means use liner
-            }
-
-            Container.ItemsSource = list3;
+            
+            containers.Add(new KeyValuePair<long, string>(1, "New container"));
+            
+            Container.ItemsSource = containers;
 
             EnableCustomerContainerSecondaryControls(false);
 
@@ -88,12 +83,43 @@ namespace EOMobile
 
             GiftCheckBox.IsChecked = false;
 
+            ArrangementListView.ItemSelected += ArrangementListView_ItemSelected;
+
+            TaskAwaiter t = ((App)App.Current).GetCustomerContainers(TabParent.Customer.Person.person_id).ContinueWith(a => CustomerContainersLoaded(a.Result)).GetAwaiter();
+
+            t.OnCompleted(() =>
+            {
+                CompleteInitialization();
+            });
+        }
+
+        private void CompleteInitialization()
+        {
+            //just because there is a Current Arrangement, DOES NOT mean that there is a customer
+            //with or without a CustomerContainer - the loading of customer containers must precede this 
+            //and must be waited for since it is async
             if (TabParent.CurrentArrangement != null)
             {
                 LoadWorkOrderArrangement();
             }
 
-            ArrangementListView.ItemSelected += ArrangementListView_ItemSelected;
+            Container.SelectedIndexChanged += Container_SelectedIndexChanged;
+        }
+
+        private void CustomerContainersLoaded(CustomerContainerResponse result)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                customerContainers = result.CustomerContainers;
+
+                if (customerContainers.Count > 0)
+                {
+                    EnableCustomerContainerSecondaryControls(true);
+
+                    containers.Add(new KeyValuePair<long, string>(2, "Customer container at EO"));
+                    containers.Add(new KeyValuePair<long, string>(3, "Customer container at customer site")); //means use liner
+                }
+            });
         }
 
         private void LoadWorkOrderArrangement()
@@ -102,6 +128,10 @@ namespace EOMobile
             Name.Text = TabParent.CurrentArrangement.Arrangement.ArrangementName;
 
             Location.Text = TabParent.CurrentArrangement.Arrangement.LocationName;
+
+            GiftCheckBox.IsChecked = TabParent.CurrentArrangement.Arrangement.IsGift == 1 ? true : false;
+
+            GiftMessage.Text = TabParent.CurrentArrangement.Arrangement.GiftMessage;
 
             int index = 0;
             foreach(KeyValuePair<long,string> kvp in Designer.ItemsSource)
@@ -128,9 +158,22 @@ namespace EOMobile
             index = 0;
             foreach (KeyValuePair<long, string> kvp in Container.ItemsSource)
             {
-                if (kvp.Key == TabParent.CurrentArrangement.Arrangement.Container)
+                if (kvp.Key == TabParent.CurrentArrangement.Arrangement.Container + 1)  //match up - list index is 0 based - container values are 1 based 
                 {
                     Container.SelectedIndex = index;
+
+                    if(index > 0)
+                    {
+                        if(customerContainers.Count > 0)
+                        {
+                            CustomerContainerDTO customerContainerDTO = customerContainers.Where(a => a.CustomerContainerId == TabParent.CurrentArrangement.Arrangement.CustomerContainerId).FirstOrDefault();
+
+                            if(customerContainerDTO != null)
+                            {
+                                CustomerContainerLabelEntry.Text = customerContainerDTO.Label;
+                            }
+                        }
+                    }
                     break;
                 }
                 index++;
@@ -140,6 +183,14 @@ namespace EOMobile
 
             foreach(NotInInventoryDTO nii in TabParent.CurrentArrangement.NotInInventory)
             {
+                notInInventoryList.Add(nii);
+
+                if (arrangementInventoryList.Where(a => a.ArrangementId == nii.ArrangementId && a.ArrangementInventoryName == nii.NotInInventoryName &&
+                    a.Quantity == nii.NotInInventoryQuantity && a.Size == nii.NotInInventorySize).Any())
+                {
+                    continue;
+                }
+
                 arrangementInventoryList.Add(new ArrangementInventoryDTO
                 {
                     ArrangementId = TabParent.CurrentArrangement.Arrangement.ArrangementId,
@@ -147,8 +198,6 @@ namespace EOMobile
                     Quantity = nii.NotInInventoryQuantity,
                     Size = nii.NotInInventorySize,
                 });
-
-                notInInventoryList.Add(nii);
             }
 
             foreach (ArrangementInventoryDTO a in arrangementInventoryList)
@@ -157,6 +206,11 @@ namespace EOMobile
             }
 
             ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+
+            if(TabParent.CurrentArrangement.Arrangement.CustomerContainerId.HasValue)
+            {
+                Container.SelectedIndex = TabParent.CurrentArrangement.Arrangement.Container;
+            }
         }
 
         private void EnableCustomerContainerSecondaryControls(bool shouldShow)
@@ -410,6 +464,7 @@ namespace EOMobile
                     request.Arrangement.DesignerName = Designer.SelectedItem != null ? ((KeyValuePair<long, string>)Designer.SelectedItem).Value : String.Empty;
                     request.Arrangement._180or360 = Style.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;
                     request.Arrangement.Container = Container.SelectedItem != null ? (int)((KeyValuePair<long, string>)Style.SelectedItem).Key : 1;   //1 = new container (db default)
+                    request.Arrangement.CustomerContainerId = customerContainerId;
                     request.Arrangement.LocationName = Location.Text;
                     request.Arrangement.UpdateDate = DateTime.Now;
                     request.ArrangementInventory = arrangementInventoryList.Where(a => a.InventoryId != 0).ToList();  // "Not In Inventory" items may have been added to the display list
@@ -434,6 +489,9 @@ namespace EOMobile
                     {
                         InventoryName = String.IsNullOrEmpty(Name.Text) ? "Arrangement_" + Convert.ToString(tempArrangementId) : Name.Text,
                         InventoryTypeId = 5,
+                        ServiceCodeId = 365,
+                        NotifyWhenLowAmount = 0,
+                        Quantity = 1
                     };
 
                     MessagingCenter.Send<AddArrangementRequest>(request, "AddArrangementToWorkOrder");
@@ -514,7 +572,7 @@ namespace EOMobile
                     {
                         GetSimpleArrangementResponse simpleArrangement = arrangementList.Where(a => a.Arrangement.ArrangementId == arrangementId).FirstOrDefault();
 
-                        UpdateArrangementRequest request = new UpdateArrangementRequest();
+                        AddArrangementRequest request = new AddArrangementRequest();
                         request.Arrangement = new ArrangementDTO();
                         request.Arrangement.ArrangementId = arrangementId;
                         request.Arrangement.ArrangementName = Name.Text;
@@ -529,7 +587,9 @@ namespace EOMobile
 
                         request.Inventory = simpleArrangement.Inventory;
 
-                        request.ArrangementItems = arrangementInventoryList;
+                        request.ArrangementInventory = arrangementInventoryList;
+
+                        request.NotInInventory = notInInventoryList;
 
                         arrangementId = ((App)App.Current).UpdateArrangement(request);
 
@@ -579,7 +639,6 @@ namespace EOMobile
 
             if (button != null)
             {
-                //Command parameter is InventoryId
                 if (button.CommandParameter != null)
                 {
                     ArrangementInventoryDTO dto = button.CommandParameter as ArrangementInventoryDTO;

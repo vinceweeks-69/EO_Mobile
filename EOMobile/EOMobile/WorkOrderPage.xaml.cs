@@ -26,10 +26,16 @@ namespace EOMobile
 	public partial class WorkOrderPage : EOBasePage
 	{
         //if a work order contains an arrangement, save that data here
-        private List<AddArrangementRequest> arrangementList = new List<AddArrangementRequest>();
-
-        private List<InventoryTypeDTO> inventoryTypeList = new List<InventoryTypeDTO>();
+        List<AddArrangementRequest> arrangementList = new List<AddArrangementRequest>();
         List<WorkOrderInventoryItemDTO> workOrderInventoryList = new List<WorkOrderInventoryItemDTO>();
+        List<NotInInventoryDTO> notInInventory = new List<NotInInventoryDTO>();
+
+        List<GetArrangementResponse> arrangements = new List<GetArrangementResponse>();
+
+        ObservableCollection<WorkOrderViewModel> workOrderList = new ObservableCollection<WorkOrderViewModel>();
+
+        List<InventoryTypeDTO> inventoryTypeList = new List<InventoryTypeDTO>();
+       
         ObservableCollection<KeyValuePair<long, string>> deliveryTypeList = new ObservableCollection<KeyValuePair<long, string>>();
         ObservableCollection<KeyValuePair<long, string>> payTypeList = new ObservableCollection<KeyValuePair<long, string>>();
         ObservableCollection<KeyValuePair<long, string>> serviceTypeList = new ObservableCollection<KeyValuePair<long, string>>();
@@ -44,24 +50,24 @@ namespace EOMobile
 
         List<KeyValuePair<long, string>> employeeDDL = new List<KeyValuePair<long, string>>();
 
-        public List<GetArrangementResponse> arrangements = new List<GetArrangementResponse>();
-
-        List<NotInInventoryDTO> notInInventory = new List<NotInInventoryDTO>();
-
         TabbedWorkOrderPage TabParent = null;
-
+     
 
         long currentWorkOrderId = 0;
         long currentWorkOrderPaymentId = 0;
 
         long sellerId = 0;
+
         long customerId = 0;
+        PersonAndAddressDTO workOrderCustomer = new PersonAndAddressDTO();
+
         long deliveryUserId = 0;
         long deliveryRecipientId = 0;
 
         PersonAndAddressDTO searchedForPerson = null;
         PersonAndAddressDTO searchedForDeliveryRecipient = null;
         int searchedForPersonType = 0;
+
         public int SearchedForPersonType
         {
             get { return searchedForPersonType; }
@@ -150,7 +156,6 @@ namespace EOMobile
 
             //both buttons are disabled until the work order data is saved
             Payment.IsEnabled = false;
-            //PaymentType.IsEnabled = false;
         }
 
         private void LoadUsers(GetUserResponse userResponse)
@@ -213,6 +218,98 @@ namespace EOMobile
             ((App)App.Current).GetWorkOrderPayment(currentWorkOrderId).ContinueWith(a => WorkOrderPaymentLoaded(workOrderResponse, a.Result));
         }
 
+        //modify the underlying data lists, then call this function
+        private void RedrawInventoryList()
+        {
+            workOrderList.Clear();
+
+            //draw work order items in inventory
+            foreach(WorkOrderInventoryItemDTO dto in workOrderInventoryList)
+            {
+                workOrderList.Add(new WorkOrderViewModel(dto));
+            }
+
+            //draw work order item Not in Inventory
+            foreach(NotInInventoryDTO dto in notInInventory)
+            {
+                workOrderList.Add(new WorkOrderViewModel(dto));
+            }
+
+            //draw arangements with header row and blank rows top and bottom
+            foreach (AddArrangementRequest ar in arrangementList)
+            {
+                //add a blank row
+                workOrderList.Add(new WorkOrderViewModel()
+                {
+                    WorkOrderId = currentWorkOrderId,
+                    InventoryId = 0,
+                    InventoryName = String.Empty,
+                    Quantity = 0,
+                    Size = String.Empty,
+                    GroupId = ar.ArrangementInventory[0].ArrangementId
+                });
+
+                //add a Header row
+                workOrderList.Add(new WorkOrderViewModel()
+                {
+                    WorkOrderId = currentWorkOrderId,
+                    InventoryId = 0,
+                    InventoryName = "Arrangement",
+                    Quantity = 0,
+                    Size = String.Empty,
+                    GroupId = ar.ArrangementInventory[0].ArrangementId
+                });
+
+                ar.ArrangementInventory.Where(a => a.InventoryId != 0).ToList().ForEach(aid =>
+                {
+                    workOrderList.Add(new WorkOrderViewModel()
+                    {
+                        WorkOrderId = currentWorkOrderId,
+                        InventoryId = aid.InventoryId,
+                        InventoryName = aid.ArrangementInventoryName,
+                        Quantity = aid.Quantity,
+                        Size = aid.Size,
+                        GroupId = aid.ArrangementId
+                    });
+                });
+
+                ar.NotInInventory.Where(b => b.ArrangementId != null && b.ArrangementId != 0).ToList().ForEach(x =>
+                {
+
+                    WorkOrderInventoryItemDTO dto =
+                        new WorkOrderInventoryItemDTO()
+                        {
+                            WorkOrderId = x.WorkOrderId,
+                            InventoryId = 0,
+                            InventoryName = x.NotInInventoryName,
+                            Size = x.NotInInventorySize,
+                            NotInInventoryName = x.NotInInventoryName,
+                            Quantity = x.NotInInventoryQuantity,
+                            NotInInventorySize = x.NotInInventorySize,
+                            NotInInventoryPrice = x.NotInInventoryPrice,
+                            GroupId = x.ArrangementId
+                        };
+
+                    workOrderList.Add(new WorkOrderViewModel(dto));
+
+                });
+
+                //add a blank row
+                workOrderList.Add(new WorkOrderViewModel()
+                {
+                    WorkOrderId = currentWorkOrderId,
+                    InventoryId = 0,
+                    InventoryName = String.Empty,
+                    Quantity = 0,
+                    Size = String.Empty,
+                    GroupId = ar.ArrangementInventory[0].ArrangementId
+                });
+            }
+
+            InventoryItemsListView.ItemsSource = workOrderList;
+        }
+
+        //Load and possibly convert data into relevant data lists
         private void WorkOrderPaymentLoaded(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment)
         {
             Device.BeginInvokeOnMainThread(() =>
@@ -247,6 +344,7 @@ namespace EOMobile
                 }
 
                 customerId = workOrder.WorkOrder.CustomerId;
+                workOrderCustomer.Person.person_id = customerId;  //the rest of the fields can be blank - just need the id
 
                 Buyer.Text = workOrder.WorkOrder.Buyer;
 
@@ -266,30 +364,11 @@ namespace EOMobile
 
                 WorkOrderDate.Date = workOrder.WorkOrder.CreateDate;
 
-                ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
+                workOrderList.Clear();
 
                 notInInventory = workOrder.NotInInventory;
-
-                workOrder.NotInInventory.Where(b => b.ArrangementId == null || b.ArrangementId == 0).ToList().ForEach(x =>
-                {
-
-                    WorkOrderInventoryItemDTO dto =
-                        new WorkOrderInventoryItemDTO()
-                        {
-                            WorkOrderId = x.WorkOrderId,
-                            InventoryId = 0,
-                            InventoryName = x.NotInInventoryName,
-                            Size = x.NotInInventorySize,
-                            NotInInventoryName = x.NotInInventoryName,
-                            Quantity = x.NotInInventoryQuantity,
-                            NotInInventorySize = x.NotInInventorySize,
-                            NotInInventoryPrice = x.NotInInventoryPrice,
-                            GroupId = x.ArrangementId
-                        };
-
-                    list1.Add(new WorkOrderViewModel(dto));
-                });
-
+               
+                //convert between duplicate types - refactor
                 foreach (var x in workOrder.WorkOrderList)
                 {
                     WorkOrderInventoryItemDTO dto =
@@ -304,91 +383,22 @@ namespace EOMobile
                         };
 
                     workOrderInventoryList.Add(dto);
-                    list1.Add(new WorkOrderViewModel(dto));
                 }
 
-                foreach(GetArrangementResponse ar in workOrder.Arrangements)
+                foreach (GetArrangementResponse ar in workOrder.Arrangements)
                 {
                     AddArrangementRequest aaReq = new AddArrangementRequest();
 
                     aaReq.Arrangement = ar.Arrangement;
+                    aaReq.Inventory = ar.Inventory;
                     aaReq.ArrangementInventory = ar.ArrangementList;
                     aaReq.GroupId = ar.Arrangement.ArrangementId;
                     aaReq.NotInInventory = ar.NotInInventory;
 
                     arrangementList.Add(aaReq);
-                    
-                    //add a blank row
-                    list1.Add(new WorkOrderViewModel()
-                    {
-                        WorkOrderId = workOrder.WorkOrder.WorkOrderId,
-                        InventoryId = 0,
-                        InventoryName = String.Empty,
-                        Quantity = 0,
-                        Size = String.Empty,
-                        GroupId = ar.ArrangementList[0].ArrangementId
-                    });
+                }     
 
-                    //add a Header row
-                    list1.Add(new WorkOrderViewModel()
-                    {
-                        WorkOrderId = workOrder.WorkOrder.WorkOrderId,
-                        InventoryId = 0,
-                        InventoryName = "Arrangement",
-                        Quantity = 0,
-                        Size = String.Empty,
-                        GroupId = ar.ArrangementList[0].ArrangementId
-                    });
-
-                    ar.ArrangementList.Where(a => a.InventoryId != 0).ToList().ForEach(aid =>
-                    {
-                        list1.Add(new WorkOrderViewModel()
-                        {
-                            WorkOrderId = workOrder.WorkOrder.WorkOrderId,
-                            InventoryId = aid.InventoryId,
-                            InventoryName = aid.ArrangementInventoryName,
-                            Quantity = aid.Quantity,
-                            Size = aid.Size,
-                            GroupId = aid.ArrangementId
-                        });
-                    });
-
-
-                    
-                   ar.NotInInventory.Where(b => b.ArrangementId != null && b.ArrangementId != 0).ToList().ForEach(x =>
-                   {
-
-                       WorkOrderInventoryItemDTO dto =
-                           new WorkOrderInventoryItemDTO()
-                           {
-                               WorkOrderId = x.WorkOrderId,
-                               InventoryId = 0,
-                               InventoryName = x.NotInInventoryName,
-                               Size = x.NotInInventorySize,
-                               NotInInventoryName = x.NotInInventoryName,
-                               Quantity = x.NotInInventoryQuantity,
-                               NotInInventorySize = x.NotInInventorySize,
-                               NotInInventoryPrice = x.NotInInventoryPrice,
-                               GroupId = x.ArrangementId
-                           };
-
-                       list1.Add(new WorkOrderViewModel(dto));
-
-                   });
-
-                    //add a blank row
-                    list1.Add(new WorkOrderViewModel()
-                    {
-                        WorkOrderId = workOrder.WorkOrder.WorkOrderId,
-                        InventoryId = 0,
-                        InventoryName = String.Empty,
-                        Quantity = 0,
-                        Size = String.Empty,
-                        GroupId = ar.ArrangementList[0].ArrangementId
-                    });
-                }
-
-                InventoryItemsListView.ItemsSource = list1;
+                RedrawInventoryList();
             });
         }
 
@@ -442,15 +452,6 @@ namespace EOMobile
                     {
                         workOrderInventoryList.Add(searchedForInventory);
 
-                        ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
-
-                        foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
-                        {
-                            list1.Add(new WorkOrderViewModel(wo));
-                        }
-
-                        InventoryItemsListView.ItemsSource = list1;
-
                         if (searchedForInventory.ImageId != 0)
                         {
                             EOImgData imageData = ((App)App.Current).GetImage(searchedForInventory.ImageId);
@@ -471,6 +472,8 @@ namespace EOMobile
             GetSearchedDeliveryRecipient();
 
             GetSearchedArrangement();
+
+            RedrawInventoryList();
         }
 
         void GetSearchedPerson()
@@ -481,9 +484,11 @@ namespace EOMobile
             {
                 Buyer.Text = searchedForPerson.Person.CustomerName;
 
-                ((App)App.Current).searchedForPerson = null;
+                workOrderCustomer = ((App)App.Current).searchedForPerson;
 
                 customerId = searchedForPerson.Person.person_id;
+
+                ((App)App.Current).searchedForPerson = null;
             }
         }
 
@@ -503,6 +508,7 @@ namespace EOMobile
 
         /// <summary>
         /// Called when arrangement data is "added" to a work order - need to use groupId variable in arrangement DTOs if PKs don't yet exist
+        /// This function is always called in OnAppearing which calls as it's last job the Redraw function
         /// </summary>
         void GetSearchedArrangement()
         {
@@ -547,100 +553,25 @@ namespace EOMobile
                         arrangementList.Add(aar);
                     }
                 }
-
-                ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
-
-                //if the arrangement data was passed back to the Arrangement page for any reason, clean the local store
-                //List<WorkOrderInventoryItemDTO> toRemove = workOrderInventoryList.Where(a => a.GroupId == groupId).ToList();
-
-                //foreach(WorkOrderInventoryItemDTO remove in toRemove)
-                //{
-                //    workOrderInventoryList.Remove(remove);
-                //}
-
-                notInInventory.ToList().ForEach(item =>
-                {
-                    WorkOrderInventoryItemDTO wovm = new WorkOrderInventoryItemDTO();
-                    wovm.GroupId = item.ArrangementId;
-                    wovm.InventoryId = 0;
-                    wovm.InventoryName = item.NotInInventoryName;
-                    wovm.Quantity = item.NotInInventoryQuantity;
-                    wovm.Size = item.NotInInventorySize;
-                    wovm.WorkOrderId = item.WorkOrderId;
-
-                    workOrderInventoryList.Add(wovm);
-                });
-
-                foreach (AddArrangementRequest req in arrangementList)
-                {
-                    //add blank row at start
-                    WorkOrderInventoryItemDTO blankFirst = new WorkOrderInventoryItemDTO();
-                    blankFirst.GroupId = groupId;
-                    workOrderInventoryList.Add(blankFirst);
-
-                    //add a "Header" row
-                    WorkOrderInventoryItemDTO header = new WorkOrderInventoryItemDTO();
-                    header.GroupId = groupId;
-                    header.InventoryName = "Arrangement";
-                    workOrderInventoryList.Add(header);
-
-                    //translate between the two inventory types
-                    foreach (ArrangementInventoryDTO dto in req.ArrangementInventory)
-                    {
-                        WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO(dto);
-                        wdto.GroupId = groupId;
-
-                        if (dto.InventoryId == 0)  //item not in inventory
-                        {
-                            wdto.InventoryName = dto.ArrangementInventoryName;
-                            wdto.NotInInventoryName = dto.ArrangementInventoryName;
-                            wdto.NotInInventorySize = dto.Size;
-                            wdto.Quantity = dto.Quantity;
-                            //wdto.NotInInventoryPrice = dto.Price;  //add price to ArrangementInventoryItemDTO ?
-                            wdto.GroupId = groupId;
-                        }
-
-                        workOrderInventoryList.Add(wdto);
-                    }
-
-                    req.NotInInventory.Where(a => a.ArrangementId != 0).ToList().ForEach(item =>
-                    {
-                        WorkOrderInventoryItemDTO wdto = new WorkOrderInventoryItemDTO();
-
-                        wdto.InventoryName = item.NotInInventoryName;
-                        wdto.NotInInventoryName = item.NotInInventoryName;
-                        wdto.NotInInventorySize = item.NotInInventorySize;
-                        wdto.Quantity = item.NotInInventoryQuantity;
-                        //wdto.NotInInventoryPrice = dto.Price;  //add price to ArrangementInventoryItemDTO ?
-                        wdto.GroupId = item.ArrangementId;
-
-                        workOrderInventoryList.Add(wdto);
-                    });
-
-                    //add blank row at end
-                    WorkOrderInventoryItemDTO blankLast = new WorkOrderInventoryItemDTO();
-                    blankLast.GroupId = groupId;
-                    workOrderInventoryList.Add(blankLast);
-                }
-
-                foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
-                {
-                    list1.Add(new WorkOrderViewModel(wo));
-                }
-
-                InventoryItemsListView.ItemsSource = list1;
   
                 ((App)App.Current).searchedForArrangement = null;
             }
         }
 
+        //the arrangement data is kept on this page - so the management for 
+        //both work order inventory and not in inventory lists as well as the
+        //arrangement inventory and arrangement not in inventory lists is done here
+        //if deletion happens here - if an item is deleted on the arrangement page,
+        //then only arrangement data is modified, if a modification is made on the
+        //arrangement page AND Save is pressed, the modified data is synced with
+        //the data on this page
         public void OnDeleteWorkOrderItem(object sender, EventArgs e)
         {
             Button button = sender as Button;
 
             if (button != null)
             {
-                WorkOrderInventoryItemDTO sel = button.CommandParameter as WorkOrderInventoryItemDTO;
+                WorkOrderViewModel sel = button.CommandParameter as WorkOrderViewModel;
 
                 if (sel != null)
                 {
@@ -648,10 +579,10 @@ namespace EOMobile
                     {
                         if(sel.GroupId == 0)   //not in arrangement
                         {
-                            if (notInInventory.Where(a => a.NotInInventoryName == sel.NotInInventoryName && a.NotInInventorySize == sel.NotInInventorySize &&
+                            if (notInInventory.Where(a => a.NotInInventoryName == sel.InventoryName && a.NotInInventorySize == sel.Size &&
                                  a.NotInInventoryQuantity == sel.Quantity).Any())
                             {
-                                NotInInventoryDTO dto = notInInventory.Where(a => a.NotInInventoryName == sel.NotInInventoryName && a.NotInInventorySize == sel.NotInInventorySize &&
+                                NotInInventoryDTO dto = notInInventory.Where(a => a.NotInInventoryName == sel.InventoryName && a.NotInInventorySize == sel.Size &&
                                 a.NotInInventoryQuantity == sel.Quantity).First();
 
                                 notInInventory.Remove(dto);
@@ -663,29 +594,32 @@ namespace EOMobile
                         }
                     }
 
-                    workOrderInventoryList.Remove(sel);
+                    RemoveItemFromInventoryList(sel);
 
-                    ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>();
-
-                    foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
-                    {
-                        list1.Add(wo);
-                    }
-
-                    InventoryItemsListView.ItemsSource = list1;
+                    RedrawInventoryList();
                 }
             }
         }
 
-        void RemoveItemFromArrangementList(WorkOrderInventoryItemDTO dto)
+        void RemoveItemFromInventoryList(WorkOrderViewModel dto)
+        {
+            if(workOrderInventoryList.Where(a => a.InventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).Any())
+            {
+                WorkOrderInventoryItemDTO remove = workOrderInventoryList.Where(a => a.InventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).First();
+
+                workOrderInventoryList.Remove(remove);
+            }
+        }
+
+        void RemoveItemFromArrangementList(WorkOrderViewModel dto)
         {
             foreach(AddArrangementRequest aaReq in arrangementList)
             {
                 if (dto.InventoryId == 0)  //not in inventory
                 {
-                    if(aaReq.NotInInventory.Where(a => a.NotInInventoryName == dto.NotInInventoryName && a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryQuantity == dto.Quantity).Any())
+                    if(aaReq.NotInInventory.Where(a => a.NotInInventoryName == dto.InventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).Any())
                     {
-                        NotInInventoryDTO remove = aaReq.NotInInventory.Where(a => a.NotInInventoryName == dto.NotInInventoryName && a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryQuantity == dto.Quantity).First();
+                        NotInInventoryDTO remove = aaReq.NotInInventory.Where(a => a.NotInInventoryName == dto.InventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).First();
                         aaReq.NotInInventory.Remove(remove);
                     }
                 }
@@ -721,7 +655,7 @@ namespace EOMobile
         {
             string errorMessage = String.Empty;
 
-            if(workOrderInventoryList.Count == 0)
+            if(workOrderInventoryList.Count == 0 && notInInventory.Count == 0 && arrangementList.Count == 0)
             {
                 errorMessage += "Please add at least one product. \n";
             }
@@ -741,6 +675,8 @@ namespace EOMobile
 
         public void OnSaveWorkOrder(object sender, EventArgs e)
         {
+            Save.IsEnabled = false;
+
             string errorMessage = ValidateSaveWorkOrder();
 
             if(String.IsNullOrEmpty(errorMessage))
@@ -751,6 +687,8 @@ namespace EOMobile
             {
                 DisplayAlert("Error saving work order", errorMessage, "Ok");
             }
+
+            Save.IsEnabled = true;
         }
 
         public void OnClear(object sender, EventArgs e)
@@ -774,14 +712,17 @@ namespace EOMobile
             DeliveryType.SelectedIndex = 0;
             //ServiceType.SelectedIndex = 0;
 
+            this.workOrderList.Clear();
+            this.arrangementList.Clear();
+            this.notInInventory.Clear();
             this.workOrderInventoryList.Clear();
-            this.InventoryItemsListView.ItemsSource = null;
+            this.InventoryItemsListView.ItemsSource = workOrderList;
         }
 
         public void AddWorkOrder()
         {
             AddWorkOrderRequest addWorkOrderRequest = new AddWorkOrderRequest();
-
+             
             WorkOrderDTO dto = new WorkOrderDTO()
             {
                 WorkOrderId = currentWorkOrderId,
@@ -803,9 +744,10 @@ namespace EOMobile
                 DeliveryUserId = this.DeliveryPerson.SelectedItem != null ? ((KeyValuePair<long, string>)this.DeliveryPerson.SelectedItem).Key : 0
             };
 
+            addWorkOrderRequest.NotInInventory = notInInventory;
+
             List<WorkOrderInventoryMapDTO> workOrderInventoryMap = new List<WorkOrderInventoryMapDTO>();
 
-            List<NotInInventoryDTO> notInInventory = new List<NotInInventoryDTO>();
 
             foreach (WorkOrderInventoryItemDTO woii in workOrderInventoryList)
             {
@@ -1009,7 +951,7 @@ namespace EOMobile
                             AddArrangementRequest aar = arrangementList.Where(a => a.GroupId == dto.GroupId).FirstOrDefault();
 
                             //get all members with same group id and load Arrangement page
-                            Navigation.PushAsync(new TabbedArrangementPage(aar));
+                            Navigation.PushAsync(new TabbedArrangementPage(aar, workOrderCustomer));
                         }
                     }
                 }
@@ -1050,41 +992,19 @@ namespace EOMobile
                 dto.NotInInventoryId = 0;
                 dto.NotInInventoryName = NotInInventoryName.Text;
                 dto.NotInInventorySize = NotInInventorySize.Text;
+                dto.NotInInventoryQuantity = Convert.ToInt32(NotInInventoryQuantity.Text);
                 dto.NotInInventoryPrice = Convert.ToDecimal(NotInInventoryPrice.Text);
 
                 if(!NotInInventoryItemIsinList(dto))
                 {
                     notInInventory.Add(dto);
 
-                    ObservableCollection<WorkOrderInventoryItemDTO> list1 = new ObservableCollection<WorkOrderInventoryItemDTO>();
-
-                     foreach (WorkOrderInventoryItemDTO wo in workOrderInventoryList)
-                     {
-                          list1.Add(wo);
-                     }
-
-                    foreach(NotInInventoryDTO nid in notInInventory)
-                    {
-                        list1.Add(new WorkOrderInventoryItemDTO()
-                        {
-                           GroupId = 0,
-                           InventoryId = 0,
-                           InventoryName = nid.NotInInventoryName,
-                           NotInInventoryName = nid.NotInInventoryName,
-                           NotInInventoryPrice = nid.NotInInventoryPrice,
-                           Quantity = nid.NotInInventoryQuantity,
-                           NotInInventorySize = nid.NotInInventorySize,
-                           Size = nid.NotInInventorySize,
-                           WorkOrderId = currentWorkOrderId
-                        });
-                    }
-
-                    InventoryItemsListView.ItemsSource = list1;
-
                     NotInInventoryName.Text = String.Empty;
                     NotInInventorySize.Text = String.Empty;
                     NotInInventoryPrice.Text = String.Empty;
                     NotInInventoryQuantity.Text = String.Empty;
+
+                    RedrawInventoryList();
                 }
                 else
                 {

@@ -23,6 +23,9 @@ namespace EOMobile
 
         public TabbedArrangementPage(bool forWorkOrder = false, PersonAndAddressDTO customer = null)
         {
+            if (customer == null)
+                customer = new PersonAndAddressDTO(); //don't pass null
+
             this.customer = customer;
             this.forWorkOrder = forWorkOrder;
 
@@ -31,9 +34,13 @@ namespace EOMobile
 
         public TabbedArrangementPage(AddArrangementRequest aar, PersonAndAddressDTO customer = null)
         {
+            if (customer == null)
+                customer = new PersonAndAddressDTO(); //don't pass null
+
+            this.customer = customer;
+
             this.forWorkOrder = true;
             this.aar = aar;
-            this.customer = customer;
 
             Initialize();
         }

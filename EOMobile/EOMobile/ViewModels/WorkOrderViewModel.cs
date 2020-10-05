@@ -13,6 +13,17 @@ namespace EOMobile.ViewModels
         { 
         }
 
+        public WorkOrderViewModel(NotInInventoryDTO dto)
+        {
+            WorkOrderId = dto.WorkOrderId;
+            InventoryId = 387;    //temp constant
+            InventoryName = dto.NotInInventoryName;
+            Quantity = dto.NotInInventoryQuantity;
+            ImageId = 0; 
+            Size = dto.NotInInventorySize;
+            GroupId = dto.ArrangementId;
+        }
+
         public WorkOrderViewModel(WorkOrderInventoryItemDTO dto)
         {
             WorkOrderId = dto.WorkOrderId;

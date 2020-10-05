@@ -664,30 +664,6 @@ namespace EOMobile
                     string strData = httpResponse.Content.ReadAsStringAsync().Result;
                     ApiResponse response = JsonConvert.DeserializeObject<ApiResponse>(strData);
                     newWorkOrderId = response.Id;
-
-                    //ApiResponse apiResponse = JsonConvert.DeserializeObject<ApiResponse>(strData);
-
-                    //if (apiResponse.Messages.Count > 0)
-                    //{
-                    //    StringBuilder sb = new StringBuilder();
-                    //    foreach (KeyValuePair<string, List<string>> messages in apiResponse.Messages)
-                    //    {
-                    //        foreach (string msg in messages.Value)
-                    //        {
-                    //            sb.AppendLine(msg);
-                    //        }
-                    //    }
-
-                    //    //MessageBox.Show(sb.ToString());
-                    //}
-                    //else
-                    //{
-                    //    //this.WorkOrderInventoryListView.ItemsSource = null;
-                    //}
-                }
-                else
-                {
-                    //MessageBox.Show("Error adding Work Order");
                 }
             }
             catch (Exception ex)
@@ -928,7 +904,7 @@ namespace EOMobile
             }
         }
 
-        public long UpdateArrangement(UpdateArrangementRequest request)
+        public long UpdateArrangement(AddArrangementRequest request)
         {
             long arrangementId = 0;
 
