@@ -1,4 +1,5 @@
 ﻿using EOMobile.Interfaces;
+using SharedData;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,10 +25,10 @@ namespace EOMobile
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class ArrangementPage : EOBasePage
 	{
-        List<ArrangementInventoryDTO> arrangementInventoryList = new List<ArrangementInventoryDTO>();
+        List<ArrangementInventoryItemDTO> arrangementInventoryList = new List<ArrangementInventoryItemDTO>();
         List<GetSimpleArrangementResponse> arrangementList = new List<GetSimpleArrangementResponse>();
 
-        ObservableCollection<ArrangementInventoryDTO> arrangementInventoryListOC = new ObservableCollection<ArrangementInventoryDTO>();
+        ObservableCollection<ArrangementInventoryItemDTO> arrangementInventoryListOC = new ObservableCollection<ArrangementInventoryItemDTO>();
         ObservableCollection<GetSimpleArrangementResponse> arrangementListOC = new ObservableCollection<GetSimpleArrangementResponse>();
 
         TabbedArrangementPage TabParent = null;
@@ -185,22 +186,22 @@ namespace EOMobile
             {
                 notInInventoryList.Add(nii);
 
-                if (arrangementInventoryList.Where(a => a.ArrangementId == nii.ArrangementId && a.ArrangementInventoryName == nii.NotInInventoryName &&
+                if (arrangementInventoryList.Where(a => a.ArrangementId == nii.ArrangementId && a.InventoryName == nii.NotInInventoryName &&
                     a.Quantity == nii.NotInInventoryQuantity && a.Size == nii.NotInInventorySize).Any())
                 {
                     continue;
                 }
 
-                arrangementInventoryList.Add(new ArrangementInventoryDTO
+                arrangementInventoryList.Add(new ArrangementInventoryItemDTO
                 {
                     ArrangementId = TabParent.CurrentArrangement.Arrangement.ArrangementId,
-                    ArrangementInventoryName = nii.NotInInventoryName,
+                    InventoryName = nii.NotInInventoryName,
                     Quantity = nii.NotInInventoryQuantity,
                     Size = nii.NotInInventorySize,
                 });
             }
 
-            foreach (ArrangementInventoryDTO a in arrangementInventoryList)
+            foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
             {
                 arrangementInventoryListOC.Add(a);
             }
@@ -209,6 +210,7 @@ namespace EOMobile
 
             if(TabParent.CurrentArrangement.Arrangement.CustomerContainerId.HasValue)
             {
+                customerContainerId = TabParent.CurrentArrangement.Arrangement.CustomerContainerId;
                 Container.SelectedIndex = TabParent.CurrentArrangement.Arrangement.Container;
             }
         }
@@ -260,7 +262,7 @@ namespace EOMobile
             Products.IsEnabled = true;
 
             //called when we return from an "Inventory Search"
-            ArrangementInventoryDTO searchedForInventory = ((App)App.Current).searchedForArrangementInventory;
+            ArrangementInventoryItemDTO searchedForInventory = ((App)App.Current).searchedForArrangementInventory;
 
             if (searchedForInventory != null && searchedForInventory.InventoryId != 0)
             {
@@ -272,7 +274,7 @@ namespace EOMobile
 
                     arrangementInventoryList.Add(searchedForInventory);
 
-                    foreach (ArrangementInventoryDTO a in arrangementInventoryList)
+                    foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
                     {
                         arrangementInventoryListOC.Add(a);
                     }
@@ -506,7 +508,7 @@ namespace EOMobile
 
                 if (arrangementInventoryList.Count > 0)
                 {
-                    foreach (ArrangementInventoryDTO dto in arrangementInventoryList)
+                    foreach (ArrangementInventoryItemDTO dto in arrangementInventoryList)
                     {
                         if (dto.ArrangementId != 0)
                         {
@@ -641,15 +643,15 @@ namespace EOMobile
             {
                 if (button.CommandParameter != null)
                 {
-                    ArrangementInventoryDTO dto = button.CommandParameter as ArrangementInventoryDTO;
+                    ArrangementInventoryItemDTO dto = button.CommandParameter as ArrangementInventoryItemDTO;
 
                     if (dto != null)
                     {
                         if (dto.InventoryId == 0)
                         {
-                            if(notInInventoryList.Where(a => a.NotInInventoryName == dto.ArrangementInventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).Any())
+                            if(notInInventoryList.Where(a => a.NotInInventoryName == dto.InventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).Any())
                             {
-                                NotInInventoryDTO nii = notInInventoryList.Where(a => a.NotInInventoryName == dto.ArrangementInventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).First();
+                                NotInInventoryDTO nii = notInInventoryList.Where(a => a.NotInInventoryName == dto.InventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).First();
                                 notInInventoryList.Remove(nii);
                             }
                         }
@@ -749,7 +751,7 @@ namespace EOMobile
 
                 arrangementInventoryListOC.Clear();
 
-                foreach (ArrangementInventoryDTO a in arrangementInventoryList)
+                foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
                 {
                     arrangementInventoryListOC.Add(a);
                 }
@@ -770,7 +772,7 @@ namespace EOMobile
                 if (button.CommandParameter != null)
                 {
                     long inventoryId = (long)(button).CommandParameter;
-                    ArrangementInventoryDTO inventory = arrangementInventoryList.Where(a => a.InventoryId == inventoryId).FirstOrDefault();
+                    ArrangementInventoryItemDTO inventory = arrangementInventoryList.Where(a => a.InventoryId == inventoryId).FirstOrDefault();
 
                     if (inventory != null && inventory.ImageId != 0)
                     {
@@ -871,12 +873,12 @@ namespace EOMobile
 
                     notInInventoryList.Add(dto);
 
-                    arrangementInventoryList.Add(new ArrangementInventoryDTO()
+                    arrangementInventoryList.Add(new ArrangementInventoryItemDTO()
                     {
                         ArrangementId = 0,
-                        ArrangementInventoryName = dto.NotInInventoryName,
+                        InventoryName = dto.NotInInventoryName,
                         InventoryId = 0,
-                        InventoryTypeId = 0,
+                        //InventoryTypeId = 0,
                         Quantity = dto.NotInInventoryQuantity,
                         Size = dto.NotInInventorySize,
                     });
@@ -884,7 +886,7 @@ namespace EOMobile
 
                     arrangementInventoryListOC.Clear();
 
-                    foreach (ArrangementInventoryDTO a in arrangementInventoryList)
+                    foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
                     {
                         arrangementInventoryListOC.Add(a);
                     }

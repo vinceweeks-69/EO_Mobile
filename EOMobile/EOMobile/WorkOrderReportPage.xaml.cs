@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EOMobile.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -139,80 +140,53 @@ namespace EOMobile
 
         public void ShowInventory_Clicked(object sender, EventArgs e)
         {
-            //the  user has clicked on a line item work order record from the top list
-            //get the list of inventory items for the work order that was clicked on
+            Button b = sender as Button;
 
-            long workOrderId = (long)(sender as Button).CommandParameter;
-
-            List<WorkOrderInventoryMapDTO> inventory = workOrderList.Where(a => a.WorkOrder.WorkOrderId == workOrderId).Select(b => b.WorkOrderList).First();
-
-            ObservableCollection<WorkOrderInventoryMapDTO> list1 = new ObservableCollection<WorkOrderInventoryMapDTO>();
-
-            //if there are arrangements that are part of this work order, group the inventory items together add blank lines start and
-            //end and add a "header" row so Melissa will be happy
-
-            Dictionary<long, List<WorkOrderInventoryMapDTO>> arrangements = new Dictionary<long, List<WorkOrderInventoryMapDTO>>();
-            
-            foreach (WorkOrderInventoryMapDTO i in inventory)
+            if (b != null)
             {
-                if (i.GroupId.HasValue)
+                long workOrderId = (long)b.CommandParameter;
+
+                if (workOrderId > 0)
                 {
-                    if (arrangements.Keys.Contains(i.GroupId.Value))
-                    {
-                        arrangements[i.GroupId.Value].Add(i);
-                    }
-                    else
-                    {
-                        List<WorkOrderInventoryMapDTO> inventoryItems = new List<WorkOrderInventoryMapDTO>();
-                        inventoryItems.Add(i);
-                        arrangements.Add(i.GroupId.Value, inventoryItems);
-                    }
-                }
-                else
-                {
-                    list1.Add(i);
-                }
-            }
+                    WorkOrderResponse r = workOrderList.Where(a => a.WorkOrder.WorkOrderId == workOrderId).First();
 
-            List<NotInInventoryDTO> notInInventory = workOrderList.Where(a => a.WorkOrder.WorkOrderId == workOrderId).Select(b => b.NotInInventory).FirstOrDefault();
+                    ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
 
-            foreach (NotInInventoryDTO a in notInInventory)
-            {
-                list1.Add(a.ConvertToWorkOrderinventoryMap());
-            }
-
-            if(arrangements.Count > 0)
-            {
-                foreach(KeyValuePair<long,List<WorkOrderInventoryMapDTO>> kvp in arrangements)
-                {
-                    //add a blank line 
-                    list1.Add(new WorkOrderInventoryMapDTO()
+                    foreach (WorkOrderInventoryMapDTO wor in r.WorkOrderList)
                     {
-                        GroupId = kvp.Key
-                    });
-
-                    //add a "header" line
-                    list1.Add(new WorkOrderInventoryMapDTO()
-                    {
-                        InventoryName = "Arrangement",
-                        GroupId = kvp.Key
-                    }); 
-
-                    //add inventory items
-                    foreach(WorkOrderInventoryMapDTO a in kvp.Value)
-                    {
-                        list1.Add(a);
+                        list1.Add(new WorkOrderViewModel(wor));
                     }
 
-                    //add a blank line
-                    list1.Add(new WorkOrderInventoryMapDTO()
+                    foreach (NotInInventoryDTO nii in r.NotInInventory)
                     {
-                        GroupId = kvp.Key
-                    });
+                        list1.Add(new WorkOrderViewModel(nii));
+                    }
+
+                    foreach (GetArrangementResponse arrangement in r.Arrangements)
+                    {
+                        list1.Add(new WorkOrderViewModel());    //blank line
+
+                        list1.Add(new WorkOrderViewModel()      //"header"
+                        {
+                            InventoryName = "Arrangement"
+                        });
+
+                        foreach (ArrangementInventoryItemDTO ai in arrangement.ArrangementList)
+                        {
+                            list1.Add(new WorkOrderViewModel(ai, r.WorkOrder.WorkOrderId));
+                        }
+
+                        foreach (NotInInventoryDTO anii in arrangement.NotInInventory)
+                        {
+                            list1.Add(new WorkOrderViewModel(anii));
+                        }
+
+                        list1.Add(new WorkOrderViewModel());  //blank line
+                    }
+
+                    InventoryList.ItemsSource = list1;
                 }
             }
-
-            InventoryList.ItemsSource = list1;
         }
 
         public void EditWorkOrder_Clicked(object sender, EventArgs e)

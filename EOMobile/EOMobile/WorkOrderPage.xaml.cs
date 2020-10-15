@@ -1,6 +1,7 @@
 ﻿using EOMobile.Interfaces;
 using EOMobile.ViewModels;
 using Newtonsoft.Json;
+using SharedData;
 using Stripe;
 using System;
 
@@ -59,7 +60,7 @@ namespace EOMobile
         long sellerId = 0;
 
         long customerId = 0;
-        PersonAndAddressDTO workOrderCustomer = new PersonAndAddressDTO();
+        //PersonAndAddressDTO workOrderCustomer = new PersonAndAddressDTO();
 
         long deliveryUserId = 0;
         long deliveryRecipientId = 0;
@@ -213,9 +214,103 @@ namespace EOMobile
 
         private void WorkOrderLoaded(WorkOrderResponse workOrderResponse)
         {
-            currentWorkOrderId = workOrderResponse.WorkOrder.WorkOrderId;
-
             ((App)App.Current).GetWorkOrderPayment(currentWorkOrderId).ContinueWith(a => WorkOrderPaymentLoaded(workOrderResponse, a.Result));
+        }
+
+        //Load and possibly convert data into relevant data lists
+        private void WorkOrderPaymentLoaded(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                currentWorkOrderId = workOrder.WorkOrder.WorkOrderId;
+
+                searchedForPerson = new PersonAndAddressDTO();
+                searchedForPerson.Person.person_id = workOrder.WorkOrder.CustomerId;
+                customerId = searchedForPerson.Person.person_id;
+
+                currentWorkOrderPaymentId = payment.WorkOrderPaymentId;
+
+                if (currentWorkOrderPaymentId == 0)
+                {
+                    Save.IsEnabled = true;
+                    Payment.IsEnabled = true;
+                }
+                else
+                {
+                    if (workOrder.WorkOrder.Paid)
+                    {
+                        InventoryItemsListView.IsEnabled = false;
+                        Save.IsEnabled = false;
+                        Payment.IsEnabled = false;
+                    }
+                    else
+                    {
+                        Save.IsEnabled = true;
+                        if (workOrder.WorkOrderList.Count == 0)
+                        {
+                            Payment.IsEnabled = false;
+                        }
+                        else
+                        {
+                            Payment.IsEnabled = true;
+                        }
+                    }
+                }
+
+                Buyer.Text = workOrder.WorkOrder.Buyer;
+
+                sellerId = workOrder.WorkOrder.SellerId;
+                Seller.SelectedIndex = ((App)App.Current).GetPickerIndex(Seller, workOrder.WorkOrder.SellerId);
+
+                DeliveryType.SelectedIndex = workOrder.WorkOrder.DeliveryType;
+
+                deliveryUserId = workOrder.WorkOrder.DeliveryUserId;
+                DeliveryPerson.SelectedIndex = ((App)App.Current).GetPickerIndex(DeliveryPerson, workOrder.WorkOrder.DeliveryUserId);
+
+                DeliveryDate.Date = workOrder.WorkOrder.DeliveryDate;
+
+                deliveryRecipientId = workOrder.WorkOrder.DeliveryRecipientId;
+
+                DeliverTo.Text = workOrder.WorkOrder.DeliverTo;
+
+                WorkOrderDate.Date = workOrder.WorkOrder.CreateDate;
+
+                workOrderList.Clear();
+
+                notInInventory = workOrder.NotInInventory;
+
+                //convert between duplicate types - refactor
+                foreach (var x in workOrder.WorkOrderList)
+                {
+                    WorkOrderInventoryItemDTO dto =
+                        new WorkOrderInventoryItemDTO()
+                        {
+                            WorkOrderId = x.WorkOrderId,
+                            InventoryId = x.InventoryId,
+                            InventoryName = x.InventoryName,
+                            Quantity = x.Quantity,
+                            Size = x.Size,
+                            GroupId = x.GroupId
+                        };
+
+                    workOrderInventoryList.Add(dto);
+                }
+
+                foreach (GetArrangementResponse ar in workOrder.Arrangements)
+                {
+                    AddArrangementRequest aaReq = new AddArrangementRequest();
+
+                    aaReq.Arrangement = ar.Arrangement;
+                    aaReq.Inventory = ar.Inventory;
+                    aaReq.ArrangementInventory = ar.ArrangementList;
+                    aaReq.GroupId = ar.Arrangement.ArrangementId;
+                    aaReq.NotInInventory = ar.NotInInventory;
+                    
+                    arrangementList.Add(aaReq);
+                }
+
+                RedrawInventoryList();
+            });
         }
 
         //modify the underlying data lists, then call this function
@@ -266,7 +361,7 @@ namespace EOMobile
                     {
                         WorkOrderId = currentWorkOrderId,
                         InventoryId = aid.InventoryId,
-                        InventoryName = aid.ArrangementInventoryName,
+                        InventoryName = aid.InventoryName,
                         Quantity = aid.Quantity,
                         Size = aid.Size,
                         GroupId = aid.ArrangementId
@@ -307,99 +402,6 @@ namespace EOMobile
             }
 
             InventoryItemsListView.ItemsSource = workOrderList;
-        }
-
-        //Load and possibly convert data into relevant data lists
-        private void WorkOrderPaymentLoaded(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment)
-        {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                currentWorkOrderPaymentId = payment.WorkOrderPaymentId;
-
-                if (currentWorkOrderPaymentId == 0)
-                {
-                    Save.IsEnabled = true;
-                    Payment.IsEnabled = true;
-                }
-                else
-                {
-                    if (workOrder.WorkOrder.Paid)
-                    {
-                        InventoryItemsListView.IsEnabled = false;
-                        Save.IsEnabled = false;
-                        Payment.IsEnabled = false;
-                    }
-                    else
-                    {
-                        Save.IsEnabled = true;
-                        if (workOrder.WorkOrderList.Count == 0)
-                        {
-                            Payment.IsEnabled = false;
-                        }
-                        else
-                        {
-                            Payment.IsEnabled = true;
-                        }
-                    }
-                }
-
-                customerId = workOrder.WorkOrder.CustomerId;
-                workOrderCustomer.Person.person_id = customerId;  //the rest of the fields can be blank - just need the id
-
-                Buyer.Text = workOrder.WorkOrder.Buyer;
-
-                sellerId = workOrder.WorkOrder.SellerId;
-                Seller.SelectedIndex = ((App)App.Current).GetPickerIndex(Seller, workOrder.WorkOrder.SellerId);
-
-                DeliveryType.SelectedIndex = workOrder.WorkOrder.DeliveryType;
-
-                deliveryUserId = workOrder.WorkOrder.DeliveryUserId;
-                DeliveryPerson.SelectedIndex = ((App)App.Current).GetPickerIndex(DeliveryPerson, workOrder.WorkOrder.DeliveryUserId);
-
-                DeliveryDate.Date = workOrder.WorkOrder.DeliveryDate;
-
-                deliveryRecipientId = workOrder.WorkOrder.DeliveryRecipientId;
-
-                DeliverTo.Text = workOrder.WorkOrder.DeliverTo;
-
-                WorkOrderDate.Date = workOrder.WorkOrder.CreateDate;
-
-                workOrderList.Clear();
-
-                notInInventory = workOrder.NotInInventory;
-               
-                //convert between duplicate types - refactor
-                foreach (var x in workOrder.WorkOrderList)
-                {
-                    WorkOrderInventoryItemDTO dto =
-                        new WorkOrderInventoryItemDTO()
-                        {
-                            WorkOrderId = x.WorkOrderId,
-                            InventoryId = x.InventoryId,
-                            InventoryName = x.InventoryName,
-                            Quantity = x.Quantity,
-                            Size = x.Size,
-                            GroupId = x.GroupId
-                        };
-
-                    workOrderInventoryList.Add(dto);
-                }
-
-                foreach (GetArrangementResponse ar in workOrder.Arrangements)
-                {
-                    AddArrangementRequest aaReq = new AddArrangementRequest();
-
-                    aaReq.Arrangement = ar.Arrangement;
-                    aaReq.Inventory = ar.Inventory;
-                    aaReq.ArrangementInventory = ar.ArrangementList;
-                    aaReq.GroupId = ar.Arrangement.ArrangementId;
-                    aaReq.NotInInventory = ar.NotInInventory;
-
-                    arrangementList.Add(aaReq);
-                }     
-
-                RedrawInventoryList();
-            });
         }
 
         private void TakePictureClicked(object sender, EventArgs e)
@@ -478,16 +480,15 @@ namespace EOMobile
 
         void GetSearchedPerson()
         {
-            searchedForPerson = ((App)App.Current).searchedForPerson;
-
-            if (searchedForPerson != null && searchedForPerson.Person.person_id != 0)
+            if (((App)App.Current).searchedForPerson != null)
             {
+                searchedForPerson = new PersonAndAddressDTO();
+                customerId = ((App)App.Current).searchedForPerson.Person.person_id;
+                searchedForPerson.Person.person_id = ((App)App.Current).searchedForPerson.Person.person_id;
+                searchedForPerson.Person.first_name = ((App)App.Current).searchedForPerson.Person.first_name;
+                searchedForPerson.Person.last_name = ((App)App.Current).searchedForPerson.Person.last_name;
+
                 Buyer.Text = searchedForPerson.Person.CustomerName;
-
-                workOrderCustomer = ((App)App.Current).searchedForPerson;
-
-                customerId = searchedForPerson.Person.person_id;
-
                 ((App)App.Current).searchedForPerson = null;
             }
         }
@@ -625,9 +626,9 @@ namespace EOMobile
                 }
                 else
                 {
-                    if (aaReq.ArrangementInventory.Where(a => a.ArrangementInventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).Any())
+                    if (aaReq.ArrangementInventory.Where(a => a.InventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).Any())
                     {
-                        ArrangementInventoryDTO remove = aaReq.ArrangementInventory.Where(a => a.ArrangementInventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).First();
+                        ArrangementInventoryItemDTO remove = aaReq.ArrangementInventory.Where(a => a.InventoryName == dto.InventoryName && a.Size == dto.Size && a.Quantity == dto.Quantity).First();
                         aaReq.ArrangementInventory.Remove(remove);
                     }
                 }
@@ -951,7 +952,7 @@ namespace EOMobile
                             AddArrangementRequest aar = arrangementList.Where(a => a.GroupId == dto.GroupId).FirstOrDefault();
 
                             //get all members with same group id and load Arrangement page
-                            Navigation.PushAsync(new TabbedArrangementPage(aar, workOrderCustomer));
+                            Navigation.PushAsync(new TabbedArrangementPage(aar, searchedForPerson));
                         }
                     }
                 }

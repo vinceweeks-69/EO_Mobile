@@ -16,8 +16,7 @@ using Android.Views;
 using Android.Widget;
 using EOMobile.Interfaces;
 using EOMobile.XamarinFormsCamera;
-using ViewModels.DataModels;
-using Xamarin.Forms;
+using SharedData;
 
 namespace EOMobile.Droid
 {

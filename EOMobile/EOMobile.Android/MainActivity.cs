@@ -21,9 +21,9 @@ using Android.Net;
 using Java.IO;
 using static Android.Provider.MediaStore;
 using Android.Database;
-using ViewModels.DataModels;
 using LibVLCSharp.Forms.Shared;
 using Android.Net.Wifi;
+using SharedData;
 
 namespace EOMobile.Droid
 {

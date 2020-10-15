@@ -1,4 +1,5 @@
 ﻿using Rg.Plugins.Popup.Extensions;
+using SharedData;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

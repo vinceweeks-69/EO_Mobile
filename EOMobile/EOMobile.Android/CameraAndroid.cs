@@ -8,7 +8,7 @@ using Android.Provider;
 using Android.Support.V4.Content;
 using EOMobile.Droid;
 using EOMobile.Interfaces;
-using ViewModels.DataModels;
+using SharedData;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(XamarinFormsCamera.Droid.CameraAndroid))]

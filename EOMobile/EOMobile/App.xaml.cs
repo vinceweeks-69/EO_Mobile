@@ -56,7 +56,7 @@ namespace EOMobile
 
         public long MissingImageId { get { return 264L; } }
 
-        public ArrangementInventoryDTO searchedForArrangementInventory { get; set; }
+        public ArrangementInventoryItemDTO searchedForArrangementInventory { get; set; }
 
         public ShipmentInventoryItemDTO searchedForShipmentInventory { get; set; }
 
@@ -84,13 +84,13 @@ namespace EOMobile
 
             //LAN_Address = "http://99.125.200.187:9000"; //Me Royalwood IP
 
-            //LAN_Address = "http://10.0.0.4:9000/";   //Me Royalwood router
+            LAN_Address = "http://10.0.0.4:9000/";   //Me Royalwood router
 
             //LAN_Address = "http://10.1.10.148:9000/";   //Me EO
 
             //LAN_Address = "http://10.1.10.1:9000/";   //router EO
 
-            LAN_Address = "http://10.1.10.36:9000/";   //Roseanne EO when hardwired to eohome network
+            //LAN_Address = "http://10.1.10.36:9000/";   //Roseanne EO when hardwired to eohome network
 
             //LAN_Address = "http://192.168.1.134:9000"; //EO my laptop on jdambar
 
@@ -108,7 +108,7 @@ namespace EOMobile
 
             MainPage = new NavigationPage(new LoginPage());
            
-            MessagingCenter.Subscribe<ArrangementInventoryDTO>(this, "SearchArrangementInventory", (arg) =>
+            MessagingCenter.Subscribe<ArrangementInventoryItemDTO>(this, "SearchArrangementInventory", (arg) =>
             {
                 LoadArrangementInventory(arg);
             });
@@ -186,6 +186,10 @@ namespace EOMobile
                 LAN_Address = "http://10.1.10.36:9000";             //Roseanne
                 //LAN_Address = "http://192.168.1.134:9000";    //Me in back office
             }
+            else if(hostName.Contains("netgear22"))
+            {
+                LAN_Address = "http://10.0.0.4:9000";               //me Royalwood
+            }
             else
             {
                 LAN_Address = "http://elegantsystem2.ddns.net:9000";  //76.109.59.49
@@ -215,7 +219,7 @@ namespace EOMobile
         {
             return usStateList;
         }
-        public void LoadArrangementInventory(ArrangementInventoryDTO arg)
+        public void LoadArrangementInventory(ArrangementInventoryItemDTO arg)
         {
             searchedForArrangementInventory = arg;
         }

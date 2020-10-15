@@ -145,12 +145,8 @@
       <Project>{38431ff0-6d59-4508-9c05-24158f58da65}</Project>
       <Name>SharedData</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\EO\LoginService\EOLoginConsoleApp\ViewModels\ViewModels.csproj">
-      <Project>{C4819671-9D35-4014-B1D3-80F9F0184501}</Project>
-      <Name>ViewModels</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EOMobile\EOMobile.csproj">
-      <Project>{5217F4AD-AF46-4CD0-87C5-F02EDE2DC6C7}</Project>
+      <Project>{6ab3c149-77bc-4766-a499-faf2a4bbb207}</Project>
       <Name>EOMobile</Name>
     </ProjectReference>
   </ItemGroup>

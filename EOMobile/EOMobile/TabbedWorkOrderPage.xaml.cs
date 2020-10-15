@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ViewModels.DataModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using SharedData;
 
 namespace EOMobile
 {

@@ -240,7 +240,11 @@ namespace EOMobile
                             }
                             else
                             {
-                                DisplayAlert("Success", "Customer saved!", "Ok");
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    ClearForm();
+                                    DisplayAlert("Success", "Customer saved!", "Ok");
+                                });
                             }
                         }
                     }
