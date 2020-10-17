@@ -70,6 +70,8 @@ namespace EOMobile
 
         public CustomerContainerDTO searchedForCustomerContainer { get; set; }
 
+        public NotInInventoryDTO notInInventory_toAdd { get; set; } 
+
         public static List<EOImgData> imageDataList = new List<EOImgData>();
 
         List<string> pngFileNames;
@@ -171,6 +173,16 @@ namespace EOMobile
             MessagingCenter.Subscribe<CustomerContainerDTO>(this, "AddCustomerContainerToWorkOrder", (arg) =>
             {
                 AddCustomerContainerToWorkOrder(arg);
+            });
+
+            MessagingCenter.Subscribe<NotInInventoryDTO>(this, "ArrangementNotInInventory", (arg) =>
+            {
+                AddNotInInventoryToArrangement(arg);
+            });
+
+            MessagingCenter.Subscribe<NotInInventoryDTO>(this, "WorkOrderNotInInventory", (arg) =>
+            {
+                AddNotInInventoryToWorkOrder(arg);
             });
 
             InitStateList();
@@ -287,6 +299,16 @@ namespace EOMobile
         public void AddCustomerContainerToWorkOrder(CustomerContainerDTO arg)
         {
             searchedForCustomerContainer = arg;
+        }
+
+        public void AddNotInInventoryToArrangement(NotInInventoryDTO arg)
+        {
+            notInInventory_toAdd = arg;
+        }
+
+        public void AddNotInInventoryToWorkOrder(NotInInventoryDTO arg)
+        {
+            notInInventory_toAdd = arg;
         }
 
         private void SendInfoEmail(string emailHtml)

@@ -1,4 +1,5 @@
 ﻿using EOMobile.Interfaces;
+using EOMobile.ViewModels;
 using SharedData;
 using System;
 using System.Collections.Generic;
@@ -300,6 +301,34 @@ namespace EOMobile
             }
 
             //called when we return from a  Work Order page click on a previously created arrangement item 
+
+            //called when we return from an "Inventory Search" AND a a not in inventory item wants to be added
+            NotInInventoryDTO notInInventory = ((App)App.Current).notInInventory_toAdd;
+
+            if(notInInventory != null && !NotInInventoryItemIsinList(notInInventory))
+            {
+                notInInventoryList.Add(notInInventory);
+                ((App)App.Current).notInInventory_toAdd = null;
+            }
+
+            ReloadListData();
+        }
+
+        private void ReloadListData()
+        {
+            ObservableCollection<WorkOrderViewModel> list1 = new ObservableCollection<WorkOrderViewModel>();
+
+            foreach(ArrangementInventoryItemDTO a in arrangementInventoryList)
+            {
+                list1.Add(new WorkOrderViewModel(a,0));
+            }
+
+            foreach(NotInInventoryDTO a in notInInventoryList)
+            {
+                list1.Add(new WorkOrderViewModel(a));
+            }
+
+            ArrangementItemsListView.ItemsSource = list1;
         }
 
         private void SetWorkOrderSalesData()
@@ -822,77 +851,6 @@ namespace EOMobile
 
                 GiftMessage.IsEnabled = cb.IsChecked;
                 GiftMessage.IsVisible = cb.IsChecked;
-            }
-        }
-
-        private void AddItemNotInInventory_Clicked(object sender, EventArgs e)
-        {
-            String msg = String.Empty;
-            if (NotInInventoryName.Text == String.Empty)
-            {
-                msg += "Please add a name for the item not in inventory. \n";
-            }
-
-            if (NotInInventorySize.Text == String.Empty)
-            {
-                msg += "Please add a size for the item not in inventory. \n";
-            }
-
-            if (NotInInventoryQuantity.Text == String.Empty)
-            {
-                msg += "Please add a quantity for the item not in inventory. \n";
-            }
-
-            if (NotInInventoryPrice.Text == String.Empty)
-            {
-                msg += "Please add a price for the item not in inventory. \n";
-            }
-
-            if (msg != String.Empty)
-            {
-                DisplayAlert("Error", msg, "Ok");
-            }
-            else
-            {
-                //add this item to the list
-                NotInInventoryDTO dto = new NotInInventoryDTO();
-
-                dto.WorkOrderId = 0;
-                dto.ArrangementId = 0;
-                dto.NotInInventoryName = NotInInventoryName.Text;
-                dto.NotInInventoryQuantity = Convert.ToInt32(NotInInventoryQuantity.Text);
-                dto.NotInInventorySize = NotInInventorySize.Text;
-                dto.NotInInventoryPrice = Convert.ToDecimal(NotInInventoryPrice.Text);
-
-                if (!NotInInventoryItemIsinList(dto))
-                {
-                    NotInInventoryName.Text = String.Empty;
-                    NotInInventoryQuantity.Text = String.Empty;
-                    NotInInventorySize.Text = String.Empty;
-                    NotInInventoryPrice.Text = String.Empty;
-
-                    notInInventoryList.Add(dto);
-
-                    arrangementInventoryList.Add(new ArrangementInventoryItemDTO()
-                    {
-                        ArrangementId = 0,
-                        InventoryName = dto.NotInInventoryName,
-                        InventoryId = 0,
-                        //InventoryTypeId = 0,
-                        Quantity = dto.NotInInventoryQuantity,
-                        Size = dto.NotInInventorySize,
-                    });
-
-
-                    arrangementInventoryListOC.Clear();
-
-                    foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
-                    {
-                        arrangementInventoryListOC.Add(a);
-                    }
-
-                    ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
-                }
             }
         }
 

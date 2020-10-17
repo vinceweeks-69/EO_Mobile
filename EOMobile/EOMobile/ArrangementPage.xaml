@@ -47,8 +47,6 @@
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
                 </Grid.RowDefinitions>
 
                 <Label Text="Arrangement Name"
@@ -59,7 +57,7 @@
                 VerticalOptions="Center" 
                 HorizontalOptions="Start"
                 XAlign="Start" />
-                <Entry x:Name="Name" Text="" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="50" WidthRequest="200"/>
+                <Entry x:Name="Name" Text="" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="40" WidthRequest="200"/>
 
                 <Label Text="Product Search"
                 Grid.Column="2"
@@ -69,7 +67,7 @@
                 VerticalOptions="Center" 
                 HorizontalOptions="Start"  
                 XAlign="Start" />
-                <Button x:Name="Products" Clicked="Products_Clicked" Text="Search" Grid.Column="2" Grid.Row="1"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="Products" Clicked="Products_Clicked" Text="Search" Grid.Column="2" Grid.Row="1"  HeightRequest="40" WidthRequest="200"/>
                 
                 <Label Text="Add Image"
                 Grid.Column="3"
@@ -78,7 +76,7 @@
                 FontAttributes="Bold"
                 VerticalOptions="Center" 
                 HorizontalOptions="Start" />
-                <Button x:Name="AddImage" Clicked="OnAddImageClicked" Text="Add Image" Grid.Column="3" Grid.Row="1"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="AddImage" Clicked="OnAddImageClicked" Text="Add Image" Grid.Column="3" Grid.Row="1"  HeightRequest="40" WidthRequest="200"/>
 
                 <Label Text="Designer"
                     Grid.Column="0"
@@ -87,7 +85,7 @@
                     FontAttributes="Bold"
                     VerticalOptions="Center" 
                     HorizontalOptions="Start" />
-                 <Picker x:Name="Designer" Grid.Column="0" Grid.Row="3"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="50" WidthRequest="200"/>
+                 <Picker x:Name="Designer" Grid.Column="0" Grid.Row="3"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="40" WidthRequest="200"/>
                 
                 <Label Text="180/360"
                     Grid.Column="1"
@@ -96,7 +94,7 @@
                     FontAttributes="Bold"
                     VerticalOptions="Center" 
                     HorizontalOptions="Start" />
-                <Picker x:Name="Style" Grid.Column="1" Grid.Row="3"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="50" WidthRequest="200"/>
+                <Picker x:Name="Style" Grid.Column="1" Grid.Row="3"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}" HeightRequest="40" WidthRequest="200"/>
                 
                 <Label Text="Location"
                     Grid.Column="2"
@@ -114,7 +112,7 @@
                     FontAttributes="Bold"
                     VerticalOptions="Center" 
                     HorizontalOptions="Start" />
-                <Picker x:Name="Container" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  HeightRequest="50" WidthRequest="200"/>
+                <Picker x:Name="Container" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  HeightRequest="40" WidthRequest="200"/>
                 
                 <Label x:Name="CustomerContainerLabel"
                     Text="Label"
@@ -154,7 +152,7 @@
                     VerticalOptions="Center" 
                     HorizontalOptions="Start"
                     XAlign="Start" />
-                <Button x:Name="ArrangementSearch" Clicked="OnSearchArrangementsClicked" Text="Search" Grid.Column="1" Grid.Row="9"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="ArrangementSearch" Clicked="OnSearchArrangementsClicked" Text="Search" Grid.Column="1" Grid.Row="9"  HeightRequest="40" WidthRequest="200"/>
 
                 <Label Text="Clear"
                     Grid.Column="2"
@@ -164,7 +162,7 @@
                     VerticalOptions="Center" 
                     HorizontalOptions="Start"
                     XAlign="Start" />
-                <Button x:Name="ClearArrangement" Clicked="OnClearArrangementsClicked" Text="Clear" Grid.Column="2" Grid.Row="9"  HeightRequest="50" WidthRequest="200"/>
+                <Button x:Name="ClearArrangement" Clicked="OnClearArrangementsClicked" Text="Clear" Grid.Column="2" Grid.Row="9"  HeightRequest="40" WidthRequest="200"/>
 
                 <Label Text="Save"
                     Grid.Column="3"
@@ -174,72 +172,8 @@
                     VerticalOptions="Center" 
                     HorizontalOptions="Start"
                     XAlign="Start" />
-                <Button x:Name="SaveArrangement" Clicked="OnSaveArrangementsClicked" Text="Save" Grid.Column="3" Grid.Row="9"  HeightRequest="50" WidthRequest="200"/>
-
-                 <Label
-                        Text="Add item not in inventory"
-                        Grid.Column="0"
-                        Grid.Row="10"
-                        Grid.ColumnSpan="2"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                     <Button
-                        x:Name="AddItemNotInInventory"
-                        Text="Add"
-                        Grid.Column="3"
-                        Grid.Row="10"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start"
-                        Clicked="AddItemNotInInventory_Clicked"/>
-                    
-                        <Label
-                        Text="Name"
-                        Grid.Column="0"
-                        Grid.Row="11"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventoryName" Grid.Column="0" Grid.Row="12" HeightRequest="40" WidthRequest="200"/>
-                    
-                        <Label
-                        Text="Size"
-                        Grid.Column="1"
-                        Grid.Row="11"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventorySize" Grid.Column="1" Grid.Row="12" HeightRequest="40" WidthRequest="200"/>
-                    
-                        <Label
-                        Text="Quantity"
-                        Grid.Column="2"
-                        Grid.Row="11"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventoryQuantity" Grid.Column="2" Grid.Row="12" HeightRequest="40" WidthRequest="200"/>
-                    
-                        <Label
-                        Text="Price"
-                        Grid.Column="3"
-                        Grid.Row="11"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventoryPrice" Grid.Column="3" Grid.Row="12" HeightRequest="40" WidthRequest="200"/>
+                <Button x:Name="SaveArrangement" Clicked="OnSaveArrangementsClicked" Text="Save" Grid.Column="3" Grid.Row="9"  HeightRequest="40" WidthRequest="200"/>
+             
             </Grid>
 
             <Label Text="Arrangement Items" HorizontalOptions="Start" FontAttributes="Bold"></Label>

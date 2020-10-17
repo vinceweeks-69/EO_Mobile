@@ -26,7 +26,9 @@ namespace EOMobile
         public bool useGiftCard = false;
 
         List<PersonAndAddressDTO> buyer = new List<PersonAndAddressDTO>();
-        WorkOrderResponse workOrder; 
+        WorkOrderResponse workOrder;
+        GetWorkOrderSalesDetailResponse workOrderSalesDetail;
+
         List<WorkOrderInventoryItemDTO> workOrderInventoryList;
         List<KeyValuePair<int, string>> discountType = new List<KeyValuePair<int, string>>();
         List<KeyValuePair<long, string>> payTypeList = new List<KeyValuePair<long, string>>();
@@ -35,10 +37,10 @@ namespace EOMobile
 
             this.workOrderId = workOrderId;
             this.workOrderInventoryList = workOrderInventoryList;
+            
+            InitializeComponent();
 
             ((App)App.Current).GetWorkOrder(workOrderId).ContinueWith(a => WorkOrderLoaded(a.Result));
-
-            InitializeComponent();
 
             CCFrame.IsVisible = false;
 
@@ -80,6 +82,25 @@ namespace EOMobile
         private void BuyerLoaded(GetPersonResponse response)
         {
             buyer = response.PersonAndAddress;
+
+            ((App)App.Current).PostRequest<WorkOrderResponse, GetWorkOrderSalesDetailResponse>("GetWorkOrderDetail", workOrder).ContinueWith(a => WorkOrderDetailLoaded(a.Result));
+        }
+
+        private void WorkOrderDetailLoaded(GetWorkOrderSalesDetailResponse response)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                workOrderSalesDetail = response;
+
+                //set subtotal and tax fields
+                SubTotal.Text = response.SubTotal.ToString("N2");
+
+                Tax.Text = response.Tax.ToString("N2");
+
+                Total.Text = response.Total.ToString("N2");
+
+                SetWorkOrderSalesData();
+            });
         }
 
         //Event handler is being called multiple times and will be called after this function
@@ -135,14 +156,7 @@ namespace EOMobile
                 }
             }
         }
-
-        private void DiscountAmount_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            //recalculate work order sub total and tax
-
-            SetWorkOrderSalesData();
-        }
-
+        
         private void Pay_Clicked(object sender, EventArgs e)
         {
             Pay.IsEnabled = false;
@@ -291,7 +305,7 @@ namespace EOMobile
 
         private void PaySuccess_Clicked(object sender, EventArgs e)
         {
-            MessagingCenter.Send<WorkOrderResponse>(workOrder,"PaymentSuccess");
+            //MessagingCenter.Send<WorkOrderResponse>(workOrder,"PaymentSuccess");
 
             Navigation.PopAsync();
         }
@@ -321,15 +335,10 @@ namespace EOMobile
 
                 string hash = JsonConvert.SerializeObject(cc);
 
-                //byte[] hash1 = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-                //byte[] hash2 = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-
                 PaymentRequest request = new PaymentRequest();
 
                 Random rnd = new Random();
                 request.test = rnd.Next(32, 64);
-
-                //request.payload = Encryption.EncryptStringToBytes(hash, hash1, hash2);
 
                 request.payload = Encryption.EncryptStringToBytes(hash, Encryption.GetBytes(Encryption.StatsOne(request.test)), Encryption.GetBytes(Encryption.StatsTwo(request.test)));
 
@@ -416,22 +425,11 @@ namespace EOMobile
             return success;
         }
 
-        private void SetWorkOrderSalesData()
-        {
-            GetWorkOrderSalesDetailResponse response = GetWorkOrderDetail();
-
-            SubTotal.Text = response.SubTotal.ToString("C", CultureInfo.CurrentCulture);
-            Tax.Text = response.Tax.ToString("C", CultureInfo.CurrentCulture);
-            Total.Text = response.Total.ToString("C", CultureInfo.CurrentCulture);
-        }
-
         public GetWorkOrderSalesDetailResponse GetWorkOrderDetail()
         {
             GetWorkOrderSalesDetailResponse response = new GetWorkOrderSalesDetailResponse();
 
-            decimal discountAmount = 0;
-            decimal.TryParse(DiscountAmount.Text, out discountAmount);
-            string jsonData = JsonConvert.SerializeObject(new GetWorkOrderSalesDetailRequest(workOrderInventoryList, DiscountType.SelectedIndex, discountAmount));
+            string jsonData = JsonConvert.SerializeObject(workOrder);
 
             try
             {
@@ -498,6 +496,56 @@ namespace EOMobile
             {
                 TaskAwaiter t = Navigation.PushAsync(new HelpPage("PaymentPage")).GetAwaiter();
             }
+        }
+
+        private string SetWorkOrderSalesData()
+        {
+            decimal total = 0.0M;
+            decimal tax = 0.0M;
+
+            if(!String.IsNullOrEmpty(Total.Text))
+            {
+                total = Convert.ToDecimal(Total.Text);
+            }
+
+            if (!String.IsNullOrEmpty(Tax.Text))
+            {
+                tax = Convert.ToDecimal(Tax.Text);
+                total += tax;
+            }
+
+            if (!String.IsNullOrEmpty(DiscountAmount.Text))
+            {
+                if (DiscountType.SelectedIndex == 1)  //percent 
+                {
+                    decimal temp = Convert.ToDecimal(DiscountAmount.Text);
+                    if (temp != 0 && temp < 100)
+                    {
+                        total -= total * (temp / 100);
+                    }
+                }
+                else
+                {
+                    total -= Convert.ToDecimal(DiscountAmount.Text);
+                }
+            }
+
+            if (!String.IsNullOrEmpty(GiftCardAmount.Text))
+            {
+                total -= Convert.ToDecimal(GiftCardAmount.Text);
+            }
+
+            return total.ToString("N2");
+        }
+
+        private void DiscountAmount_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Total.Text = SetWorkOrderSalesData();
+        }
+
+        private void GiftCardAmount_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Total.Text = SetWorkOrderSalesData();
         }
     }
 }

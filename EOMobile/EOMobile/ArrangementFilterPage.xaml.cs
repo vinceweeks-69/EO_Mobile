@@ -204,9 +204,9 @@ namespace EOMobile
                 }
                 else if (Initiator is ArrangementPage)
                 {
-                    ArrangementInventoryDTO ao = new ArrangementInventoryDTO(0, item.Id, item.InventoryTypeId, item.Name, item.Type, item.Size, 0);
+                    ArrangementInventoryItemDTO ao = new ArrangementInventoryItemDTO(0, item.Id, item.Name,  0);
 
-                    MessagingCenter.Send<ArrangementInventoryDTO>(ao, "SearchArrangementInventory");
+                    MessagingCenter.Send<ArrangementInventoryItemDTO>(ao, "SearchArrangementInventory");
                 }
                 else
                 {
@@ -217,6 +217,52 @@ namespace EOMobile
             }
 
             Navigation.PopAsync();
+        }
+
+        private void AddNotInInventory_Clicked(object sender, EventArgs e)
+        {
+            String msg = String.Empty;
+            if (NotInInventoryName.Text == String.Empty)
+            {
+                msg += "Please add a name for the item not in inventory. \n";
+            }
+
+            if (NotInInventorySize.Text == String.Empty)
+            {
+                msg += "Please add a size for the item not in inventory. \n";
+            }
+
+            if (NotInInventoryPrice.Text == String.Empty)
+            {
+                msg += "Please add a price for the item not in inventory. \n";
+            }
+
+            if (msg != String.Empty)
+            {
+                DisplayAlert("Error", msg, "Ok");
+            }
+            else
+            {
+                NotInInventoryDTO dto = new NotInInventoryDTO();
+
+                dto.WorkOrderId = 0;
+                dto.ArrangementId = 0;
+                dto.NotInInventoryName = NotInInventoryName.Text;
+                dto.NotInInventoryQuantity = 1;
+                dto.NotInInventorySize = NotInInventorySize.Text;
+                dto.NotInInventoryPrice = Convert.ToDecimal(NotInInventoryPrice.Text);
+
+                if (Initiator is ArrangementPage)
+                {
+                    MessagingCenter.Send<NotInInventoryDTO>(dto, "ArrangementNotInInventory");
+                }
+                else if (Initiator is WorkOrderPage)
+                {
+                    MessagingCenter.Send<NotInInventoryDTO>(dto, "WorkOrderNotInInventory");
+                }
+
+                Navigation.PopAsync();
+            }
         }
 
         private void InventoryType_SelectedIndexChanged(object sender, EventArgs e)

@@ -44,8 +44,6 @@
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
                  </Grid.RowDefinitions>
 
 
@@ -56,7 +54,7 @@
                         FontAttributes="Bold"
                         VerticalOptions="Start" 
                         HorizontalOptions="Start" />
-                 <Picker x:Name="Seller"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="0" Grid.Row="1"  HeightRequest="50" WidthRequest="200"/>
+                 <Picker x:Name="Seller"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="0" Grid.Row="1"  HeightRequest="40" WidthRequest="200"/>
 
                 <Label Text="Pick/Create Buyer"
                         Grid.Column="1"
@@ -65,7 +63,7 @@
                         FontAttributes="Bold"
                         VerticalOptions="Start" 
                         HorizontalOptions="Start" />
-                <Picker x:Name="BuyerChoice"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="1" Grid.Row="1"  HeightRequest="50" WidthRequest="200" />
+                <Picker x:Name="BuyerChoice"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="1" Grid.Row="1"  HeightRequest="40" WidthRequest="200" />
    
                  <Label Text="Buyer"
                         Grid.Column="2"
@@ -74,7 +72,7 @@
                         FontAttributes="Bold"
                         VerticalOptions="Start" 
                         HorizontalOptions="Start" />
-                <Entry x:Name="Buyer" Text="" Focused="Buyer_Focused" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="50" WidthRequest="200"/>
+                <Entry x:Name="Buyer" Text="" Focused="Buyer_Focused" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="40" WidthRequest="200"/>
                                 
                 <Label Text="Comments"
                         Grid.Column="0"
@@ -92,7 +90,7 @@
                     FontAttributes="Bold"
                     VerticalOptions="Start" 
                     HorizontalOptions="Start" />
-                 <Picker x:Name="OrderType"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="0" Grid.Row="5"  HeightRequest="50" WidthRequest="200" SelectedIndexChanged="OrderType_SelectedIndexChanged" />
+                 <Picker x:Name="OrderType"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="0" Grid.Row="5"  HeightRequest="40" WidthRequest="200" SelectedIndexChanged="OrderType_SelectedIndexChanged" />
 
                  <Label Text="Delivery Type"
                         Grid.Column="1"
@@ -101,7 +99,7 @@
                         FontAttributes="Bold"
                         VerticalOptions="Start" 
                         HorizontalOptions="Start" />
-                 <Picker x:Name="DeliveryType"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="1" Grid.Row="5"  HeightRequest="50" WidthRequest="200" SelectedIndexChanged="DeliveryType_SelectedIndexChanged"/>
+                 <Picker x:Name="DeliveryType"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="1" Grid.Row="5"  HeightRequest="40" WidthRequest="200" SelectedIndexChanged="DeliveryType_SelectedIndexChanged"/>
 
                  <!--<Label Text="Site Service?"
                         Grid.Column="2"
@@ -119,7 +117,7 @@
                         FontAttributes="Bold"
                         VerticalOptions="Start" 
                         HorizontalOptions="Start" />
-                <DatePicker x:Name="WorkOrderDate" Grid.Column="3" Grid.Row="5"  HeightRequest="50" WidthRequest="200"/>
+                <DatePicker x:Name="WorkOrderDate" Grid.Column="3" Grid.Row="5"  HeightRequest="40" WidthRequest="200"/>
                     
                  <Label x:Name="DeliveryPersonLabel"
                     Text="Delivery Person"
@@ -129,7 +127,7 @@
                     FontAttributes="Bold"
                     VerticalOptions="Start" 
                     HorizontalOptions="Start" />
-                 <Picker x:Name="DeliveryPerson"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="1" Grid.Row="7"  HeightRequest="50" WidthRequest="200"/>
+                 <Picker x:Name="DeliveryPerson"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="1" Grid.Row="7"  HeightRequest="40" WidthRequest="200"/>
 
                  <Label x:Name="DeliverToLabel"
                     Text="Deliver To"
@@ -159,72 +157,6 @@
 
                 <Button x:Name="Payment" Text="Pay" Clicked="Payment_Clicked"  Grid.Column="3" Grid.Row="8"  HeightRequest="50" WidthRequest="200"/>
       
-                  
-                    <Label
-                        Text="Add item not in inventory"
-                        Grid.Column="0"
-                        Grid.Row="9"
-                        Grid.ColumnSpan="2"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                     <Button
-                        x:Name="AddItemNotInInventory"
-                        Text="Add"
-                        Grid.Column="3"
-                        Grid.Row="9"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start"
-                        Clicked="AddItemNotInInventory_Clicked"/>
-                    
-                        <Label
-                        Text="Name"
-                        Grid.Column="0"
-                        Grid.Row="10"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventoryName" Grid.Column="0" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
-                    
-                        <Label
-                        Text="Size"
-                        Grid.Column="1"
-                        Grid.Row="10"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventorySize" Grid.Column="1" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
-                    
-                        <Label
-                        Text="Quantity"
-                        Grid.Column="2"
-                        Grid.Row="10"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventoryQuantity" Grid.Column="2" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
-                    
-                        <Label
-                        Text="Price"
-                        Grid.Column="3"
-                        Grid.Row="10"
-                        FontSize="Default"
-                        FontAttributes="Bold"
-                        VerticalOptions="Start" 
-                        HorizontalOptions="Start" />
-                    
-                        <Entry x:Name="NotInInventoryPrice" Grid.Column="3" Grid.Row="11" HeightRequest="40" WidthRequest="200"/>
-
             </Grid>
 
 

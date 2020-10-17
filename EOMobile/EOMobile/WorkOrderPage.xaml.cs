@@ -475,6 +475,8 @@ namespace EOMobile
 
             GetSearchedArrangement();
 
+            GetSearchedForNotInInventory();
+
             RedrawInventoryList();
         }
 
@@ -556,6 +558,15 @@ namespace EOMobile
                 }
   
                 ((App)App.Current).searchedForArrangement = null;
+            }
+        }
+
+        void GetSearchedForNotInInventory()
+        {
+            if(((App)App.Current).notInInventory_toAdd != null && !NotInInventoryItemIsinList(((App)App.Current).notInInventory_toAdd))
+            {
+                notInInventory.Add(((App)App.Current).notInInventory_toAdd);
+                ((App)App.Current).notInInventory_toAdd = null;
             }
         }
 
@@ -813,15 +824,10 @@ namespace EOMobile
                     }
                 }
 
-                ((App)App.Current).ClearImageData();
-
                 Save.IsEnabled = false;
-                //PaymentType.IsEnabled = true;
                 Payment.IsEnabled = true;
 
                 DisplayAlert("Success", "WorkOrder Saved!", "OK");
-
-                OnClear(null, new EventArgs());
             }
             else
             {
@@ -959,71 +965,10 @@ namespace EOMobile
             }
         }
 
-        private void AddItemNotInInventory_Clicked(object sender, EventArgs e)
-        {
-            String msg = String.Empty;
-            if (NotInInventoryName.Text == String.Empty)
-            {
-                msg += "Please add a name for the item not in inventory. \n";
-            }
-
-            if(NotInInventorySize.Text == String.Empty)
-            {
-                msg += "Please add a size for the item not in inventory. \n";
-            }
-
-            if (NotInInventoryQuantity.Text == String.Empty)
-            {
-                msg += "Please add a quantity for the item not in inventory. \n";
-            }
-
-            if (NotInInventoryPrice.Text == String.Empty)
-            {
-                msg += "Please add a price for the item not in inventory. \n";
-            }
-
-            if(msg!= String.Empty)
-            {
-                DisplayAlert("Error", msg, "Ok");
-            }
-            else
-            {
-                NotInInventoryDTO dto = new NotInInventoryDTO();
-                dto.ArrangementId = 0;
-                dto.NotInInventoryId = 0;
-                dto.NotInInventoryName = NotInInventoryName.Text;
-                dto.NotInInventorySize = NotInInventorySize.Text;
-                dto.NotInInventoryQuantity = Convert.ToInt32(NotInInventoryQuantity.Text);
-                dto.NotInInventoryPrice = Convert.ToDecimal(NotInInventoryPrice.Text);
-
-                if(!NotInInventoryItemIsinList(dto))
-                {
-                    notInInventory.Add(dto);
-
-                    NotInInventoryName.Text = String.Empty;
-                    NotInInventorySize.Text = String.Empty;
-                    NotInInventoryPrice.Text = String.Empty;
-                    NotInInventoryQuantity.Text = String.Empty;
-
-                    RedrawInventoryList();
-                }
-                else
-                {
-                    DisplayAlert("Error", "Duplicate item", "Ok");
-                }
-            }
-        }
-
         private bool NotInInventoryItemIsinList(NotInInventoryDTO dto)
         {
             return notInInventory.Where(a => a.NotInInventoryName == dto.NotInInventoryName &&
                 a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryPrice == dto.NotInInventoryPrice).Any();
         }
-
-        //private bool NotInInventoryItemIsinList(WorkOrderInventoryItemDTO dto)
-        //{
-        //    return workOrderInventoryList.Where(a => a.NotInInventoryName == dto.NotInInventoryName &&
-        //        a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryPrice == dto.NotInInventoryPrice).Any();
-        //}
     }
 }
