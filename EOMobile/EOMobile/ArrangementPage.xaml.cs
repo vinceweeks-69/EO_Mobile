@@ -29,7 +29,7 @@ namespace EOMobile
         List<ArrangementInventoryItemDTO> arrangementInventoryList = new List<ArrangementInventoryItemDTO>();
         List<GetSimpleArrangementResponse> arrangementList = new List<GetSimpleArrangementResponse>();
 
-        ObservableCollection<ArrangementInventoryItemDTO> arrangementInventoryListOC = new ObservableCollection<ArrangementInventoryItemDTO>();
+        //ObservableCollection<ArrangementInventoryItemDTO> arrangementInventoryListOC = new ObservableCollection<ArrangementInventoryItemDTO>();
         ObservableCollection<GetSimpleArrangementResponse> arrangementListOC = new ObservableCollection<GetSimpleArrangementResponse>();
 
         TabbedArrangementPage TabParent = null;
@@ -202,12 +202,12 @@ namespace EOMobile
                 });
             }
 
-            foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
-            {
-                arrangementInventoryListOC.Add(a);
-            }
+            //foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
+            //{
+            //    arrangementInventoryListOC.Add(a);
+            //}
 
-            ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+            //ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
 
             if(TabParent.CurrentArrangement.Arrangement.CustomerContainerId.HasValue)
             {
@@ -269,18 +269,18 @@ namespace EOMobile
             {
                 if (!arrangementInventoryList.Contains(searchedForInventory))
                 {
-                    arrangementInventoryListOC.Clear();
+                    //arrangementInventoryListOC.Clear();
 
                     searchedForInventory.Quantity = 1;
 
                     arrangementInventoryList.Add(searchedForInventory);
 
-                    foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
-                    {
-                        arrangementInventoryListOC.Add(a);
-                    }
+                    //foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
+                    //{
+                    //    arrangementInventoryListOC.Add(a);
+                    //}
 
-                    ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                    //ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
 
                     SetWorkOrderSalesData();
 
@@ -400,8 +400,8 @@ namespace EOMobile
             arrangementList.Clear();
             arrangementListOC.Clear();
             arrangementInventoryList.Clear();
-            arrangementInventoryListOC.Clear();
-            ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+            //arrangementInventoryListOC.Clear();
+            //ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
             inventoryImageIdsLoaded.Clear();
             TabParent.ClearArrangementImages();
             customerContainerId = null;
@@ -486,6 +486,8 @@ namespace EOMobile
 
                 if (TabParent.ForWorkOrder)
                 {
+                    //get quantities from ArrangementItemsListView ItemsSource
+
                     AddArrangementRequest request = new AddArrangementRequest();
                     request.Arrangement = new ArrangementDTO();
 
@@ -498,19 +500,45 @@ namespace EOMobile
                     request.Arrangement.CustomerContainerId = customerContainerId;
                     request.Arrangement.LocationName = Location.Text;
                     request.Arrangement.UpdateDate = DateTime.Now;
-                    request.ArrangementInventory = arrangementInventoryList.Where(a => a.InventoryId != 0).ToList();  // "Not In Inventory" items may have been added to the display list
                     request.Arrangement.IsGift = GiftCheckBox.IsChecked ? 1 : 0;
                     request.Arrangement.GiftMessage = GiftMessage.Text;
 
                     Random r = new Random();
                     long tempArrangementId = r.Next(1, 100);
 
-                    foreach(NotInInventoryDTO dto in notInInventoryList)
+                    foreach (ArrangementInventoryItemDTO dto in arrangementInventoryList)
+                    {
+                        if (dto.ArrangementId != 0)
+                        {
+                            arrangementId = dto.ArrangementId;
+                            break;
+                        }
+
+                        WorkOrderViewModel wovm = null;
+
+                        if (((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.InventoryId == dto.InventoryId).Any())
+                        {
+                            wovm = ((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.InventoryId == dto.InventoryId).First();
+                            dto.Quantity = wovm.Quantity;
+                        }
+                    }
+
+                    request.ArrangementInventory = arrangementInventoryList;
+
+                    foreach (NotInInventoryDTO dto in notInInventoryList)
                     {
                         //group them for the work order
                         if(!dto.ArrangementId.HasValue || dto.ArrangementId == 0)
                         {
                             dto.ArrangementId = tempArrangementId;
+                        }
+
+                        WorkOrderViewModel wovm = null;
+
+                        if(((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.NotInInventoryId == dto.NotInInventoryId).Any())
+                        {
+                            wovm = ((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.NotInInventoryId == dto.NotInInventoryId).First();
+                            dto.NotInInventoryQuantity = wovm.Quantity;
                         }
                     }
 
@@ -544,6 +572,13 @@ namespace EOMobile
                             arrangementId = dto.ArrangementId;
                             break;
                         }
+
+                        WorkOrderViewModel wovm = null;
+
+                        if (((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.InventoryId == dto.InventoryId).Any())
+                        {
+                            dto.Quantity = wovm.Quantity;
+                        }
                     }
 
                     if (arrangementId == 0)
@@ -560,7 +595,7 @@ namespace EOMobile
                         request.Arrangement.GiftMessage = GiftMessage.Text;
 
                         request.Arrangement.UpdateDate = DateTime.Now;
-                        request.ArrangementInventory = arrangementInventoryList;
+                        request.ArrangementInventory = arrangementInventoryList.Where(a => a.InventoryId != 0).ToList();  // "Not In Inventory" items may have been added to the display list;
 
                         request.Inventory = new InventoryDTO()
                         {
@@ -686,8 +721,8 @@ namespace EOMobile
                         }
 
                         arrangementInventoryList.Remove(dto);
-                        arrangementInventoryListOC.Remove(dto);
-                        ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                        //arrangementInventoryListOC.Remove(dto);
+                        //ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
                     }
                 }
             }
@@ -695,16 +730,42 @@ namespace EOMobile
 
         private void Quantity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Xamarin.Forms.Entry entry = sender as Xamarin.Forms.Entry;
+            //quantity has changed in the ObservableCollection - update the actual backing store
+            //Consolidate the DTOs 
 
-            if (entry != null)
+            try
             {
-                string strQty = entry.Text;
+                if (ArrangementItemsListView.ItemsSource == null)
+                    return;
 
-                if (!String.IsNullOrEmpty(strQty))
+                var wtf = (ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource;
+
+                if(wtf != null)
                 {
-                    int qty = Convert.ToInt32(strQty);
+                    foreach (ArrangementInventoryItemDTO dto in arrangementInventoryList)
+                    {
+                        WorkOrderViewModel wovm = null;
+                        if (((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.InventoryId == dto.InventoryId).Any())
+                        {
+                            wovm = ((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.InventoryId == dto.InventoryId).First();
+                            dto.Quantity = wovm.Quantity;
+                        }
+                    }
+
+                    foreach (NotInInventoryDTO dto in notInInventoryList)
+                    {
+                        WorkOrderViewModel wovm = null;
+                        if (((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.InventoryId == dto.NotInInventoryId).Any())
+                        {
+                            wovm = ((ObservableCollection<WorkOrderViewModel>)ArrangementItemsListView.ItemsSource).Where(a => a.NotInInventoryId == dto.NotInInventoryId).First();
+                            dto.NotInInventoryQuantity = wovm.Quantity;
+                        }
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                int debug = 1;
             }
         }
 
@@ -778,14 +839,14 @@ namespace EOMobile
 
                 arrangementInventoryList = response.ArrangementList;
 
-                arrangementInventoryListOC.Clear();
+                //arrangementInventoryListOC.Clear();
 
                 foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
                 {
-                    arrangementInventoryListOC.Add(a);
+                    //arrangementInventoryListOC.Add(a);
                 }
 
-                ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                //ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
                 lv.SelectedItem = null;
 
                 TabParent.LoadArrangmentImages(response.Images);

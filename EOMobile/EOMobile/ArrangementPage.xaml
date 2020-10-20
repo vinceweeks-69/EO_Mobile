@@ -178,7 +178,7 @@
 
             <Label Text="Arrangement Items" HorizontalOptions="Start" FontAttributes="Bold"></Label>
             <Frame Padding="10,10,10,10" HeightRequest="300">
-                <ListView  x:Name="ArrangementItemsListView" ItemsSource="{Binding arrangementInventoryList}">
+                <ListView  x:Name="ArrangementItemsListView">
                     <ListView.Header>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -210,8 +210,8 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <Label Grid.Column="0" Text="{Binding ArrangementInventoryName}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
-                                    <Entry Keyboard="Numeric"  x:Name="Quantity" Text="{Binding Quantity, Mode=TwoWay}" Grid.Column="1" WidthRequest="40" PropertyChanged="Quantity_PropertyChanged" HorizontalOptions="Start" MaxLength="3"/>
+                                    <Label Grid.Column="0" Text="{Binding InventoryName}" VerticalOptions="Center" HorizontalOptions="Start" HorizontalTextAlignment="Start"/>
+                                    <Entry Keyboard="Numeric"  x:Name="Quantity" Text="{Binding Quantity, Mode=TwoWay}" Grid.Column="1" WidthRequest="40" PropertyChanged="Quantity_PropertyChanged"  HorizontalOptions="Start" MaxLength="3"/>
                                     <Button Text="Image" Grid.Column="2" HorizontalOptions="Start"  Clicked="ShowImage_Clicked" CommandParameter="{Binding InventoryId}"/>
                                     <Button Text="Delete"  Grid.Column="3" Clicked="OnDeleteArrangementItem" CommandParameter="{Binding}" HorizontalOptions="Start"/>
                                 </Grid>

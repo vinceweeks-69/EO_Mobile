@@ -204,13 +204,13 @@ namespace EOMobile
                 }
                 else if (Initiator is ArrangementPage)
                 {
-                    ArrangementInventoryItemDTO ao = new ArrangementInventoryItemDTO(0, item.Id, item.Name,  0);
+                    ArrangementInventoryItemDTO ao = new ArrangementInventoryItemDTO(0, item.Id, item.Name, item.InventoryTypeId, 0);
 
                     MessagingCenter.Send<ArrangementInventoryItemDTO>(ao, "SearchArrangementInventory");
                 }
                 else
                 {
-                    WorkOrderInventoryItemDTO wo = new WorkOrderInventoryItemDTO(0, item.Id, item.Name, item.Size, 0);
+                    WorkOrderInventoryItemDTO wo = new WorkOrderInventoryItemDTO(0, item.Id, item.InventoryTypeId, item.Name, item.Size, 0);
 
                     MessagingCenter.Send<WorkOrderInventoryItemDTO>(wo, "SearchInventory");
                 }
@@ -245,12 +245,17 @@ namespace EOMobile
             {
                 NotInInventoryDTO dto = new NotInInventoryDTO();
 
+                Random r = new Random();
+                dto.NotInInventoryId = r.Next(-5000, -1);
+
                 dto.WorkOrderId = 0;
                 dto.ArrangementId = 0;
                 dto.NotInInventoryName = NotInInventoryName.Text;
                 dto.NotInInventoryQuantity = 1;
                 dto.NotInInventorySize = NotInInventorySize.Text;
                 dto.NotInInventoryPrice = Convert.ToDecimal(NotInInventoryPrice.Text);
+
+               
 
                 if (Initiator is ArrangementPage)
                 {
@@ -275,7 +280,7 @@ namespace EOMobile
                 Name.ItemsSource = null;
 
                 //clear any previous selected 
-                ArrangementInventoryList.ItemsSource = null;
+                ArrangementInventoryList.ItemsSource = new ObservableCollection<ArrangementInventoryFilteredItem>();
 
                 //get types for the current inventory type selection
                 Picker p = sender as Picker;

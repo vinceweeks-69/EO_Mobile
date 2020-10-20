@@ -1,4 +1,5 @@
-﻿using EOMobile.Interfaces;
+﻿using EOMobile.Converters;
+using EOMobile.Interfaces;
 using EOMobile.ViewModels;
 using Newtonsoft.Json;
 using SharedData;
@@ -52,7 +53,6 @@ namespace EOMobile
         List<KeyValuePair<long, string>> employeeDDL = new List<KeyValuePair<long, string>>();
 
         TabbedWorkOrderPage TabParent = null;
-     
 
         long currentWorkOrderId = 0;
         long currentWorkOrderPaymentId = 0;
@@ -79,6 +79,8 @@ namespace EOMobile
         {
             get { return searchedForPerson; }
         }
+
+        WorkOrderInventoryItemDTO searchedForInventory;
 
         public bool EnablePayment()
         {
@@ -108,6 +110,11 @@ namespace EOMobile
             InitializeComponent();
 
             TabParent = tabParent;
+
+            MessagingCenter.Subscribe<WorkOrderInventoryItemDTO>(this, "SearchInventory", (arg) =>
+            {
+                searchedForInventory = arg;
+            });
 
             MessagingCenter.Subscribe<PersonAndAddressDTO>(this, "SearchCustomer", (arg) =>
             {
@@ -214,6 +221,7 @@ namespace EOMobile
 
         private void WorkOrderLoaded(WorkOrderResponse workOrderResponse)
         {
+            currentWorkOrderId = workOrderResponse.WorkOrder.WorkOrderId;
             ((App)App.Current).GetWorkOrderPayment(currentWorkOrderId).ContinueWith(a => WorkOrderPaymentLoaded(workOrderResponse, a.Result));
         }
 
@@ -242,6 +250,7 @@ namespace EOMobile
                         InventoryItemsListView.IsEnabled = false;
                         Save.IsEnabled = false;
                         Payment.IsEnabled = false;
+                        AddInventory.IsEnabled = false;
                     }
                     else
                     {
@@ -321,13 +330,17 @@ namespace EOMobile
             //draw work order items in inventory
             foreach(WorkOrderInventoryItemDTO dto in workOrderInventoryList)
             {
-                workOrderList.Add(new WorkOrderViewModel(dto));
+                WorkOrderViewModel vm = new WorkOrderViewModel(dto);
+                vm.ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true;
+                workOrderList.Add(vm);
             }
 
             //draw work order item Not in Inventory
             foreach(NotInInventoryDTO dto in notInInventory)
             {
-                workOrderList.Add(new WorkOrderViewModel(dto));
+                WorkOrderViewModel vm = new WorkOrderViewModel(dto);
+                vm.ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true;
+                workOrderList.Add(vm);
             }
 
             //draw arangements with header row and blank rows top and bottom
@@ -361,10 +374,12 @@ namespace EOMobile
                     {
                         WorkOrderId = currentWorkOrderId,
                         InventoryId = aid.InventoryId,
+                        InventoryTypeId = aid.InventoryTypeId,
                         InventoryName = aid.InventoryName,
                         Quantity = aid.Quantity,
                         Size = aid.Size,
-                        GroupId = aid.ArrangementId
+                        GroupId = aid.ArrangementId,
+                        ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true
                     });
                 });
 
@@ -382,10 +397,12 @@ namespace EOMobile
                             Quantity = x.NotInInventoryQuantity,
                             NotInInventorySize = x.NotInInventorySize,
                             NotInInventoryPrice = x.NotInInventoryPrice,
-                            GroupId = x.ArrangementId
+                            GroupId = x.ArrangementId,
                         };
 
-                    workOrderList.Add(new WorkOrderViewModel(dto));
+                    WorkOrderViewModel vm = new WorkOrderViewModel(dto);
+                    vm.ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true;
+                    workOrderList.Add(vm);
 
                 });
 
@@ -422,7 +439,7 @@ namespace EOMobile
             }
             else
             {
-                //To iterate, on iOS, if you want to save images to the devie, set 
+                //To iterate, on iOS, if you want to save images to the device, set 
                 if (fileName != null)
                 {
                     App.ImageIdToSave = fileName;
@@ -763,43 +780,44 @@ namespace EOMobile
 
             foreach (WorkOrderInventoryItemDTO woii in workOrderInventoryList)
             {
-                if (!String.IsNullOrEmpty(woii.NotInInventoryName))
+                WorkOrderViewModel wovm = null; 
+                if(((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.InventoryId == woii.InventoryId).Any())
                 {
-                    //don't add the items that are members of an arrangement
-                    if (!woii.GroupId.HasValue || woii.GroupId == 0)
-                    {
-                        //notInInventory.Add(new NotInInventoryDTO()
-                        //{
-                        //    WorkOrderId = currentWorkOrderId,
-                        //    ArrangementId = woii.GroupId,
-                        //    NotInInventoryName = woii.NotInInventoryName,
-                        //    NotInInventorySize = woii.NotInInventorySize,
-                        //    NotInInventoryQuantity = woii.Quantity,
-                        //    NotInInventoryPrice = woii.NotInInventoryPrice
-                        //});
-                    }
+                    wovm = ((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.InventoryId == woii.InventoryId).First();
                 }
-                else
+
+                workOrderInventoryMap.Add(new WorkOrderInventoryMapDTO()
                 {
-                    //don't add the items that are members of an arrangement
-                    if (!woii.GroupId.HasValue || woii.GroupId == 0)
-                    {
-                        workOrderInventoryMap.Add(new WorkOrderInventoryMapDTO()
-                        {
-                            WorkOrderId = currentWorkOrderId,
-                            InventoryId = woii.InventoryId,
-                            InventoryName = woii.InventoryName,
-                            Quantity = woii.Quantity,
-                            GroupId = woii.GroupId,
-                            Size = woii.Size,
-                        });
-                    }
-                }
+                    WorkOrderId = currentWorkOrderId,
+                    InventoryId = woii.InventoryId,
+                    InventoryName = woii.InventoryName,
+                    //Quantity = woii.Quantity,
+                    Quantity = wovm != null ? wovm.Quantity : 1, 
+                    GroupId = woii.GroupId,
+                    Size = woii.Size,
+                });
             }
 
             addWorkOrderRequest.WorkOrder = dto;
             addWorkOrderRequest.WorkOrderInventoryMap = workOrderInventoryMap.Where(a => a.GroupId == 0).ToList();
+
+            foreach(NotInInventoryDTO notIn in notInInventory)
+            {
+                WorkOrderViewModel wovm = null;
+
+                if (((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.NotInInventoryId == notIn.NotInInventoryId).Any())
+                {
+                    wovm = ((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.NotInInventoryId == notIn.NotInInventoryId).First();
+                }
+
+                if(wovm != null)
+                {
+                    notIn.NotInInventoryQuantity = wovm.Quantity;
+                }
+            }
+
             addWorkOrderRequest.NotInInventory = notInInventory;
+
             addWorkOrderRequest.Arrangements = arrangementList;
 
             currentWorkOrderId = ((App)App.Current).AddWorkOrder(addWorkOrderRequest);
@@ -837,7 +855,40 @@ namespace EOMobile
 
         private void Quantity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            int debug = 1;
+            //quantity has changed in the ObservableCollection - update the actual backing store - what needs to happen is the consolidation of all the different DTO types
+            //at the very least, a common base class of WorkOrderViewModel
+
+            Xamarin.Forms.Entry entry = sender as Xamarin.Forms.Entry;
+
+            if (entry != null)
+            {
+                string strQty = entry.Text;
+
+                if (!String.IsNullOrEmpty(strQty))
+                {
+                    int qty = Convert.ToInt32(strQty);
+                }
+
+                foreach(WorkOrderInventoryItemDTO dto in workOrderInventoryList)
+                {
+                    WorkOrderViewModel wovm = null;
+                    if (((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.InventoryId == dto.InventoryId).Any())
+                    {
+                        wovm = ((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.InventoryId == dto.InventoryId).First();
+                        dto.Quantity = wovm.Quantity;
+                    }
+                }
+
+                foreach(NotInInventoryDTO dto in notInInventory)
+                {
+                    WorkOrderViewModel wovm = null;
+                    if (((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.InventoryId == dto.NotInInventoryId).Any())
+                    {
+                        wovm = ((ObservableCollection<WorkOrderViewModel>)InventoryItemsListView.ItemsSource).Where(a => a.NotInInventoryId == dto.NotInInventoryId).First();
+                        dto.NotInInventoryQuantity = wovm.Quantity;
+                    }
+                }
+            }
         }
 
         private void Payment_Clicked(object sender, EventArgs e)
@@ -969,6 +1020,21 @@ namespace EOMobile
         {
             return notInInventory.Where(a => a.NotInInventoryName == dto.NotInInventoryName &&
                 a.NotInInventorySize == dto.NotInInventorySize && a.NotInInventoryPrice == dto.NotInInventoryPrice).Any();
+        }
+
+        public bool EnableWorkOrderButtons()
+        {
+            bool enableButtons = true;
+
+            if(currentWorkOrderId > 0)
+            {
+                if(currentWorkOrderPaymentId > 0)
+                {
+                    enableButtons = false;
+                }
+            }
+
+            return enableButtons;
         }
     }
 }

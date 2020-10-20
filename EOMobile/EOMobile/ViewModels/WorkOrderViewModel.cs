@@ -17,6 +17,7 @@ namespace EOMobile.ViewModels
         {
             WorkOrderId = dto.WorkOrderId;
             InventoryId = 387;    //temp constant
+            InventoryTypeId = 0;        //we don't know - should they have to add this?
             NotInInventoryId = dto.NotInInventoryId;
             UnsavedId = dto.UnsavedId;
             InventoryName = dto.NotInInventoryName;
@@ -30,6 +31,7 @@ namespace EOMobile.ViewModels
         {
             WorkOrderId = dto.WorkOrderId;
             InventoryId = dto.InventoryId;
+            InventoryTypeId = dto.InventoryTypeId;
             InventoryName = dto.InventoryName;
             Quantity = dto.Quantity;
             ImageId = dto.ImageId;
@@ -42,6 +44,7 @@ namespace EOMobile.ViewModels
             WorkOrderId = dto.WorkOrderId;
             WorkOrderInventoryMapId = dto.WorkOrderInventoryMapId;
             InventoryId = dto.InventoryId;
+            InventoryTypeId = dto.InventoryTypeId;
             InventoryName = dto.InventoryName;
             Quantity = dto.Quantity;
             //ImageId = dto.ImageId;
@@ -53,6 +56,7 @@ namespace EOMobile.ViewModels
         {
             WorkOrderId = workOrderId;
             InventoryId = dto.InventoryId;
+            InventoryTypeId = dto.InventoryTypeId;
             InventoryName = dto.InventoryName;
             Quantity = dto.Quantity;
             ImageId = dto.ImageId;
@@ -66,13 +70,25 @@ namespace EOMobile.ViewModels
 
         public long InventoryId { get; set; }
 
+        public long InventoryTypeId { get; set; }
+
         public long NotInInventoryId { get; set; }
 
         public long UnsavedId { get; set; }
 
         public string InventoryName { get; set; }
 
-        public int Quantity { get; set; }
+        int quantity;
+        public int Quantity
+        {
+            get {
+                return quantity;
+            }
+            set {
+                quantity = value;
+                OnPropertyChanged(nameof(Quantity));
+            }
+        }
 
         public long ImageId { get; set; }
 
@@ -89,6 +105,20 @@ namespace EOMobile.ViewModels
             }
             get { 
                 return Quantity == 0 ? false : true; 
+            }
+        }
+
+        bool shouldEnable;
+        public bool ShouldEnable
+        {
+            set
+            {
+                shouldEnable = value;
+                OnPropertyChanged(nameof(ShouldEnable));
+            }
+            get
+            {
+                return shouldEnable;
             }
         }
 

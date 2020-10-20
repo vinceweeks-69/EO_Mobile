@@ -42,7 +42,19 @@ namespace EOMobile.ViewModels
 
         public string InventoryName { get; set; }
 
-        public int Quantity { get; set; }
+        int quantity;
+        public int Quantity
+        {
+            get
+            {
+                return quantity;
+            }
+            set
+            {
+                quantity = value;
+                OnPropertyChanged(nameof(Quantity));
+            }
+        }
 
         public long ImageId { get; set; }
 
