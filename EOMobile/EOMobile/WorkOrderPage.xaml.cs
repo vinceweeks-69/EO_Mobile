@@ -748,8 +748,10 @@ namespace EOMobile
             this.InventoryItemsListView.ItemsSource = workOrderList;
         }
 
-        public void AddWorkOrder()
+        public bool AddWorkOrder(bool displayAlert = true)
         {
+            bool result = false;
+
             AddWorkOrderRequest addWorkOrderRequest = new AddWorkOrderRequest();
              
             WorkOrderDTO dto = new WorkOrderDTO()
@@ -824,6 +826,8 @@ namespace EOMobile
 
             if(currentWorkOrderId > 0)
             {
+                result = true;
+
                 //add any images
                 List<EOImgData> imageData = ((App)App.Current).GetImageData();
 
@@ -845,12 +849,20 @@ namespace EOMobile
                 Save.IsEnabled = false;
                 Payment.IsEnabled = true;
 
-                DisplayAlert("Success", "WorkOrder Saved!", "OK");
+                if (displayAlert)
+                {
+                    DisplayAlert("Success", "WorkOrder Saved!", "OK");
+                }
             }
             else
             {
-                DisplayAlert("Error", "There was an error saving this work order.", "Ok");
+                if (displayAlert)
+                {
+                    DisplayAlert("Error", "There was an error saving this work order.", "Ok");
+                }
             }
+
+            return result;
         }
 
         private void Quantity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -897,7 +909,14 @@ namespace EOMobile
             {
                 if (!PageExists(typeof(PaymentPage)))
                 {
-                    Navigation.PushAsync(new PaymentPage(currentWorkOrderId, workOrderInventoryList));
+                    if (AddWorkOrder(false))
+                    {
+                        Navigation.PushAsync(new PaymentPage(currentWorkOrderId, workOrderInventoryList));
+                    }
+                    else
+                    {
+                        DisplayAlert("Error", "There was an error saving the work order", "Ok");
+                    }
                 }
             }
         }

@@ -31,9 +31,12 @@ namespace EOMobile
         {
             GetPersonRequest request = new GetPersonRequest();
 
-            request.FirstName = Name.Text;
+            request.FirstName = FirstName.Text;
+            request.LastName = LastName.Text;
             request.Email = Email.Text;
             request.PhonePrimary = Phone.Text;
+            request.Address = Address.Text;
+            request.ZipCode = ZipCode.Text;
 
             ((App)App.Current).GetCustomers(request).ContinueWith(a => CustomersLoaded(a.Result));
         }

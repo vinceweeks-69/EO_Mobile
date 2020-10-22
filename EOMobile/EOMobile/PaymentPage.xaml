@@ -60,6 +60,17 @@
                         <Picker x:Name="PaymentType"  ItemDisplayBinding="{Binding Value}" SelectedItem="{Binding SelectedItem}"  Grid.Column="0" Grid.Row="1"  SelectedIndexChanged="PaymentType_SelectedIndexChanged" HeightRequest="50" WidthRequest="200"/>
 
 
+                        <Label x:Name="ccConfirmLabel" Text="Credit Card payment confirmation"
+                            Grid.Column="1"
+                            Grid.Row="0"
+                            Grid.ColumnSpan="2"  
+                            FontSize="Default"
+                            FontAttributes="Bold"
+                            VerticalOptions="Start" 
+                            HorizontalOptions="Start" />
+                        <Entry x:Name="ccConfirmPaid"  Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" IsReadOnly="True" HeightRequest="50" WidthRequest="200"/>
+
+                        
                         <Label Text="Sub Total"
                             Grid.Column="0"
                             Grid.Row="2"

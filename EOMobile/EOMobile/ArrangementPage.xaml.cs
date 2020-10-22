@@ -85,6 +85,8 @@ namespace EOMobile
 
             GiftCheckBox.IsChecked = false;
 
+            ArrangementListView.ItemsSource = new ObservableCollection<WorkOrderViewModel>();
+
             ArrangementListView.ItemSelected += ArrangementListView_ItemSelected;
 
             TaskAwaiter t = ((App)App.Current).GetCustomerContainers(TabParent.Customer.Person.person_id).ContinueWith(a => CustomerContainersLoaded(a.Result)).GetAwaiter();
@@ -202,18 +204,13 @@ namespace EOMobile
                 });
             }
 
-            //foreach (ArrangementInventoryItemDTO a in arrangementInventoryList)
-            //{
-            //    arrangementInventoryListOC.Add(a);
-            //}
-
-            //ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
-
             if(TabParent.CurrentArrangement.Arrangement.CustomerContainerId.HasValue)
             {
                 customerContainerId = TabParent.CurrentArrangement.Arrangement.CustomerContainerId;
                 Container.SelectedIndex = TabParent.CurrentArrangement.Arrangement.Container;
             }
+
+            ReloadListData();
         }
 
         private void EnableCustomerContainerSecondaryControls(bool shouldShow)
@@ -707,23 +704,29 @@ namespace EOMobile
             {
                 if (button.CommandParameter != null)
                 {
-                    ArrangementInventoryItemDTO dto = button.CommandParameter as ArrangementInventoryItemDTO;
+                    WorkOrderViewModel dto = button.CommandParameter as WorkOrderViewModel;
 
                     if (dto != null)
                     {
                         if (dto.InventoryId == 0)
                         {
-                            if(notInInventoryList.Where(a => a.NotInInventoryName == dto.InventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).Any())
+                            if (notInInventoryList.Where(a => a.NotInInventoryName == dto.InventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).Any())
                             {
                                 NotInInventoryDTO nii = notInInventoryList.Where(a => a.NotInInventoryName == dto.InventoryName && a.NotInInventorySize == dto.Size && a.NotInInventoryQuantity == dto.Quantity).First();
                                 notInInventoryList.Remove(nii);
                             }
                         }
-
-                        arrangementInventoryList.Remove(dto);
-                        //arrangementInventoryListOC.Remove(dto);
-                        //ArrangementItemsListView.ItemsSource = arrangementInventoryListOC;
+                        else
+                        {
+                            if (arrangementInventoryList.Where(a => a.InventoryId == dto.InventoryId).Any())
+                            {
+                                ArrangementInventoryItemDTO aiid = arrangementInventoryList.Where(a => a.InventoryId == dto.InventoryId).First();
+                                arrangementInventoryList.Remove(aiid);
+                            }
+                        }
                     }
+
+                    ReloadListData();
                 }
             }
         }

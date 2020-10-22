@@ -137,10 +137,11 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Label Text="Created Date"  Grid.Column="0" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
-                                <Label Text="Seller"  Grid.Column="1" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
-                                <Label Text="Buyer"  Grid.Column="2" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
-                                <Label Text="Items"  Grid.Column="3" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
-                                <Label Text="Edit"  Grid.Column="4" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <!--<Label Text="Seller"  Grid.Column="1" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />-->
+                                <Label Text="Buyer"  Grid.Column="1" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <Label Text="Items"  Grid.Column="2" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <Label Text="Edit"  Grid.Column="3" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
+                                <Label Text="Payment"  Grid.Column="4" Grid.Row="0" HorizontalOptions="StartAndExpand" FontAttributes="Bold" />
                             </Grid>
                         </ListView.Header>
 
@@ -156,11 +157,12 @@
                                             <ColumnDefinition Width="20*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <Label  Text="{Binding CreateDate, StringFormat='{0:MMMM dd, yyyy}'}" Grid.Column="0" HorizontalOptions="StartAndExpand" />
-                                        <Label  Text="{Binding Seller}" Grid.Column="1" HorizontalOptions="StartAndExpand" />
-                                        <Label Text="{Binding Buyer}" Grid.Column="2" HorizontalOptions="StartAndExpand" />
-                                        <Button Text="Items" Grid.Column="3" Clicked="ShowInventory_Clicked" CommandParameter="{Binding WorkOrderId}" HorizontalOptions="StartAndExpand" />
-                                        <Button Text="Edit"  Grid.Column="4" Clicked="EditWorkOrder_Clicked" CommandParameter="{Binding WorkOrderId}" HorizontalOptions="StartAndExpand" />
+                                        <Label  Text="{Binding WorkOrder.CreateDate, StringFormat='{0:MMMM dd, yyyy}'}" Grid.Column="0" HorizontalOptions="StartAndExpand" />
+                                        <!--<Label  Text="{Binding Seller}" Grid.Column="1" HorizontalOptions="StartAndExpand" />-->
+                                        <Label Text="{Binding WorkOrder.Buyer}" Grid.Column="1" HorizontalOptions="StartAndExpand" />
+                                        <Button Text="Items" Grid.Column="2" Clicked="ShowInventory_Clicked" CommandParameter="{Binding WorkOrder.WorkOrderId}" HorizontalOptions="StartAndExpand" />
+                                        <Button Text="Edit"  Grid.Column="3" Clicked="EditWorkOrder_Clicked" CommandParameter="{Binding WorkOrder.WorkOrderId}" HorizontalOptions="StartAndExpand" />
+                                        <Button Text="Detail"  Grid.Column="4" Clicked="PaymentDetail_Clicked"  CommandParameter="{Binding}" HorizontalOptions="StartAndExpand" />
                                     </Grid>
                                 </ViewCell>
                             </DataTemplate>

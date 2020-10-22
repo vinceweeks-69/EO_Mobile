@@ -54,6 +54,9 @@ namespace EOMobile
             WorkOrderSiteService.ItemsSource = siteServiceList;
             WorkOrderSiteService.SelectedIndex = 0;
 
+            WorkOrderFromDate.Date = DateTime.Today;
+            WorkOrderToDate.Date = DateTime.Today;
+
             ((App)App.Current).GetUsers().ContinueWith(a => LoadUserData(a.Result));
         }
 
@@ -106,7 +109,8 @@ namespace EOMobile
                 }
 
                 filter.FromDate = this.WorkOrderFromDate.Date;
-                filter.ToDate = this.WorkOrderToDate.Date;
+                filter.ToDate = this.WorkOrderToDate.Date.AddHours(23);
+                filter.ToDate = filter.ToDate.AddMinutes(59);
 
                 ((App)App.Current).GetWorkOrders(filter).ContinueWith(a => WorkOrdersLoaded(a.Result));
             }
@@ -120,7 +124,7 @@ namespace EOMobile
         {
             workOrderList = response;
 
-            ObservableCollection<WorkOrderDTO> list1 = new ObservableCollection<WorkOrderDTO>();
+            ObservableCollection<WorkOrderResponse> list1 = new ObservableCollection<WorkOrderResponse>();
 
             //for arrangements, add blank rows fore and aft and a header row
             foreach (WorkOrderResponse wo in workOrderList)
@@ -129,7 +133,7 @@ namespace EOMobile
 
                 inventoryList.Add(wo.WorkOrderList);
 
-                list1.Add(wo.WorkOrder);
+                list1.Add(wo);
             }
 
             Device.BeginInvokeOnMainThread(() =>
@@ -234,6 +238,40 @@ namespace EOMobile
 
             ObservableCollection<WorkOrderInventoryMapDTO> list1 = new ObservableCollection<WorkOrderInventoryMapDTO>();
             InventoryList.ItemsSource = list1;
+        }
+
+        private async void PaymentDetail_Clicked(object sender, EventArgs e)
+        {
+            Button b = sender as Button;
+
+            if (b != null)
+            {
+                try
+                {
+                    WorkOrderResponse workOrder = (WorkOrderResponse)b.CommandParameter;
+
+                    if (workOrder != null)
+                    {
+                        if (!PageExists(typeof(PaymentPage)))
+                        {
+                            WorkOrderPaymentDTO payment = await ((App)App.Current).GetWorkOrderPayment(workOrder.WorkOrder.WorkOrderId);
+
+                            if (payment.WorkOrderPaymentId > 0)
+                            {
+                                Navigation.PushAsync(new PaymentPage(workOrder, payment));
+                            }
+                            else
+                            {
+                                DisplayAlert("Unpaid", "This work order has not been paid.", "Ok");
+                            }
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+
+                }
+            }
         }
     }
 }

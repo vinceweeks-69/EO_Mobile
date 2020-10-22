@@ -32,15 +32,10 @@ namespace EOMobile
         List<WorkOrderInventoryItemDTO> workOrderInventoryList;
         List<KeyValuePair<int, string>> discountType = new List<KeyValuePair<int, string>>();
         List<KeyValuePair<long, string>> payTypeList = new List<KeyValuePair<long, string>>();
-        public PaymentPage(long workOrderId, List<WorkOrderInventoryItemDTO> workOrderInventoryList)
+
+        public PaymentPage()
         {
-
-            this.workOrderId = workOrderId;
-            this.workOrderInventoryList = workOrderInventoryList;
-            
             InitializeComponent();
-
-            ((App)App.Current).GetWorkOrder(workOrderId).ContinueWith(a => WorkOrderLoaded(a.Result));
 
             CCFrame.IsVisible = false;
 
@@ -62,6 +57,79 @@ namespace EOMobile
 
             DiscountType.SelectedItem = 0;
             DiscountType.SelectedIndex = 0;
+
+            GiftCardNumberLabel.Text = "";
+            GiftCardNumber.IsVisible = false;
+
+            GiftCardAmountLabel.Text = "";
+            GiftCardAmount.IsVisible = false;
+
+        }
+        public PaymentPage(long workOrderId, List<WorkOrderInventoryItemDTO> workOrderInventoryList) : this()
+        {
+
+            this.workOrderId = workOrderId;
+            this.workOrderInventoryList = workOrderInventoryList;
+
+            ((App)App.Current).GetWorkOrder(workOrderId).ContinueWith(a => WorkOrderLoaded(a.Result));
+        }
+
+        public PaymentPage(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment) : this()
+        {
+            SetPaymentData(payment);
+        }
+
+        private void SetPaymentData(WorkOrderPaymentDTO payment)
+        {
+            Pay.IsEnabled = false;
+           
+            PaymentType.SelectedIndex = payment.WorkOrderPaymentType;
+            PaymentType.IsEnabled = false;
+
+            CCFrame.IsVisible = false;
+
+            if (payment.WorkOrderPaymentType == 2)
+            {
+                ccConfirmLabel.IsVisible = true;
+                ccConfirmPaid.IsVisible = true;
+                ccConfirmPaid.Text = payment.WorkOrderPaymentCreditCardConfirmation;
+               
+            }
+
+            DiscountType.SelectedIndex = payment.DiscountType;
+            DiscountType.IsEnabled = false;
+
+            DiscountAmount.IsEnabled = false;
+
+            if (payment.DiscountType > 0)
+            {
+                DiscountAmount.Text = payment.DiscountAmount.ToString("N2");
+            }
+
+            if (!String.IsNullOrEmpty(payment.GiftCardNumber))
+            {
+                GiftCardNumber.Text = payment.GiftCardNumber;
+                GiftCardNumber.IsEnabled = false;
+            }
+
+
+            if (payment.GiftCardAmount > 0)
+            {
+                GiftCard.IsChecked = true;
+                GiftCard_PropertyChanged(GiftCard, null);
+                GiftCard.IsEnabled = false;
+                GiftCardAmount.Text = payment.GiftCardAmount.ToString("N2");
+                GiftCardAmount.IsEnabled = false;
+            }
+
+            SubTotal.Text = "";
+            SubTotal.IsEnabled = false;
+
+            Tax.Text = payment.WorkOrderPaymentTax.ToString("N2");
+            Tax.IsEnabled = false;
+
+            Total.Text = payment.WorkOrderPaymentAmount.ToString("N2");
+            Total.IsEnabled = false;
         }
 
         private void WorkOrderLoaded(WorkOrderResponse response)
@@ -109,14 +177,14 @@ namespace EOMobile
         {
             base.OnAppearing();
 
-            useGiftCard = false;
-            GiftCard.IsChecked = false;
+            //useGiftCard = false;
+            //GiftCard.IsChecked = false;
 
-            GiftCardNumberLabel.Text = "";
-            GiftCardNumber.IsVisible = false;
+            //GiftCardNumberLabel.Text = "";
+            //GiftCardNumber.IsVisible = false;
 
-            GiftCardAmountLabel.Text = "";
-            GiftCardAmount.IsVisible = false;
+            //GiftCardAmountLabel.Text = "";
+            //GiftCardAmount.IsVisible = false;
         }
 
         private void PaymentType_SelectedIndexChanged(object sender, EventArgs e)
@@ -540,12 +608,18 @@ namespace EOMobile
 
         private void DiscountAmount_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Total.Text = SetWorkOrderSalesData();
+            if (Pay.IsEnabled)
+            {
+                Total.Text = SetWorkOrderSalesData();
+            }
         }
 
         private void GiftCardAmount_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Total.Text = SetWorkOrderSalesData();
+            if (Pay.IsEnabled)
+            {
+                Total.Text = SetWorkOrderSalesData();
+            }
         }
     }
 }

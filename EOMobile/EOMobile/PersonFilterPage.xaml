@@ -44,24 +44,24 @@
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="CenterAndExpand" />
 
-                <Label Text="Name"
+                <Label Text="First Name"
                     Grid.Column="0"
                     Grid.Row="1"
                     FontSize="Default"
                     FontAttributes="Bold"
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="StartAndExpand" />
-                <Entry x:Name="Name" Text="" Grid.Column="0" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
+                <Entry x:Name="FirstName" Text="" Grid.Column="0" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
 
-                <Label Text="City"
+                <Label Text="Last Name"
                     Grid.Column="1"
                     Grid.Row="1"
                     FontSize="Default"
                     FontAttributes="Bold"
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="StartAndExpand" />
-                <Entry x:Name="City" Text="" Grid.Column="1" Grid.Row="2" HeightRequest="50" WidthRequest="200"/>
-
+                <Entry x:Name="LastName" Text="" Grid.Column="1" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
+                
                 <Label Text="Community"
                     Grid.Column="2"
                     Grid.Row="1"
@@ -70,46 +70,66 @@
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="StartAndExpand" />
                 <Entry x:Name="Community" Text="" Grid.Column="2" Grid.Row="2"  HeightRequest="50" WidthRequest="200"/>
-
-                <Label Text="Phone"
+                
+                <Label Text="Address"
                     Grid.Column="0"
                     Grid.Row="3"
                     FontSize="Default"
                     FontAttributes="Bold"
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="StartAndExpand" />
-                <Entry x:Name="Phone" Text="" Grid.Column="0" Grid.Row="4"  HeightRequest="50" WidthRequest="200">
-                    <Entry.Behaviors>
-                        <local:PhoneNumberValidator />
-                        <local:MaxLengthValidator  MaxLength="12"/>
-                    </Entry.Behaviors>
-                </Entry>
-                <Label Text="Email"
+                <Entry x:Name="Address" Text="" Grid.Column="0" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
+                
+                <Label Text="City"
                     Grid.Column="1"
                     Grid.Row="3"
                     FontSize="Default"
                     FontAttributes="Bold"
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="StartAndExpand" />
-                <Entry x:Name="Email" Text="" Grid.Column="1" Grid.Row="4" HeightRequest="50" WidthRequest="200">
-                    <Entry.Behaviors>
-                        <local:EmailValidator />
-                    </Entry.Behaviors>
-                </Entry>
-                
-                <Label Text="Address"
+                <Entry x:Name="City" Text="" Grid.Column="1" Grid.Row="4" HeightRequest="50" WidthRequest="200"/>
+
+                <Label Text="Zip Code"
                     Grid.Column="2"
                     Grid.Row="3"
                     FontSize="Default"
                     FontAttributes="Bold"
                     VerticalOptions="CenterAndExpand" 
                     HorizontalOptions="StartAndExpand" />
-                <Entry x:Name="Address" Text="" Grid.Column="2" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
+                <Entry x:Name="ZipCode" Text="" Grid.Column="2" Grid.Row="4"  HeightRequest="50" WidthRequest="200"/>
 
-                <Button Text="Search" Grid.Column="1" Grid.Row="5" Clicked="OnSearchPersonClicked" HeightRequest="100" WidthRequest="300"/>
+                <Label Text="Phone"
+                    Grid.Column="0"
+                    Grid.Row="5"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="Phone" Text="" Grid.Column="0" Grid.Row="6"  HeightRequest="50" WidthRequest="200">
+                    <Entry.Behaviors>
+                        <local:PhoneNumberValidator />
+                        <local:MaxLengthValidator  MaxLength="12"/>
+                    </Entry.Behaviors>
+                </Entry>
+                
+                <Label Text="Email"
+                    Grid.Column="1"
+                    Grid.Row="5"
+                    FontSize="Default"
+                    FontAttributes="Bold"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="StartAndExpand" />
+                <Entry x:Name="Email" Text="" Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2" HeightRequest="50" WidthRequest="200">
+                    <Entry.Behaviors>
+                        <local:EmailValidator />
+                    </Entry.Behaviors>
+                </Entry>
+                
+                <Button Text="Search" Grid.Column="1" Grid.Row="7" Clicked="OnSearchPersonClicked" HeightRequest="100" WidthRequest="300"/>
+                
             </Grid>
 
-            <Frame Padding="10,10,10,10">
+            <Frame Padding="10,10,10,10" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3">
                 <ListView x:Name="PersonListView" ItemSelected="PersonListView_ItemSelected"  ItemsSource="{Binding Persons}" > 
                     <ListView.Header>
                         <Grid >
