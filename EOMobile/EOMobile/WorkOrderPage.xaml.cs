@@ -50,7 +50,7 @@ namespace EOMobile
 
         List<UserDTO> users = new List<UserDTO>();
 
-        List<KeyValuePair<long, string>> employeeDDL = new List<KeyValuePair<long, string>>();
+        //List<KeyValuePair<long, string>> employeeDDL = new List<KeyValuePair<long, string>>();
 
         TabbedWorkOrderPage TabParent = null;
 
@@ -170,14 +170,26 @@ namespace EOMobile
         {
             users = userResponse.Users;
 
+            ObservableCollection<KeyValuePair<long, string>> deliverers = new ObservableCollection<KeyValuePair<long, string>>();
+            ObservableCollection<KeyValuePair<long, string>> notDeliverers = new ObservableCollection<KeyValuePair<long, string>>();
+
             foreach (UserDTO user in users)
             {
-                employeeDDL.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
+                if (user.RoleId != 2)
+                {
+                    deliverers.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
+                }
+
+                if(user.RoleId < 3)
+                {
+                    notDeliverers.Add(new KeyValuePair<long, string>(user.UserId, user.UserName));
+                }
             }
+
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                DeliveryPerson.ItemsSource = employeeDDL;
+                DeliveryPerson.ItemsSource = deliverers;
 
                 DeliveryPersonLabel.Text = "";
                 DeliveryPerson.IsVisible = false;
@@ -188,7 +200,7 @@ namespace EOMobile
                 DeliveryDateLabel.Text = "Pickup Date";
                 DeliveryDate.IsVisible = true;
 
-                Seller.ItemsSource = employeeDDL;
+                Seller.ItemsSource = notDeliverers;
                 Seller.SelectedIndex = -1;
             });
         }

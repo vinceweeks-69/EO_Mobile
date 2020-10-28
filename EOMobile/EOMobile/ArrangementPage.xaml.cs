@@ -63,11 +63,7 @@ namespace EOMobile
 
             ArrangementListView.ItemsSource = arrangementListOC;
 
-            ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
-            list1.Add(new KeyValuePair<long, string>(1, "Vicky"));
-            list1.Add(new KeyValuePair<long, string>(2, "Marguerita"));
-
-            Designer.ItemsSource = list1;
+            GetUsers();
 
             ObservableCollection<KeyValuePair<long, string>> list2 = new ObservableCollection<KeyValuePair<long, string>>();
             list2.Add(new KeyValuePair<long, string>(1, "180"));
@@ -108,6 +104,26 @@ namespace EOMobile
             }
 
             Container.SelectedIndexChanged += Container_SelectedIndexChanged;
+        }
+
+        private async void GetUsers()
+        {
+            GenericGetRequest request = new GenericGetRequest("GetUsers", String.Empty, 0);
+            ((App)App.Current).GetRequest<GetUserResponse>(request).ContinueWith(a => UsersLoaded(a.Result));
+        }
+
+        private void UsersLoaded(GetUserResponse response)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                ObservableCollection<KeyValuePair<long, string>> list1 = new ObservableCollection<KeyValuePair<long, string>>();
+                foreach (UserDTO u in response.Users.Where(a => a.RoleId == 2).ToList())
+                {
+                    list1.Add(new KeyValuePair<long, string>(u.UserId, u.UserName));
+                }
+
+                Designer.ItemsSource = list1;
+            });
         }
 
         private void CustomerContainersLoaded(CustomerContainerResponse result)
