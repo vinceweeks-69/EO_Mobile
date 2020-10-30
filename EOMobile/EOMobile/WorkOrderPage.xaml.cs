@@ -927,12 +927,15 @@ namespace EOMobile
             {
                 if (!PageExists(typeof(PaymentPage)))
                 {
+                    Payment.IsEnabled = false;
+
                     if (AddWorkOrder(false))
                     {
                         Navigation.PushAsync(new PaymentPage(currentWorkOrderId, workOrderInventoryList));
                     }
                     else
                     {
+                        Payment.IsEnabled = true;
                         DisplayAlert("Error", "There was an error saving the work order", "Ok");
                     }
                 }

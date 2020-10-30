@@ -223,9 +223,15 @@ namespace EOMobile
                 }
                 else
                 {
-                    DiscountAmountLabel.Text = "";
+                    DiscountAmountLabel.Text = String.Empty;
                     DiscountAmount.IsVisible = false;
                     DiscountAmount.IsEnabled = false;
+                    DiscountAmount.Text = String.Empty;
+
+                    if(Pay.IsEnabled)
+                    {
+                        Total.Text = SetWorkOrderSalesData();
+                    }
                 }
             }
         }
@@ -381,6 +387,7 @@ namespace EOMobile
 
             Email.SendEmail(mailMessage);
         }
+
         private void PaySuccess_Clicked(object sender, EventArgs e)
         {
             MessagingCenter.Send<WorkOrderResponse>(workOrder,"PaymentSuccess");
@@ -480,6 +487,15 @@ namespace EOMobile
                 workOrderPayment.DiscountAmount = workValue;
             }
 
+            workValue = 0;
+            decimal.TryParse(GiftCardAmount.Text, out workValue);
+
+            if (workValue > 0)
+            {
+                workOrderPayment.GiftCardAmount = workValue;
+                workOrderPayment.GiftCardNumber = GiftCardNumber.Text;
+            }
+
             return workOrderPayment;
         }
 
@@ -503,44 +519,6 @@ namespace EOMobile
             return success;
         }
 
-        public GetWorkOrderSalesDetailResponse GetWorkOrderDetail()
-        {
-            GetWorkOrderSalesDetailResponse response = new GetWorkOrderSalesDetailResponse();
-
-            string jsonData = JsonConvert.SerializeObject(workOrder);
-
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(((App)App.Current).LAN_Address);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                client.DefaultRequestHeaders.Add("EO-Header", ((App)App.Current).User + " : " + ((App)App.Current).Pwd);
-               
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                HttpResponseMessage httpResponse = client.PostAsync("api/Login/GetWorkOrderDetail", content).Result;
-
-                if (httpResponse.IsSuccessStatusCode)
-                {
-                    Stream streamData = httpResponse.Content.ReadAsStreamAsync().Result;
-                    StreamReader strReader = new StreamReader(streamData);
-                    string strData = strReader.ReadToEnd();
-                    //strReader.Close();
-                    response = JsonConvert.DeserializeObject<GetWorkOrderSalesDetailResponse>(strData);
-                }
-                else
-                {
-                    //MessageBox.Show("There was an error retreiving work order sales detail");
-                }
-            }
-            catch (Exception ex)
-            {
-                Exception ex2 = new Exception("GetWorkOrderDetail", ex);
-                ((App)App.Current).LogError(ex2.Message, jsonData);
-            }
-
-            return response;
-        }
         private void GiftCard_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if(useGiftCard)
@@ -558,6 +536,13 @@ namespace EOMobile
 
                 GiftCardAmountLabel.Text = "";
                 GiftCardAmount.IsVisible = false;
+                GiftCardNumber.Text = String.Empty;
+                GiftCardAmount.Text = String.Empty;
+
+                if (Pay.IsEnabled) // they might have turn gift card on, set a value (total affected) and then turned gift card back off
+                {
+                    Total.Text = SetWorkOrderSalesData();
+                }
             }
 
             useGiftCard = !useGiftCard;
@@ -581,9 +566,9 @@ namespace EOMobile
             decimal total = 0.0M;
             decimal tax = 0.0M;
 
-            if(!String.IsNullOrEmpty(Total.Text))
+            if(!String.IsNullOrEmpty(SubTotal.Text))
             {
-                total = Convert.ToDecimal(Total.Text);
+                total = Convert.ToDecimal(SubTotal.Text);
             }
 
             if (!String.IsNullOrEmpty(Tax.Text))

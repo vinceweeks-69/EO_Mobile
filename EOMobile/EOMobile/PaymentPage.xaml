@@ -115,7 +115,7 @@
                             FontAttributes="Bold"
                             VerticalOptions="Start" 
                             HorizontalOptions="Start" />
-                        <Entry x:Name="DiscountAmount"  Text="" Grid.Column="1" Grid.Row="5"  Keyboard="Numeric"  HeightRequest="50" WidthRequest="200" PropertyChanged="DiscountAmount_PropertyChanged"/>
+                        <Entry x:Name="DiscountAmount"  Text="" Grid.Column="1" Grid.Row="5"  Keyboard="Numeric"  HeightRequest="50" WidthRequest="200" Unfocused="DiscountAmount_PropertyChanged"/>
 
                         <Label Text="Gift Card?"
                             Grid.Column="0"
@@ -135,7 +135,7 @@
                             FontAttributes="Bold"
                             VerticalOptions="Start" 
                             HorizontalOptions="Start" />
-                        <Entry x:Name="GiftCardNumber"  Text="" Grid.Column="1" Grid.Row="7"  Keyboard="Numeric"  HeightRequest="50" WidthRequest="200" PropertyChanged="DiscountAmount_PropertyChanged"/>
+                        <Entry x:Name="GiftCardNumber"  Text="" Grid.Column="1" Grid.Row="7"  Keyboard="Numeric"  HeightRequest="50" WidthRequest="200" />
 
                         <Label x:Name="GiftCardAmountLabel"
                             Text="Gift Card Amount"
@@ -145,7 +145,7 @@
                             FontAttributes="Bold"
                             VerticalOptions="Start" 
                             HorizontalOptions="Start" />
-                        <Entry x:Name="GiftCardAmount"  Text="" Grid.Column="2" Grid.Row="7"  Keyboard="Numeric"  HeightRequest="50" WidthRequest="200" PropertyChanged="GiftCardAmount_PropertyChanged"/>
+                        <Entry x:Name="GiftCardAmount"  Text="" Grid.Column="2" Grid.Row="7"  Keyboard="Numeric"  HeightRequest="50" WidthRequest="200" Unfocused="GiftCardAmount_PropertyChanged"/>
 
                         <Button x:Name="Back" Text="Back" Clicked="Back_Clicked" Grid.Column="0" Grid.Row="8"   HeightRequest="50" WidthRequest="200"/>
                         
