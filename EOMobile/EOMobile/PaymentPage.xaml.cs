@@ -151,7 +151,12 @@ namespace EOMobile
         {
             buyer = response.PersonAndAddress;
 
-            ((App)App.Current).PostRequest<WorkOrderResponse, GetWorkOrderSalesDetailResponse>("GetWorkOrderDetail", workOrder).ContinueWith(a => WorkOrderDetailLoaded(a.Result));
+            WorkOrderResponse request = new WorkOrderResponse();
+            request.WorkOrderList = workOrder.WorkOrderList;
+            request.NotInInventory = workOrder.NotInInventory;
+            request.Arrangements = workOrder.Arrangements;
+
+            ((App)App.Current).PostRequest<WorkOrderResponse, GetWorkOrderSalesDetailResponse>("GetWorkOrderDetail", request).ContinueWith(a => WorkOrderDetailLoaded(a.Result));
         }
 
         private void WorkOrderDetailLoaded(GetWorkOrderSalesDetailResponse response)
@@ -358,22 +363,27 @@ namespace EOMobile
             }
         }
 
-        private void WorkOrderPaymentLoaded(WorkOrderPaymentDTO payment)
+        private async void WorkOrderPaymentLoaded(WorkOrderPaymentDTO payment)
+        {
+            GenericGetRequest request = new GenericGetRequest("GetWorkOrderPrices", "workOrderId", payment.WorkOrderId);
+            ((App)App.Current).GetRequest<GetWorkOrderPriceResponse>(request).ContinueWith(a => WorkOrderPricesLoaded(workOrder,payment,a.Result));
+        }
+
+        private void WorkOrderPricesLoaded(WorkOrderResponse workOrder, WorkOrderPaymentDTO payment, GetWorkOrderPriceResponse workOrderPriceResponse)
         {
             EmailHelpers emailHelper = new EmailHelpers();
 
             EOMailMessage mailMessage = new EOMailMessage();
 
-            string emailHtml = emailHelper.ComposeReceipt(workOrder, payment);
+            string emailHtml = emailHelper.ComposeReceipt(workOrder, payment, workOrderPriceResponse);
 
             mailMessage = new EOMailMessage("service@elegantorchids.com", buyer[0].Person.email, "Elegant Orchids Receipt", emailHtml, "Orchids@5185");
 
             Email.SendEmail(mailMessage);
         }
-
         private void PaySuccess_Clicked(object sender, EventArgs e)
         {
-            //MessagingCenter.Send<WorkOrderResponse>(workOrder,"PaymentSuccess");
+            MessagingCenter.Send<WorkOrderResponse>(workOrder,"PaymentSuccess");
 
             Navigation.PopAsync();
         }

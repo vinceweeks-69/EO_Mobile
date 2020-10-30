@@ -126,11 +126,6 @@ namespace EOMobile
                 searchedForDeliveryRecipient = arg as PersonAndAddressDTO;
             });
 
-            MessagingCenter.Subscribe<WorkOrderResponse>(this, "PaymentSuccess", (arg) =>
-            {
-                OnClear(null,null);
-            });
-
             orderType.Add(new KeyValuePair<int, string>(0, "Walk In"));
             orderType.Add(new KeyValuePair<int, string>(1, "Phone"));
             orderType.Add(new KeyValuePair<int, string>(2, "Email"));
@@ -164,6 +159,15 @@ namespace EOMobile
 
             //both buttons are disabled until the work order data is saved
             Payment.IsEnabled = false;
+
+            MessagingCenter.Subscribe<WorkOrderResponse>(this, "PaymentSuccess", (arg) =>
+            {
+                currentWorkOrderPaymentId = -1;
+                Save.IsEnabled = EnableSave();
+                Payment.IsEnabled = EnablePayment();
+                AddInventory.IsEnabled = false;
+                RedrawInventoryList(); //disable  arrangement list view item qty text boxes and delete buttons
+            });
         }
 
         private void LoadUsers(GetUserResponse userResponse)
@@ -337,13 +341,15 @@ namespace EOMobile
         //modify the underlying data lists, then call this function
         private void RedrawInventoryList()
         {
+            Camera.IsEnabled = currentWorkOrderPaymentId != 0 ? false : true;
+
             workOrderList.Clear();
 
             //draw work order items in inventory
             foreach(WorkOrderInventoryItemDTO dto in workOrderInventoryList)
             {
                 WorkOrderViewModel vm = new WorkOrderViewModel(dto);
-                vm.ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true;
+                vm.ShouldEnable = currentWorkOrderPaymentId != 0 ? false : true;
                 workOrderList.Add(vm);
             }
 
@@ -351,7 +357,7 @@ namespace EOMobile
             foreach(NotInInventoryDTO dto in notInInventory)
             {
                 WorkOrderViewModel vm = new WorkOrderViewModel(dto);
-                vm.ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true;
+                vm.ShouldEnable = currentWorkOrderPaymentId != 0 ? false : true;
                 workOrderList.Add(vm);
             }
 
@@ -391,7 +397,7 @@ namespace EOMobile
                         Quantity = aid.Quantity,
                         Size = aid.Size,
                         GroupId = aid.ArrangementId,
-                        ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true
+                        ShouldEnable = currentWorkOrderPaymentId != 0 ? false : true
                     });
                 });
 
@@ -413,7 +419,7 @@ namespace EOMobile
                         };
 
                     WorkOrderViewModel vm = new WorkOrderViewModel(dto);
-                    vm.ShouldEnable = currentWorkOrderPaymentId > 0 ? false : true;
+                    vm.ShouldEnable = currentWorkOrderPaymentId != 0 ? false : true;
                     workOrderList.Add(vm);
 
                 });
